@@ -1,0 +1,22 @@
+[
+  { "name": "knowledge",      "category": "concept",   "related_theme_names": ["wisdom", "learning", "education"] },
+  { "name": "wisdom",         "category": "concept",   "related_theme_names": ["knowledge", "discernment", "strategy"] },
+  { "name": "greed",          "category": "vice",      "related_theme_names": ["desire", "wealth", "contentment"] },
+  { "name": "leadership",     "category": "concept",   "related_theme_names": ["governance", "courage", "strategy", "duty"] },
+  { "name": "betrayal",       "category": "situation", "related_theme_names": ["trust", "loyalty", "enemies"] },
+  { "name": "courage",        "category": "virtue",    "related_theme_names": ["fear", "strength", "duty"] },
+  { "name": "fear",           "category": "emotion",   "related_theme_names": ["courage", "anxiety", "danger"] },
+  { "name": "self-discipline","category": "virtue",    "related_theme_names": ["laziness", "effort", "habit"] },
+  { "name": "laziness",       "category": "vice",      "related_theme_names": ["self-discipline", "procrastination"] },
+  { "name": "desire",         "category": "emotion",   "related_theme_names": ["greed", "contentment", "ambition"] },
+  { "name": "contentment",    "category": "virtue",    "related_theme_names": ["desire", "greed", "peace"] },
+  { "name": "loyalty",        "category": "virtue",    "related_theme_names": ["betrayal", "trust", "friendship"] },
+  { "name": "trust",          "category": "concept",   "related_theme_names": ["loyalty", "betrayal", "relationships"] },
+  { "name": "strategy",       "category": "concept",   "related_theme_names": ["leadership", "war", "diplomacy"] },
+  { "name": "enemies",        "category": "situation", "related_theme_names": ["betrayal", "strategy", "war"] },
+  { "name": "wealth",         "category": "concept",   "related_theme_names": ["greed", "poverty", "contentment"] },
+  { "name": "family",         "category": "situation", "related_theme_names": ["duty", "loyalty", "relationships"] },
+  { "name": "friendship",     "category": "concept",   "related_theme_names": ["loyalty", "trust", "enemies"] },
+  { "name": "anger",          "category": "emotion",   "related_theme_names": ["patience", "self-discipline", "conflict"] },
+  { "name": "patience",       "category": "virtue",    "related_theme_names": ["anger", "wisdom", "endurance"] }
+]
