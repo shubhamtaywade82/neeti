@@ -5,6 +5,7 @@ RSpec.describe "Database schema" do
   it "sutras table has GIN index on themes" do
     idx = ActiveRecord::Base.connection.indexes(:sutras)
               .find { |i| i.name == "index_sutras_on_themes" }
+    expect(idx).not_to be_nil, "expected GIN index on sutras.themes to exist"
     expect(idx.using).to eq :gin
   end
 

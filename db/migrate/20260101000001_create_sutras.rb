@@ -1,5 +1,5 @@
 class CreateSutras < ActiveRecord::Migration[8.1]
-  def change
+  def up
     create_table :sutras do |t|
       t.text    :canonical_id,    null: false
       t.text    :sanskrit
@@ -43,5 +43,13 @@ class CreateSutras < ActiveRecord::Migration[8.1]
         BEFORE INSERT OR UPDATE ON sutras
         FOR EACH ROW EXECUTE FUNCTION sutras_search_vector_update();
     SQL
+  end
+
+  def down
+    execute <<-SQL
+      DROP TRIGGER IF EXISTS sutras_search_vector_trigger ON sutras;
+      DROP FUNCTION IF EXISTS sutras_search_vector_update();
+    SQL
+    drop_table :sutras
   end
 end
