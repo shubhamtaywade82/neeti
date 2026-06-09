@@ -8,19 +8,20 @@ interface Conversation {
 }
 
 interface Props {
-  activeId?:  number
-  onSelect:   (id: number) => void
-  onNewChat:  () => void
+  activeId?:       number
+  refreshTrigger?: number
+  onSelect:        (id: number) => void
+  onNewChat:       () => void
 }
 
-export function ConversationSidebar({ activeId, onSelect, onNewChat }: Props) {
+export function ConversationSidebar({ activeId, refreshTrigger, onSelect, onNewChat }: Props) {
   const [conversations, setConversations] = useState<Conversation[]>([])
 
   useEffect(() => {
     apiClient.get<Conversation[]>('/conversations')
       .then((r) => setConversations(r.data))
       .catch(() => {})
-  }, [])
+  }, [refreshTrigger])
 
   return (
     <aside className="w-64 bg-stone-900 border-r border-stone-800 flex flex-col h-full">

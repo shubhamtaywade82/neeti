@@ -91,7 +91,6 @@ export function ChatWindow({ conversationId, onConversationCreated }: Props) {
         onSubmit={handleSubmit}
         onCancel={cancel}
         isStreaming={isStreaming}
-        disabled={isStreaming}
       />
     </div>
   )

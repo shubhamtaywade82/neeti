@@ -64,6 +64,27 @@ export function useAdvisor() {
       const decoder = new TextDecoder()
       let lineBuffer = ''
 
+      const processLine = (line: string) => {
+        if (!line.startsWith('data: ')) return
+        try {
+          const data = JSON.parse(line.slice(6))
+          if (data.type === 'token') {
+            accumulated += data.content
+            setStreamedText((prev) => prev + data.content)
+          } else if (data.type === 'complete') {
+            setResult({
+              conversation_id:  data.conversation_id,
+              cited_sutras:     data.cited_sutras,
+              reflection_score: data.reflection_score
+            })
+          } else if (data.type === 'error') {
+            setError(data.message)
+          }
+        } catch {
+          // malformed SSE line — ignore
+        }
+      }
+
       while (true) {
         const { value, done } = await reader.read()
         if (done) break
@@ -73,28 +94,11 @@ export function useAdvisor() {
         // last element may be incomplete — keep it in buffer
         lineBuffer = lines.pop() ?? ''
 
-        for (const line of lines) {
-          if (!line.startsWith('data: ')) continue
-          try {
-            const data = JSON.parse(line.slice(6))
-
-            if (data.type === 'token') {
-              accumulated += data.content
-              setStreamedText((prev) => prev + data.content)
-            } else if (data.type === 'complete') {
-              setResult({
-                conversation_id:  data.conversation_id,
-                cited_sutras:     data.cited_sutras,
-                reflection_score: data.reflection_score
-              })
-            } else if (data.type === 'error') {
-              setError(data.message)
-            }
-          } catch {
-            // malformed SSE line — ignore
-          }
-        }
+        for (const line of lines) processLine(line)
       }
+
+      // flush any remaining buffered content
+      if (lineBuffer.trim()) processLine(lineBuffer)
     } catch (err: unknown) {
       if (err instanceof Error && err.name !== 'AbortError') {
         setError('Connection error. Please try again.')

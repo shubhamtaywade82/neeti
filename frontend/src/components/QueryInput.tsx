@@ -5,10 +5,9 @@ interface Props {
   onSubmit:    (query: string) => void
   onCancel:    () => void
   isStreaming: boolean
-  disabled:    boolean
 }
 
-export function QueryInput({ onSubmit, onCancel, isStreaming, disabled }: Props) {
+export function QueryInput({ onSubmit, onCancel, isStreaming }: Props) {
   const [value, setValue] = useState('')
 
   const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
@@ -40,7 +39,7 @@ export function QueryInput({ onSubmit, onCancel, isStreaming, disabled }: Props)
           rows={1}
           onChange={(e) => setValue(e.target.value)}
           onKeyDown={handleKeyDown}
-          disabled={disabled && !isStreaming}
+          disabled={isStreaming}
         />
         <button
           onClick={handleClick}

@@ -57,6 +57,10 @@ export function SubscriptionModal({ open, onClose }: Props) {
           </button>
         </div>
 
+        {error && (
+          <p className="text-red-400 text-sm mb-4">{error}</p>
+        )}
+
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {PLANS.map((plan) => (
             <div key={plan.key} className="border border-stone-700 rounded-xl p-5 hover:border-amber-600 transition-colors">

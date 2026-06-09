@@ -21,6 +21,7 @@ export function ChatPage() {
     <div className="flex h-screen bg-stone-950">
       <ConversationSidebar
         activeId={activeConvoId}
+        refreshTrigger={activeConvoId}
         onSelect={(id) => setActiveConvoId(id)}
         onNewChat={() => setActiveConvoId(undefined)}
       />
