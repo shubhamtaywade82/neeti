@@ -1,0 +1,17 @@
+{
+  "id": "019eab7c-03ef-76c6-9b3c-6d64d3112f83",
+  "name": "'/home/nemesis/project/ai-workspace/neeti/complete_plan.md''",
+  "description": "'/home/nemesis/project/ai-workspace/neeti/complete_plan.md''/home/nemesis/project/ai-workspace/neeti/implementation_plan_requirements.md' Is this project on track with these requirements?",
+  "status": "draft",
+  "worktree": {
+    "path": "/home/nemesis/project/ai-workspace/neeti",
+    "branch": "main",
+    "commit": "6584cc8e1443327579a4d7a3a9d67af770320a21"
+  },
+  "scoping": {},
+  "phases": [],
+  "decisions": [],
+  "memories": [],
+  "createdAt": "2026-06-09T08:24:51.950Z",
+  "updatedAt": "2026-06-09T08:24:51.950Z"
+}
