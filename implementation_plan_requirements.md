@@ -226,10 +226,10 @@ pip install langgraph qdrant-client langchain voyageai cohere pymupdf langchain-
 
 **Model Recommendations:**
 
-| Environment   | Chat Model (Primary)     | Embedding Model (Primary)  |
-| ------------- | ------------------------ | --------------------------- |
-| **Local (Dev)**   | Llama 3.1 8B (`llama3.1:8b`) or Phi-3 Mini (`phi3:mini`) | BGE-M3 (`bge-m3:latest`) |
-| **Cloud (Prod)**  | GPT-4o-mini ($0.60/MTok) or Claude 3.5 Sonnet ($3.00/MTok) | Voyage AI `voyage-4-large` ($0.06/MTok) |
+| Environment      | Chat Model (Primary)                                       | Embedding Model (Primary)               |
+| ---------------- | ---------------------------------------------------------- | --------------------------------------- |
+| **Local (Dev)**  | Llama 3.1 8B (`llama3.1:8b`) or Phi-3 Mini (`phi3:mini`)   | BGE-M3 (`bge-m3:latest`)                |
+| **Cloud (Prod)** | GPT-4o-mini ($0.60/MTok) or Claude 3.5 Sonnet ($3.00/MTok) | Voyage AI `voyage-4-large` ($0.06/MTok) |
 
 * **System Prompt Testing**: Ollama is perfect for iterative prompt engineering. You can test and refine the "Chanakya voice" locally without incurring any cloud costs, ensuring the persona is perfected before deployment.
 * **Embedding Consistency**: Use the **BGE-M3** embedding model locally, as it's highly performant. Just ensure you deploy an equivalent high-quality model (like `voyage-4-large`) in production to maintain retrieval quality.
@@ -280,11 +280,11 @@ For larger local models (e.g., 70B parameters), consider using `vLLM` for produc
 
 ### ☁️ Phase 3: Production Deployment Strategy
 
-| Deployment Option          | Best For        | Key Considerations                                 |
-| -------------------------- | --------------- | -------------------------------------------------- |
-| **LangGraph Cloud**        | Rapid, scalable deployment | Native observability, persistent state handling, serverless |
-| **AWS (EKS + ECS) + Bedrock** | Enterprise, full control | Tight AWS integration, native Bedrock API access, high scalability |
-| **Self-Hosted on GPU Cloud**   | Data sovereignty, custom hardware | You manage infrastructure; best for high-volume, low-latency needs |
+| Deployment Option             | Best For                          | Key Considerations                                                 |
+| ----------------------------- | --------------------------------- | ------------------------------------------------------------------ |
+| **LangGraph Cloud**           | Rapid, scalable deployment        | Native observability, persistent state handling, serverless        |
+| **AWS (EKS + ECS) + Bedrock** | Enterprise, full control          | Tight AWS integration, native Bedrock API access, high scalability |
+| **Self-Hosted on GPU Cloud**  | Data sovereignty, custom hardware | You manage infrastructure; best for high-volume, low-latency needs |
 
 ### 🔄 Phase 4: CI/CD for Environment Switching
 
@@ -313,13 +313,13 @@ jobs:
 
 This hybrid strategy provides strong financial benefits, paying for its increased architectural complexity within a few months.
 
-| Component                   | All-Cloud (Monthly) | Hybrid (Local Dev + Cloud Prod) |
-| --------------------------- | ------------------- | ------------------------------- |
-| **Development LLM Calls**   | ~$200               | **$0** (Local Ollama)           |
-| **Production LLM Calls**    | ~$1.80              | ~$1.80                          |
-| **Developer Compute**       | $200 (Cloud GPU)    | **$0** (Local Machine)          |
-| **Infrastructure**          | $50                 | $50                             |
-| **Total Monthly Cost**      | **~$452**           | **~$52**                        |
+| Component                 | All-Cloud (Monthly) | Hybrid (Local Dev + Cloud Prod) |
+| ------------------------- | ------------------- | ------------------------------- |
+| **Development LLM Calls** | ~$200               | **$0** (Local Ollama)           |
+| **Production LLM Calls**  | ~$1.80              | ~$1.80                          |
+| **Developer Compute**     | $200 (Cloud GPU)    | **$0** (Local Machine)          |
+| **Infrastructure**        | $50                 | $50                             |
+| **Total Monthly Cost**    | **~$452**           | **~$52**                        |
 
 **ROI Analysis**: For a small team of 3 developers, this translates to a **yearly saving of approximately $14,400** by utilizing local hardware for development. The slight added complexity is often worth the financial and privacy benefits.
 
@@ -347,16 +347,16 @@ Excellent choice. The `ollama-client` Ruby gem is production‑ready and aligns 
 
 ## 🧱 Adjusted Architecture (Ruby + ollama-client)
 
-| Component               | Local Development (Ollama)           | Production (Cloud)                  |
-| ----------------------- | ------------------------------------- | ----------------------------------- |
-| **LLM Chat/Generate**   | `Ollama::Client` (via gem)            | OpenAI‑compatible facade or direct API |
-| **Structured Output**   | `generate` with JSON schema           | Same, with cloud model fallback     |
-| **Tool Calling**        | Native `tools` in `chat`              | Same                                |
-| **Embeddings (RAG)**    | `client.embeddings.embed` (BGE‑M3)    | Voyage AI via HTTP or cloud wrapper |
-| **Vector Database**     | `qdrant-ruby` or `pgvector` + `sequel`| Same                                |
-| **Knowledge Graph**     | `neo4j` Ruby driver                   | Same                                |
-| **Agent Loop**          | Custom `Agent` class (using gem)      | Same                                |
-| **Memory**              | Redis / SQLite (dev), PostgreSQL (prod)| Same                                |
+| Component             | Local Development (Ollama)              | Production (Cloud)                     |
+| --------------------- | --------------------------------------- | -------------------------------------- |
+| **LLM Chat/Generate** | `Ollama::Client` (via gem)              | OpenAI‑compatible facade or direct API |
+| **Structured Output** | `generate` with JSON schema             | Same, with cloud model fallback        |
+| **Tool Calling**      | Native `tools` in `chat`                | Same                                   |
+| **Embeddings (RAG)**  | `client.embeddings.embed` (BGE‑M3)      | Voyage AI via HTTP or cloud wrapper    |
+| **Vector Database**   | `qdrant-ruby` or `pgvector` + `sequel`  | Same                                   |
+| **Knowledge Graph**   | `neo4j` Ruby driver                     | Same                                   |
+| **Agent Loop**        | Custom `Agent` class (using gem)        | Same                                   |
+| **Memory**            | Redis / SQLite (dev), PostgreSQL (prod) | Same                                   |
 
 ---
 
@@ -765,15 +765,15 @@ end
 
 ## ✅ Why This Gem is Perfect for Your Project
 
-| Gem Feature               | How It Helps Chanakya Advisor                            |
-| ------------------------- | -------------------------------------------------------- |
-| **Auto‑pull missing models** | No manual `ollama pull` – agent just works.            |
-| **JSON schema enforcement** | Guarantees structured advice (e.g., action + reasoning). |
-| **Tool calling**          | Agent can retrieve sutras and query knowledge graph.     |
-| **Exponential backoff**   | Resilient to transient Ollama failures.                  |
-| **Streaming hooks**       | Smooth chat experience.                                  |
-| **OpenAI facade**         | Seamless transition to GPT‑4o in production.             |
-| **Embeddings endpoint**   | RAG pipeline fully integrated.                           |
+| Gem Feature                  | How It Helps Chanakya Advisor                            |
+| ---------------------------- | -------------------------------------------------------- |
+| **Auto‑pull missing models** | No manual `ollama pull` – agent just works.              |
+| **JSON schema enforcement**  | Guarantees structured advice (e.g., action + reasoning). |
+| **Tool calling**             | Agent can retrieve sutras and query knowledge graph.     |
+| **Exponential backoff**      | Resilient to transient Ollama failures.                  |
+| **Streaming hooks**          | Smooth chat experience.                                  |
+| **OpenAI facade**            | Seamless transition to GPT‑4o in production.             |
+| **Embeddings endpoint**      | RAG pipeline fully integrated.                           |
 
 ---
 
@@ -793,49 +793,49 @@ Here are several name options for your Chanakya-inspired personal advisor agent,
 
 ## 🔥 Top Recommendations
 
-| Name | Meaning / Inspiration | Why It Works |
-|------|----------------------|---------------|
-| **Artha** | Sanskrit for "purpose, wealth, meaning" – from *Arthashastra* | Short, memorable, hints at strategic life advice. "Artha" is also one of the four puruṣārthas (life goals). |
-| **Neeti** | Sanskrit for "policy, ethics, wise conduct" – from *Chanakya Neeti* | Directly references the source text. Sounds soft yet authoritative. |
-| **Kautilya** | Chanakya's other name | Classic, scholarly, instantly recognizable to those who know. Good for a serious/professional tool. |
-| **Sutra** | Aphorism, thread | Evokes the concise, powerful verses of Chanakya. Works as a brand (e.g., "Sutra Advisor"). |
+| Name         | Meaning / Inspiration                                               | Why It Works                                                                                                |
+| ------------ | ------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| **Artha**    | Sanskrit for "purpose, wealth, meaning" – from *Arthashastra*       | Short, memorable, hints at strategic life advice. "Artha" is also one of the four puruṣārthas (life goals). |
+| **Neeti**    | Sanskrit for "policy, ethics, wise conduct" – from *Chanakya Neeti* | Directly references the source text. Sounds soft yet authoritative.                                         |
+| **Kautilya** | Chanakya's other name                                               | Classic, scholarly, instantly recognizable to those who know. Good for a serious/professional tool.         |
+| **Sutra**    | Aphorism, thread                                                    | Evokes the concise, powerful verses of Chanakya. Works as a brand (e.g., "Sutra Advisor").                  |
 
 ---
 
 ## 📜 Sanskrit‑Inspired Names
 
-| Name | Meaning | Vibe |
-|------|---------|------|
-| **Dhi** | Intellect, wisdom | Short, modern, unisex |
-| **Nīti** (or Neeti) | Policy, guidance | As above |
-| **Mantra** | Instrument of thought | Well‑known, mystical |
-| **Anvesha** | Seeking, inquiry | Great for a self‑improvement advisor |
-| **Bodha** | Knowledge, awakening | Calm, wise |
-| **Sāra** | Essence, core | Clean, minimal |
+| Name                | Meaning               | Vibe                                 |
+| ------------------- | --------------------- | ------------------------------------ |
+| **Dhi**             | Intellect, wisdom     | Short, modern, unisex                |
+| **Nīti** (or Neeti) | Policy, guidance      | As above                             |
+| **Mantra**          | Instrument of thought | Well‑known, mystical                 |
+| **Anvesha**         | Seeking, inquiry      | Great for a self‑improvement advisor |
+| **Bodha**           | Knowledge, awakening  | Calm, wise                           |
+| **Sāra**            | Essence, core         | Clean, minimal                       |
 
 ---
 
 ## 🦅 Symbolic & Evocative Names
 
-| Name | Inspiration | Why It Works |
-|------|-------------|---------------|
-| **Chāṇakya** (with diacritic) | Original spelling | Authentic, but harder to type. Use as `Chanakya` (simpler). |
-| **Vishnugupta** | Chanakya's birth name | Unique, distinguished. |
-| **Takshashila** | Ancient university where Chanakya taught | Evokes deep learning and strategy. |
-| **Maurya** | The empire he built | Strong, historical. |
-| **Acharya** | Teacher, preceptor | Respectful, clear purpose. |
+| Name                          | Inspiration                              | Why It Works                                                |
+| ----------------------------- | ---------------------------------------- | ----------------------------------------------------------- |
+| **Chāṇakya** (with diacritic) | Original spelling                        | Authentic, but harder to type. Use as `Chanakya` (simpler). |
+| **Vishnugupta**               | Chanakya's birth name                    | Unique, distinguished.                                      |
+| **Takshashila**               | Ancient university where Chanakya taught | Evokes deep learning and strategy.                          |
+| **Maurya**                    | The empire he built                      | Strong, historical.                                         |
+| **Acharya**                   | Teacher, preceptor                       | Respectful, clear purpose.                                  |
 
 ---
 
 ## 🚀 Modern, Brandable Names
 
-| Name | Rationale |
-|------|------------|
+| Name                 | Rationale                      |
+| -------------------- | ------------------------------ |
 | **Niti** (shortened) | Easy to spell, works globally. |
-| **SutraAI** | Clear tech + wisdom blend. |
-| **Arthabot** | Playful but purposeful. |
-| **KautilyaOne** | Professional tier. |
-| **NeetiGuide** | Self‑explanatory. |
+| **SutraAI**          | Clear tech + wisdom blend.     |
+| **Arthabot**         | Playful but purposeful.        |
+| **KautilyaOne**      | Professional tier.             |
+| **NeetiGuide**       | Self‑explanatory.              |
 
 ---
 
@@ -878,14 +878,14 @@ Here is a brand strategy for your **Neeti** project, covering domain availabilit
 
 ### 1. Domain Availability Assessment
 
-| Domain Name | Status | Recommended Action |
-| :--- | :--- | :--- |
-| **neeti.com** | 🚫 **Taken** | This 4-letter domain is a premium digital asset. Not impossible to acquire, but likely costs $10,000+ if you buy from current owner. |
-| **niti.ai** | 🚫 **Taken** | The .ai extension is popular for tech/AI startups. Shows strong market interest. You might try offering around $500-$2,000 to the current owner. |
-| **neeti.ai** | ❓ **Unknown / Taken by registrar?** | The ownership details are unclear, but all major registrars report this domain is unavailable to register. |
-| **neeti.app** | 🟢 **Available** | Modern, trustworthy extension. If you plan a mobile-first app, `.app` signals exactly that. |
-| **neeti.one** | 🟢 **Available** | Short, memorable, professional. Avoids needing a "one." Look at major registrars like GoDaddy, Namecheap. |
-| **tryneeti.com** | 🟢 **Available** | Descriptive (like `tryneeti.com`). Good for marketing, or more standard like `neetiguide.com`. |
+| Domain Name      | Status                              | Recommended Action                                                                                                                               |
+| :--------------- | :---------------------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------- |
+| **neeti.com**    | 🚫 **Taken**                         | This 4-letter domain is a premium digital asset. Not impossible to acquire, but likely costs $10,000+ if you buy from current owner.             |
+| **niti.ai**      | 🚫 **Taken**                         | The .ai extension is popular for tech/AI startups. Shows strong market interest. You might try offering around $500-$2,000 to the current owner. |
+| **neeti.ai**     | ❓ **Unknown / Taken by registrar?** | The ownership details are unclear, but all major registrars report this domain is unavailable to register.                                       |
+| **neeti.app**    | 🟢 **Available**                     | Modern, trustworthy extension. If you plan a mobile-first app, `.app` signals exactly that.                                                      |
+| **neeti.one**    | 🟢 **Available**                     | Short, memorable, professional. Avoids needing a "one." Look at major registrars like GoDaddy, Namecheap.                                        |
+| **tryneeti.com** | 🟢 **Available**                     | Descriptive (like `tryneeti.com`). Good for marketing, or more standard like `neetiguide.com`.                                                   |
 
 **Strategy:** Register **`neeti.one`** now. Use it for your landing page and technical demo. It's a small, immediate investment that secures your core brand identity. You can always add other domains later for specific campaigns or products.
 
@@ -905,11 +905,11 @@ Use the Devanagari script for "Neeti" — `नी` (nī) + `ति` (ti) — as 
 
 **Detailed Concept Elements**
 
-| Element | Design Direction & Recommendation |
-| :--- | :--- |
+| Element                           | Design Direction & Recommendation                                                                                                                                                                                                           |
+| :-------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | **Typography (Primary Wordmark)** | A clean, modern serif font. For wordmark, try **Playfair Display** (elegant) or **Cormorant Garamond** (classic). Use a **custom Devanagari typeface** for "नीति" (like *Poppins Devanagari* or *Noto Serif Devanagari*) as the central icon. |
-| **Color Palette** | **Deep Saffron (#FF9933)** for energy & intellect; **Rich Indigo (#4B0082)** for depth & trust; **Off-White (#F8F9FA)** for background & contrast. |
-| **Visual Mark (Icon)** | A unique, abstract shape derived from the `नी` (nī) character. Uses clean, geometric lines, as if carved from stone. Represents ancient wisdom in a modern, technological container. |
+| **Color Palette**                 | **Deep Saffron (#FF9933)** for energy & intellect; **Rich Indigo (#4B0082)** for depth & trust; **Off-White (#F8F9FA)** for background & contrast.                                                                                          |
+| **Visual Mark (Icon)**            | A unique, abstract shape derived from the `नी` (nī) character. Uses clean, geometric lines, as if carved from stone. Represents ancient wisdom in a modern, technological container.                                                         |
 
 ### Summary & Next Steps
 
@@ -978,14 +978,14 @@ Here is a comprehensive checklist of everything you need to know, structured for
 
 ### 🛠️ Tech Stack: The Developer's Toolbox
 
-| Layer | Recommended Tool | Why It's a Great Choice for a Solo Dev |
-| :--- | :--- | :--- |
-| **🎨 Frontend** | **Tailwind CSS** | A utility-first framework that allows you to build custom, professional UIs without writing a single line of custom CSS, dramatically speeding up development. |
-| **🧠 AI Framework** | **Langchain.rb** | The de-facto standard for building LLM-powered apps in Ruby. It provides a unified interface for all major LLM providers and streamlines RAG and agent creation. |
-| **🤖 LLM** | **Ollama** | A fantastic tool for local development. It's free, respects your data privacy, and allows for rapid prototyping. For production, you can easily swap in cloud models (like GPT-4o) via Langchain. |
-| **💾 Database** | **PostgreSQL** | The most robust, reliable, and feature-rich open-source database. It has excellent `pgvector` support, turning it into a vector database for RAG, which reduces the need for extra infrastructure. |
-| **🔗 Payments** | **Pay Gem** | A complete payments engine that abstracts Stripe, Paddle, and other gateways into a single, easy-to-use API. It handles subscriptions, one-off payments, and webhooks. |
-| **🚀 Deployment** | **Render / Fly.io** | Modern PaaS (Platform-as-a-Service) providers that are the polar opposite of AWS's complexity. They offer simple deployment, automatic SSL, and scaling with a focus on developer happiness. |
+| Layer              | Recommended Tool    | Why It's a Great Choice for a Solo Dev                                                                                                                                                             |
+| :----------------- | :------------------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **🎨 Frontend**     | **Tailwind CSS**    | A utility-first framework that allows you to build custom, professional UIs without writing a single line of custom CSS, dramatically speeding up development.                                     |
+| **🧠 AI Framework** | **Langchain.rb**    | The de-facto standard for building LLM-powered apps in Ruby. It provides a unified interface for all major LLM providers and streamlines RAG and agent creation.                                   |
+| **🤖 LLM**          | **Ollama**          | A fantastic tool for local development. It's free, respects your data privacy, and allows for rapid prototyping. For production, you can easily swap in cloud models (like GPT-4o) via Langchain.  |
+| **💾 Database**     | **PostgreSQL**      | The most robust, reliable, and feature-rich open-source database. It has excellent `pgvector` support, turning it into a vector database for RAG, which reduces the need for extra infrastructure. |
+| **🔗 Payments**     | **Pay Gem**         | A complete payments engine that abstracts Stripe, Paddle, and other gateways into a single, easy-to-use API. It handles subscriptions, one-off payments, and webhooks.                             |
+| **🚀 Deployment**   | **Render / Fly.io** | Modern PaaS (Platform-as-a-Service) providers that are the polar opposite of AWS's complexity. They offer simple deployment, automatic SSL, and scaling with a focus on developer happiness.       |
 
 ### 🚀 Developer's Roadmap (Where To Spend Your Time)
 
@@ -1043,14 +1043,14 @@ For a philosophical text like Chanakya Neeti, naive vector-only RAG fails becaus
 
 ### Why This Stack for Chanakya?
 
-| Component | 2026 Best Practice | Why It Fits Chanakya |
-|---|---|---|
-| **Chunking** | Semantic chunking by sutra/theme | Each sutra is already a self-contained aphorism. No fixed-size splitting. |
-| **Retrieval** | Hybrid: BM25 + Dense Vectors | BM25 catches exact Sanskrit terms/keywords; dense vectors catch thematic parallels. |
-| **Re-ranking** | Cross-encoder re-ranker | Filters out semantically adjacent but irrelevant sutras. Critical for authenticity. |
-| **Reasoning** | Knowledge Graph (GraphRAG) | Connects "greed → enemy," "king → duty," "friend → testing" across all 17 chapters. |
-| **Memory** | LangGraph persistent state | Remembers your life context across sessions for personalized advice. |
-| **LLM** | Claude 3.5 / GPT-4o-mini | Strong reasoning at low cost; or local LLM (Llama 3.3) for privacy. |
+| Component      | 2026 Best Practice               | Why It Fits Chanakya                                                                |
+| -------------- | -------------------------------- | ----------------------------------------------------------------------------------- |
+| **Chunking**   | Semantic chunking by sutra/theme | Each sutra is already a self-contained aphorism. No fixed-size splitting.           |
+| **Retrieval**  | Hybrid: BM25 + Dense Vectors     | BM25 catches exact Sanskrit terms/keywords; dense vectors catch thematic parallels. |
+| **Re-ranking** | Cross-encoder re-ranker          | Filters out semantically adjacent but irrelevant sutras. Critical for authenticity. |
+| **Reasoning**  | Knowledge Graph (GraphRAG)       | Connects "greed → enemy," "king → duty," "friend → testing" across all 17 chapters. |
+| **Memory**     | LangGraph persistent state       | Remembers your life context across sessions for personalized advice.                |
+| **LLM**        | Claude 3.5 / GPT-4o-mini         | Strong reasoning at low cost; or local LLM (Llama 3.3) for privacy.                 |
 
 ---
 
@@ -1150,16 +1150,16 @@ FORMAT:
 
 ## 🛠️ Tech Stack (2026 Proven)
 
-| Layer | Tool | Role |
-|---|---|---|
-| **Orchestration** | **LangGraph** | Agentic workflow with state management, memory, and human-in-the-loop. Best for complex multi-step reasoning. |
-| **Vector DB** | **Qdrant** or **Weaviate** | Open-source, high-performance hybrid search (BM25 + HNSW). Qdrant has excellent metadata filtering. |
-| **Knowledge Graph** | **Neo4j Aura** (free tier) or **Memgraph** | Stores entities/relations extracted from sutras. LangChain has native Neo4j vector index support. |
-| **Embeddings** | **Voyage AI voyage-3-large** or **Cohere embed-v4** | Top MTEB performers for 2026. |
-| **Re-ranker** | **Cohere Rerank** or **BGE-Reranker** | Cross-encoder for final relevance scoring. |
-| **LLM** | **Claude 3.5 Sonnet** (reasoning) / **GPT-4o-mini** (cost) | Or local **Llama 3.3 70B** via Ollama for full privacy. |
-| **UI** | **Streamlit** (prototype) or **FastAPI + React** | Streamlit for solo use; FastAPI for a sharable advisor API. |
-| **Evaluation** | **RAGAS** | Measure Faithfulness (>0.9), Answer Relevancy (>0.85), Context Precision (>0.8). |
+| Layer               | Tool                                                       | Role                                                                                                          |
+| ------------------- | ---------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| **Orchestration**   | **LangGraph**                                              | Agentic workflow with state management, memory, and human-in-the-loop. Best for complex multi-step reasoning. |
+| **Vector DB**       | **Qdrant** or **Weaviate**                                 | Open-source, high-performance hybrid search (BM25 + HNSW). Qdrant has excellent metadata filtering.           |
+| **Knowledge Graph** | **Neo4j Aura** (free tier) or **Memgraph**                 | Stores entities/relations extracted from sutras. LangChain has native Neo4j vector index support.             |
+| **Embeddings**      | **Voyage AI voyage-3-large** or **Cohere embed-v4**        | Top MTEB performers for 2026.                                                                                 |
+| **Re-ranker**       | **Cohere Rerank** or **BGE-Reranker**                      | Cross-encoder for final relevance scoring.                                                                    |
+| **LLM**             | **Claude 3.5 Sonnet** (reasoning) / **GPT-4o-mini** (cost) | Or local **Llama 3.3 70B** via Ollama for full privacy.                                                       |
+| **UI**              | **Streamlit** (prototype) or **FastAPI + React**           | Streamlit for solo use; FastAPI for a sharable advisor API.                                                   |
+| **Evaluation**      | **RAGAS**                                                  | Measure Faithfulness (>0.9), Answer Relevancy (>0.85), Context Precision (>0.8).                              |
 
 ---
 
@@ -1219,12 +1219,12 @@ This adds 2-8s latency but dramatically reduces hallucination on ambiguous queri
 
 ## 📚 Data & Tools Quick Reference
 
-| Resource | Link | Format |
-|---|---|---|
-| Chanakya Neeti Darpan (Hindi/Sanskrit) | [Archive.org](https://archive.org/details/chanakya-niti-darpan) | PDF/TXT |
-| Chanakya Neeti (Dr. S.K. Verma) | [Archive.org](https://archive.org/details/chanakya-neeti_202305) | PDF with OCR |
-| Chanakya Neeti Sutra (1946 ed.) | [Archive.org](https://archive.org/details/ChanakyaNeetiSutra) | PDF |
-| R.P. Jain translation | Purchase or PDF | Structured English |
+| Resource                               | Link                                                             | Format             |
+| -------------------------------------- | ---------------------------------------------------------------- | ------------------ |
+| Chanakya Neeti Darpan (Hindi/Sanskrit) | [Archive.org](https://archive.org/details/chanakya-niti-darpan)  | PDF/TXT            |
+| Chanakya Neeti (Dr. S.K. Verma)        | [Archive.org](https://archive.org/details/chanakya-neeti_202305) | PDF with OCR       |
+| Chanakya Neeti Sutra (1946 ed.)        | [Archive.org](https://archive.org/details/ChanakyaNeetiSutra)    | PDF                |
+| R.P. Jain translation                  | Purchase or PDF                                                  | Structured English |
 
 ---
 
@@ -1241,12 +1241,12 @@ This is a strong business plan with clear monetization logic. Here is my critica
 
 **Verdict**: The plan is viable, but needs two critical corrections and tighter integration with the technical stack.
 
-| Aspect | Rating | Note |
-|---|---|---|
-| Monetization | ✅ Solid | Freemium + subscription is the right model for India + global |
-| Market sizing | ⚠️ Aggressive | $2.1B advice market by 2030 is plausible, but 1,000 paying users in Month 3 is optimistic without distribution |
-| Compliance | ⚠️ Needs correction | SEBI registration is only for *financial advice*. General life/leadership advice is unregulated |
-| Branding | ✅ Excellent | "Neeti" is the right choice. Short, ownable, culturally rooted |
+| Aspect        | Rating             | Note                                                                                                           |
+| ------------- | ------------------ | -------------------------------------------------------------------------------------------------------------- |
+| Monetization  | ✅ Solid            | Freemium + subscription is the right model for India + global                                                  |
+| Market sizing | ⚠️ Aggressive       | $2.1B advice market by 2030 is plausible, but 1,000 paying users in Month 3 is optimistic without distribution |
+| Compliance    | ⚠️ Needs correction | SEBI registration is only for *financial advice*. General life/leadership advice is unregulated                |
+| Branding      | ✅ Excellent        | "Neeti" is the right choice. Short, ownable, culturally rooted                                                 |
 
 ---
 
@@ -1279,12 +1279,12 @@ You mention *"India's upcoming IT Rules (Amendment) 2026 regarding AI transparen
 
 Your monetization tiers should directly map to technical capabilities:
 
-| Tier | Price | Technical Feature | Implementation |
-|---|---|---|---|
-| **Free** | ₹0 | Basic chat, 3 queries/day | Standard RAG with limited context window |
-| **Seeker** | ₹199/mo | Unlimited queries, audio summaries, daily sutra | Add TTS (text-to-speech) pipeline, scheduled push notifications |
-| **Strategist** | ₹499/mo | Goal tracking, memory across sessions, deep dives | Full LangGraph memory store, user insight extraction, long-term profile |
-| **Raja** | ₹1,999/mo | Human expert review + AI hybrid | Escalation to human coaches via dashboard, async review workflow |
+| Tier           | Price     | Technical Feature                                 | Implementation                                                          |
+| -------------- | --------- | ------------------------------------------------- | ----------------------------------------------------------------------- |
+| **Free**       | ₹0        | Basic chat, 3 queries/day                         | Standard RAG with limited context window                                |
+| **Seeker**     | ₹199/mo   | Unlimited queries, audio summaries, daily sutra   | Add TTS (text-to-speech) pipeline, scheduled push notifications         |
+| **Strategist** | ₹499/mo   | Goal tracking, memory across sessions, deep dives | Full LangGraph memory store, user insight extraction, long-term profile |
+| **Raja**       | ₹1,999/mo | Human expert review + AI hybrid                   | Escalation to human coaches via dashboard, async review workflow        |
 
 **The "hybrid human-AI" differentiator** you mentioned is your strongest moat. Implement it as:
 
@@ -1316,12 +1316,12 @@ This requires a simple admin dashboard in your Rails app — which your existing
 
 ## 🗺️ Revised Integrated Roadmap (Business + Tech)
 
-| Phase | Timeline | Business Action | Technical Action |
-|---|---|---|---|
-| **0: Foundation** | Week 1-2 | Register `neeti.one`, create landing page with waitlist | Set up Ruby project, ollama-client, parse Chanakya sutras |
-| **1: MVP** | Month 1 | Free beta to 50 users, collect feedback | Deploy basic RAG (Qdrant + local LLM), simple Streamlit UI |
-| **2: Monetization** | Month 2-3 | Launch Freemium, integrate Razorpay | Add subscription gating, usage limits, audio summaries |
-| **3: Scale** | Month 4-6 | Target 1,000 paying users, influencer marketing | Move to cloud LLM (GPT-4o-mini), add human review dashboard |
+| Phase                  | Timeline   | Business Action                                             | Technical Action                                                                 |
+| ---------------------- | ---------- | ----------------------------------------------------------- | -------------------------------------------------------------------------------- |
+| **0: Foundation**      | Week 1-2   | Register `neeti.one`, create landing page with waitlist     | Set up Ruby project, ollama-client, parse Chanakya sutras                        |
+| **1: MVP**             | Month 1    | Free beta to 50 users, collect feedback                     | Deploy basic RAG (Qdrant + local LLM), simple Streamlit UI                       |
+| **2: Monetization**    | Month 2-3  | Launch Freemium, integrate Razorpay                         | Add subscription gating, usage limits, audio summaries                           |
+| **3: Scale**           | Month 4-6  | Target 1,000 paying users, influencer marketing             | Move to cloud LLM (GPT-4o-mini), add human review dashboard                      |
 | **4: Differentiation** | Month 6-12 | Launch "Raja" tier with human coaches, vernacular languages | Add Hindi/Marathi/Tamil support, Neo4j knowledge graph for cross-theme reasoning |
 
 ---
@@ -1369,20 +1369,20 @@ For ~455 sutras across 17 chapters, traditional vector RAG is **overkill and opa
 
 ## 🏗️ The Stack
 
-| Layer | Technology | Why |
-|---|---|---|
-| **Backend** | Rails 8.1.3 + Solid Queue/Cache/Cable | You already run this. Native background jobs, caching, WebSockets. |
-| **Frontend** | Vite + React + TypeScript + Tailwind + shadcn/ui | Modern, fast, PWA-ready. |
-| **Database** | PostgreSQL 16 (single source of truth) | Sutras, themes, graph edges, conversations, insights, jobs, cache — everything. |
-| **AI Local** | Ollama (`llama3.3:70b`) via `ollama-client` gem | Primary. Zero API cost, zero latency, full privacy. |
-| **AI Fallback** | OpenAI GPT-4o-mini → Anthropic Claude 3.5 | Cloud burst when local is overloaded or for complex reasoning. |
-| **AI Research** | Gemini / DeepSeek / Perplexity | Optional tools for web search or deep research. |
-| **RAG** | **Structured** (metadata + FTS + graph) | No embeddings. No Qdrant. No Pinecone. |
-| **Agent** | Custom Ruby ReAct + Reflection | Reason → Act → Observe → Reflect → Refine. |
-| **Memory** | PostgreSQL + Solid Queue jobs | Session history + extracted user insights. |
-| **Auth** | JWT + Bcrypt | Stateless API auth. |
-| **Payments** | Razorpay | India-native subscriptions. |
-| **Deploy** | Kamal 2 (Rails 8 native) | Docker-based zero-downtime deploy. |
+| Layer           | Technology                                       | Why                                                                             |
+| --------------- | ------------------------------------------------ | ------------------------------------------------------------------------------- |
+| **Backend**     | Rails 8.1.3 + Solid Queue/Cache/Cable            | You already run this. Native background jobs, caching, WebSockets.              |
+| **Frontend**    | Vite + React + TypeScript + Tailwind + shadcn/ui | Modern, fast, PWA-ready.                                                        |
+| **Database**    | PostgreSQL 16 (single source of truth)           | Sutras, themes, graph edges, conversations, insights, jobs, cache — everything. |
+| **AI Local**    | Ollama (`llama3.3:70b`) via `ollama-client` gem  | Primary. Zero API cost, zero latency, full privacy.                             |
+| **AI Fallback** | OpenAI GPT-4o-mini → Anthropic Claude 3.5        | Cloud burst when local is overloaded or for complex reasoning.                  |
+| **AI Research** | Gemini / DeepSeek / Perplexity                   | Optional tools for web search or deep research.                                 |
+| **RAG**         | **Structured** (metadata + FTS + graph)          | No embeddings. No Qdrant. No Pinecone.                                          |
+| **Agent**       | Custom Ruby ReAct + Reflection                   | Reason → Act → Observe → Reflect → Refine.                                      |
+| **Memory**      | PostgreSQL + Solid Queue jobs                    | Session history + extracted user insights.                                      |
+| **Auth**        | JWT + Bcrypt                                     | Stateless API auth.                                                             |
+| **Payments**    | Razorpay                                         | India-native subscriptions.                                                     |
+| **Deploy**      | Kamal 2 (Rails 8 native)                         | Docker-based zero-downtime deploy.                                              |
 
 ---
 
@@ -1590,14 +1590,14 @@ Deploy: `kamal deploy`
 
 ## 📊 Why This Beats Vector-Only RAG
 
-| Dimension | Vector RAG (Qdrant) | Neeti Structured RAG |
-|---|---|---|
-| **Cost** | $0.05–0.25/1K queries + embedding costs | $0 (PostgreSQL already running) |
-| **Latency** | 50–200ms (network to vector DB) | 5–15ms (same database) |
-| **Explainability** | "Similarity 0.78" — opaque | "Matched theme `greed` in Chapter 3" — transparent |
-| **Accuracy** | Misses exact phrases, false positives | Exact metadata + FTS + graph = precision |
-| **Maintenance** | Sync vectors, re-embed on update | Single source of truth, ACID |
-| **Small Corpus** | Overkill, vectors lose nuance | Perfect fit, structured metadata shines |
+| Dimension          | Vector RAG (Qdrant)                     | Neeti Structured RAG                               |
+| ------------------ | --------------------------------------- | -------------------------------------------------- |
+| **Cost**           | $0.05–0.25/1K queries + embedding costs | $0 (PostgreSQL already running)                    |
+| **Latency**        | 50–200ms (network to vector DB)         | 5–15ms (same database)                             |
+| **Explainability** | "Similarity 0.78" — opaque              | "Matched theme `greed` in Chapter 3" — transparent |
+| **Accuracy**       | Misses exact phrases, false positives   | Exact metadata + FTS + graph = precision           |
+| **Maintenance**    | Sync vectors, re-embed on update        | Single source of truth, ACID                       |
+| **Small Corpus**   | Overkill, vectors lose nuance           | Perfect fit, structured metadata shines            |
 
 ---
 
