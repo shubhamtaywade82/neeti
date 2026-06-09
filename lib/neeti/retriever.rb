@@ -48,9 +48,10 @@ module Neeti
     end
 
     def layer2_fts(query)
-      quoted = ActiveRecord::Base.connection.quote(query)
       Sutra.where("search_vector @@ plainto_tsquery('english', ?)", query)
-           .order(Arel.sql("ts_rank(search_vector, plainto_tsquery('english', #{quoted})) DESC"))
+           .order(Arel.sql(ActiveRecord::Base.sanitize_sql_array(
+             ["ts_rank(search_vector, plainto_tsquery('english', ?)) DESC", query]
+           )))
            .limit(@limit * 2).to_a
     end
 
