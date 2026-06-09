@@ -1,10 +1,26 @@
 Rails.application.routes.draw do
-  # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
+  namespace :api do
+    namespace :v1 do
+      # Auth
+      post '/auth/register', to: 'auth#register'
+      post '/auth/login',    to: 'auth#login'
+      get  '/auth/me',       to: 'auth#me'
 
-  # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.
-  # Can be used by load balancers and uptime monitors to verify that the app is live.
-  get "up" => "rails/health#show", as: :rails_health_check
+      # Advisor (SSE streaming) — implemented in Task 7
+      post '/advice', to: 'advisor#create'
 
-  # Defines the root path route ("/")
-  # root "posts#index"
+      # Conversations
+      resources :conversations, only: [:index, :show, :destroy] do
+        resources :messages, only: [:index]
+      end
+
+      # Subscriptions — implemented in Task 8
+      get    '/subscriptions/plans',   to: 'subscriptions#plans'
+      post   '/subscriptions',         to: 'subscriptions#create'
+      delete '/subscriptions',         to: 'subscriptions#cancel'
+      post   '/subscriptions/webhook', to: 'subscriptions#webhook'
+    end
+  end
+
+  get '/up', to: proc { [200, {}, ['OK']] }
 end
