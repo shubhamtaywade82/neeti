@@ -44,6 +44,64 @@ class Sutra < ApplicationRecord
       .distinct
   end
 
+  # --- Transition helpers: array columns still exist in DB (step-6 will drop them) ---
+  # When assigned string arrays, write to both the array column AND the join table.
+  %w[themes virtues vices situations emotions].each do |attr|
+    define_method("#{attr}=") do |values|
+      if values.present? && values.all? { |v| v.is_a?(String) }
+        write_attribute(attr, values)
+        assoc = attr.to_sym
+        join_assoc = {
+          themes: :sutra_themes, virtues: :sutra_virtues, vices: :sutra_vices,
+          situations: :sutra_situations, emotions: :sutra_emotions
+        }[assoc]
+        send(join_assoc).delete_all
+        themes = values.map { |name| Theme.find_or_create_by!(name: name) { |t| t.category ||= 'concept' } }
+        themes.each { |t| send(join_assoc).build(theme: t) }
+      else
+        super(values)
+      end
+    end
+  end
+
+  after_save :rebuild_search_vector_from_joins!
+
+  private
+
+  # Rebuild search_vector after join records are saved, since the DB trigger
+  # fires BEFORE insert when the join rows do not yet exist.
+  def rebuild_search_vector_from_joins!
+    themes_agg     = aggregate_theme_names(:sutra_themes)
+    situations_agg = aggregate_theme_names(:sutra_situations)
+    return unless themes_agg || situations_agg
+
+    sql = ActiveRecord::Base.sanitize_sql_array([
+      "UPDATE sutras SET search_vector =
+         setweight(to_tsvector('english', COALESCE(?, '')), 'A') ||
+         setweight(to_tsvector('english', COALESCE(?, '')), 'B') ||
+         setweight(to_tsvector('english', COALESCE(?, '')), 'C') ||
+         setweight(to_tsvector('english', COALESCE(?, '')), 'C')
+       WHERE id = ?",
+      translation_en || '',
+      transliteration || '',
+      themes_agg || '',
+      situations_agg || '',
+      id
+    ])
+
+    ActiveRecord::Base.connection.execute(sql)
+  end
+
+  def aggregate_theme_names(join_table)
+    result = ActiveRecord::Base.connection.execute(
+      ActiveRecord::Base.sanitize_sql_array([
+        "SELECT STRING_AGG(themes.name, ' ') FROM #{join_table} st INNER JOIN themes ON themes.id = st.theme_id WHERE st.sutra_id = ?",
+        id
+      ])
+    )
+    result.first.values.first
+  end
+
   validates :canonical_id,   presence: true, uniqueness: true
   validates :translation_en, presence: true
   validates :chapter,        presence: true, numericality: { only_integer: true, greater_than_or_equal_to: 1, less_than_or_equal_to: 17 }

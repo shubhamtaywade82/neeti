@@ -11,15 +11,22 @@ module Neeti
     # @param user         [User]
     # @param conversation [Conversation]
     # @param stream_proc  [Proc, nil] receives token strings for SSE
+    # @param mode         [Symbol] :retrieval (default) or :cag (full corpus)
     # @return [Hash] { advice:, cited_sutra_ids:, reflection_score: }
-    def advise(query, user:, conversation:, stream_proc: nil)
-      sutras   = @retriever.retrieve(query)
+    def advise(query, user:, conversation:, stream_proc: nil, mode: :retrieval)
+      sutras, context_text = if mode == :cag
+        [CorpusCache.all_sutras, CorpusCache.corpus_text]
+      else
+        retrieved = @retriever.retrieve(query)
+        [retrieved, nil]
+      end
+
       insights = MemoryStore.retrieve_insights(user)
-      messages = build_messages(query, sutras, insights, conversation)
+      messages = build_messages(query, sutras, insights, conversation, corpus_text: context_text)
 
       draft = @provider.chat(messages: messages, stream: stream_proc || false)
 
-      reflection = reflect(draft, query, sutras)
+      reflection = needs_reflection?(sutras, draft) ? reflect(draft, query, sutras) : skip_reflection
       final = reflection[:good] ? draft : refine(draft, reflection, messages)
 
       InsightExtractionJob.perform_later(user.id, query, final)
@@ -29,15 +36,33 @@ module Neeti
 
     private
 
-    def build_messages(query, sutras, insights, conversation)
+    def build_messages(query, sutras, insights, conversation, corpus_text: nil)
       history = conversation.messages.order(:created_at).last(6).map do |m|
         { role: m.role, content: m.content }
       end
+
+      user_content = if corpus_text
+        mem = insights.any? ? "\nUser context:\n#{insights.map(&:content).join("\n")}" : ""
+        "#{mem}\n\nFull Chanakya Neeti corpus (455 sutras):\n#{corpus_text}\n\nUser question: #{query}"
+      else
+        Prompts.advice_user_message(query, sutras, insights)
+      end
+
       [
         { role: "system", content: Prompts::CHANAKYA_SYSTEM },
         *history,
-        { role: "user",   content: Prompts.advice_user_message(query, sutras, insights) }
+        { role: "user",   content: user_content }
       ]
+    end
+
+    # Reflect only when retrieval is weak or draft is suspiciously short.
+    # Skipping saves ~50% token cost on confident queries.
+    def needs_reflection?(sutras, draft)
+      sutras.size < 2 || draft.split.length < 40
+    end
+
+    def skip_reflection
+      { good: true, issues: [], score: 8 }
     end
 
     def reflect(draft, query, sutras)

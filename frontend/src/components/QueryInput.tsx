@@ -5,9 +5,11 @@ interface Props {
   onSubmit:    (query: string) => void
   onCancel:    () => void
   isStreaming: boolean
+  cagMode:     boolean
+  onToggleCag: () => void
 }
 
-export function QueryInput({ onSubmit, onCancel, isStreaming }: Props) {
+export function QueryInput({ onSubmit, onCancel, isStreaming, cagMode, onToggleCag }: Props) {
   const [value, setValue] = useState('')
 
   const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
@@ -41,6 +43,18 @@ export function QueryInput({ onSubmit, onCancel, isStreaming }: Props) {
           onKeyDown={handleKeyDown}
           disabled={isStreaming}
         />
+        <button
+          onClick={onToggleCag}
+          title="CAG: use full corpus"
+          className={clsx(
+            'px-3 py-3 rounded-xl text-xs font-medium transition-colors border',
+            cagMode
+              ? 'bg-amber-700/30 border-amber-600 text-amber-300'
+              : 'bg-transparent border-stone-700 text-stone-600 hover:border-stone-500 hover:text-stone-400'
+          )}
+        >
+          ∞
+        </button>
         <button
           onClick={handleClick}
           className={clsx(

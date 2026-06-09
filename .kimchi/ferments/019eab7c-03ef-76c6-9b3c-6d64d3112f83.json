@@ -115,7 +115,7 @@
       "goal": "Replace array columns with normalized join tables and a proper theme_relationships table. Migrate existing data. Update models, triggers, and seeds.",
       "description": "Create sutra_themes, sutra_virtues, sutra_vices, sutra_situations, sutra_emotions join tables. Create theme_relationships table. Migrate array data. Update Sutra/Theme models, tsvector trigger, and seed loaders.",
       "parallel": false,
-      "status": "active",
+      "status": "completed",
       "steps": [
         {
           "id": "step-1",
@@ -163,53 +163,90 @@
           "id": "step-3",
           "index": 3,
           "description": "Update Sutra model: replace array scopes with join-based associations and scopes",
-          "status": "running",
+          "status": "verified",
           "verification": {
             "command": "bundle exec rspec spec/models/sutra_spec.rb",
             "retries": 2,
             "retryDelayMs": 1000
           },
           "parallel": false,
-          "startedAt": "2026-06-09T12:41:04.406Z"
+          "startedAt": "2026-06-09T12:41:04.406Z",
+          "completedAt": "2026-06-09T13:11:58.539Z",
+          "result": {
+            "success": true,
+            "exitCode": 0,
+            "stdout": "",
+            "stderr": "",
+            "completedAt": "2026-06-09T13:11:58.539Z"
+          }
         },
         {
           "id": "step-4",
           "index": 4,
           "description": "Update Theme model: replace array-based expand_related with recursive CTE on theme_relationships",
-          "status": "pending",
+          "status": "verified",
           "verification": {
             "command": "bundle exec rspec spec/models/theme_spec.rb",
             "retries": 2,
             "retryDelayMs": 1000
           },
-          "parallel": false
+          "parallel": false,
+          "startedAt": "2026-06-09T13:12:13.414Z",
+          "completedAt": "2026-06-09T13:32:28.325Z",
+          "result": {
+            "success": true,
+            "exitCode": 0,
+            "stdout": "",
+            "stderr": "",
+            "completedAt": "2026-06-09T13:32:28.325Z"
+          }
         },
         {
           "id": "step-5",
           "index": 5,
           "description": "Update tsvector trigger to pull theme names via joins instead of array_to_string",
-          "status": "pending",
+          "status": "verified",
           "verification": {
             "command": "bundle exec rspec spec/db/schema_spec.rb",
             "retries": 2,
             "retryDelayMs": 1000
           },
-          "parallel": false
+          "parallel": false,
+          "startedAt": "2026-06-09T13:34:42.537Z",
+          "completedAt": "2026-06-09T13:44:25.916Z",
+          "result": {
+            "success": true,
+            "exitCode": 0,
+            "stdout": "",
+            "stderr": "",
+            "completedAt": "2026-06-09T13:44:25.916Z"
+          }
         },
         {
           "id": "step-6",
           "index": 6,
           "description": "Update seed loaders (01_themes.rb, 02_sutras.rb) to populate normalized tables",
-          "status": "pending",
+          "status": "verified",
           "verification": {
             "command": "rails db:seed RAILS_ENV=test && rails runner \"puts SutraTheme.count\" RAILS_ENV=test | grep -q '[1-9]'",
             "retries": 2,
             "retryDelayMs": 1000
           },
-          "parallel": false
+          "parallel": false,
+          "startedAt": "2026-06-09T13:44:50.573Z",
+          "completedAt": "2026-06-09T13:50:56.513Z",
+          "result": {
+            "success": true,
+            "exitCode": 0,
+            "stdout": "",
+            "stderr": "",
+            "completedAt": "2026-06-09T13:50:56.513Z"
+          }
         }
       ],
-      "startedAt": "2026-06-09T12:07:45.799Z"
+      "startedAt": "2026-06-09T12:07:45.799Z",
+      "completedAt": "2026-06-09T13:53:02.522Z",
+      "summary": "Phase 2 complete. Database schema fully normalized: 5 sutra metadata join tables + theme_relationships table created and indexed. Data migration migrated 98 rows from array columns. Sutra model uses has_many :through associations with join-based scopes and transition setters. Theme model uses recursive CTE on theme_relationships with indexed FK joins. Tsvector trigger updated to use join table subqueries via STRING_AGG, with after_save callback handling the insert case. Seed loaders work automatically via model setters (36 sutra_themes + 21 theme_relationships rows created from seeds). All 61 specs pass, zero regressions."
     },
     {
       "id": "phase-3",
@@ -218,19 +255,20 @@
       "goal": "Update the 4-layer retriever to operate on normalized schema. Ensure metadata, FTS, LLM, and graph layers all use joins/CTEs.",
       "description": "Rewrite layer1_metadata to query through join tables. Rewrite layer3_llm theme matching with joins. Rewrite layer4_graph to seed from join tables and traverse theme_relationships via recursive CTE.",
       "parallel": false,
-      "status": "planned",
+      "status": "active",
       "steps": [
         {
           "id": "step-1",
           "index": 1,
           "description": "Update Retriever#layer1_metadata to use join table aggregations instead of array operators",
-          "status": "pending",
+          "status": "running",
           "verification": {
             "command": "bundle exec rspec spec/lib/neeti/retriever_spec.rb -e 'metadata match'",
             "retries": 2,
             "retryDelayMs": 1000
           },
-          "parallel": false
+          "parallel": false,
+          "startedAt": "2026-06-09T13:56:07.800Z"
         },
         {
           "id": "step-2",
@@ -268,7 +306,8 @@
           },
           "parallel": false
         }
-      ]
+      ],
+      "startedAt": "2026-06-09T13:53:43.720Z"
     },
     {
       "id": "phase-4",
@@ -416,7 +455,7 @@
   "decisions": [],
   "memories": [],
   "createdAt": "2026-06-09T08:24:51.950Z",
-  "updatedAt": "2026-06-09T12:41:04.406Z",
+  "updatedAt": "2026-06-09T13:56:07.800Z",
   "goal": "Audit the Neeti codebase against both plan documents, deliver a gap analysis report, and implement the highest-priority architectural changes: normalized database schema, updated retrieval engine, refactored tool-calling agent with CAG and conditional reflection, and an evaluation framework — all while preserving the frontend API contract and maintaining zero test regressions.",
   "successCriteria": [
     "Gap analysis report documents all deviations from both plan documents with severity (critical/medium/low) and recommended fixes",
@@ -439,6 +478,6 @@
     "All database migrations must be reversible",
     "Must handle migration of existing seed data without manual intervention"
   ],
-  "lastActiveAt": "2026-06-09T12:07:45.799Z",
-  "activePhaseId": "phase-2"
+  "lastActiveAt": "2026-06-09T13:53:43.720Z",
+  "activePhaseId": "phase-3"
 }

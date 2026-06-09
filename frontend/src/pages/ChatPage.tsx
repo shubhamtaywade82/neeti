@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { ChatWindow } from '../components/ChatWindow'
 import { ConversationSidebar } from '../components/ConversationSidebar'
+import { DailySutraWidget } from '../components/DailySutraWidget'
 import { SubscriptionModal } from '../components/SubscriptionModal'
 import { useAuthStore } from '../stores/authStore'
 import { useNavigate } from 'react-router-dom'
@@ -8,6 +9,8 @@ import { useNavigate } from 'react-router-dom'
 export function ChatPage() {
   const [activeConvoId, setActiveConvoId] = useState<number | undefined>()
   const [showUpgrade, setShowUpgrade]     = useState(false)
+  const [prefillQuery, setPrefillQuery]   = useState<string>('')
+  const [cagMode, setCagMode]             = useState(false)
   const logout                            = useAuthStore((s) => s.logout)
   const user                              = useAuthStore((s) => s.user)
   const navigate                          = useNavigate()
@@ -47,9 +50,14 @@ export function ChatPage() {
           </div>
         </div>
 
+        <DailySutraWidget onAsk={(q) => setPrefillQuery(q)} />
         <ChatWindow
           conversationId={activeConvoId}
           onConversationCreated={(id) => setActiveConvoId(id)}
+          prefillQuery={prefillQuery}
+          onPrefillConsumed={() => setPrefillQuery('')}
+          cagMode={cagMode}
+          onToggleCag={() => setCagMode((v) => !v)}
         />
       </div>
 

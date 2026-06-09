@@ -28,8 +28,20 @@ CREATE FUNCTION public.sutras_search_vector_update() RETURNS trigger
         NEW.search_vector :=
           setweight(to_tsvector('english', coalesce(NEW.translation_en, '')), 'A') ||
           setweight(to_tsvector('english', coalesce(NEW.transliteration, '')), 'B') ||
-          setweight(to_tsvector('english', coalesce(array_to_string(NEW.themes, ' '), '')), 'C') ||
-          setweight(to_tsvector('english', coalesce(array_to_string(NEW.situations, ' '), '')), 'C');
+          setweight(to_tsvector('english', coalesce(
+            (SELECT string_agg(themes.name, ' ')
+             FROM sutra_themes st
+             INNER JOIN themes ON themes.id = st.theme_id
+             WHERE st.sutra_id = NEW.id),
+            ''
+          )), 'C') ||
+          setweight(to_tsvector('english', coalesce(
+            (SELECT string_agg(themes.name, ' ')
+             FROM sutra_situations ss
+             INNER JOIN themes ON themes.id = ss.theme_id
+             WHERE ss.sutra_id = NEW.id),
+            ''
+          )), 'C');
         RETURN NEW;
       END
       $$;
@@ -147,8 +159,28 @@ CREATE TABLE public.schema_migrations (
 
 CREATE TABLE public.sutra_emotions (
     sutra_id bigint NOT NULL,
-    theme_id bigint NOT NULL
+    theme_id bigint NOT NULL,
+    id bigint NOT NULL
 );
+
+
+--
+-- Name: sutra_emotions_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.sutra_emotions_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: sutra_emotions_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.sutra_emotions_id_seq OWNED BY public.sutra_emotions.id;
 
 
 --
@@ -157,8 +189,28 @@ CREATE TABLE public.sutra_emotions (
 
 CREATE TABLE public.sutra_situations (
     sutra_id bigint NOT NULL,
-    theme_id bigint NOT NULL
+    theme_id bigint NOT NULL,
+    id bigint NOT NULL
 );
+
+
+--
+-- Name: sutra_situations_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.sutra_situations_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: sutra_situations_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.sutra_situations_id_seq OWNED BY public.sutra_situations.id;
 
 
 --
@@ -167,8 +219,28 @@ CREATE TABLE public.sutra_situations (
 
 CREATE TABLE public.sutra_themes (
     sutra_id bigint NOT NULL,
-    theme_id bigint NOT NULL
+    theme_id bigint NOT NULL,
+    id bigint NOT NULL
 );
+
+
+--
+-- Name: sutra_themes_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.sutra_themes_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: sutra_themes_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.sutra_themes_id_seq OWNED BY public.sutra_themes.id;
 
 
 --
@@ -177,8 +249,28 @@ CREATE TABLE public.sutra_themes (
 
 CREATE TABLE public.sutra_vices (
     sutra_id bigint NOT NULL,
-    theme_id bigint NOT NULL
+    theme_id bigint NOT NULL,
+    id bigint NOT NULL
 );
+
+
+--
+-- Name: sutra_vices_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.sutra_vices_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: sutra_vices_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.sutra_vices_id_seq OWNED BY public.sutra_vices.id;
 
 
 --
@@ -187,8 +279,28 @@ CREATE TABLE public.sutra_vices (
 
 CREATE TABLE public.sutra_virtues (
     sutra_id bigint NOT NULL,
-    theme_id bigint NOT NULL
+    theme_id bigint NOT NULL,
+    id bigint NOT NULL
 );
+
+
+--
+-- Name: sutra_virtues_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.sutra_virtues_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: sutra_virtues_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.sutra_virtues_id_seq OWNED BY public.sutra_virtues.id;
 
 
 --
@@ -388,6 +500,41 @@ ALTER TABLE ONLY public.messages ALTER COLUMN id SET DEFAULT nextval('public.mes
 
 
 --
+-- Name: sutra_emotions id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.sutra_emotions ALTER COLUMN id SET DEFAULT nextval('public.sutra_emotions_id_seq'::regclass);
+
+
+--
+-- Name: sutra_situations id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.sutra_situations ALTER COLUMN id SET DEFAULT nextval('public.sutra_situations_id_seq'::regclass);
+
+
+--
+-- Name: sutra_themes id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.sutra_themes ALTER COLUMN id SET DEFAULT nextval('public.sutra_themes_id_seq'::regclass);
+
+
+--
+-- Name: sutra_vices id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.sutra_vices ALTER COLUMN id SET DEFAULT nextval('public.sutra_vices_id_seq'::regclass);
+
+
+--
+-- Name: sutra_virtues id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.sutra_virtues ALTER COLUMN id SET DEFAULT nextval('public.sutra_virtues_id_seq'::regclass);
+
+
+--
 -- Name: sutras id; Type: DEFAULT; Schema: public; Owner: -
 --
 
@@ -452,6 +599,46 @@ ALTER TABLE ONLY public.messages
 
 ALTER TABLE ONLY public.schema_migrations
     ADD CONSTRAINT schema_migrations_pkey PRIMARY KEY (version);
+
+
+--
+-- Name: sutra_emotions sutra_emotions_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.sutra_emotions
+    ADD CONSTRAINT sutra_emotions_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: sutra_situations sutra_situations_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.sutra_situations
+    ADD CONSTRAINT sutra_situations_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: sutra_themes sutra_themes_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.sutra_themes
+    ADD CONSTRAINT sutra_themes_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: sutra_vices sutra_vices_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.sutra_vices
+    ADD CONSTRAINT sutra_vices_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: sutra_virtues sutra_virtues_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.sutra_virtues
+    ADD CONSTRAINT sutra_virtues_pkey PRIMARY KEY (id);
 
 
 --
@@ -765,6 +952,8 @@ ALTER TABLE ONLY public.theme_relationships
 SET search_path TO "$user", public;
 
 INSERT INTO "schema_migrations" (version) VALUES
+('20260609000004'),
+('20260609000003'),
 ('20260609000002'),
 ('20260609000001'),
 ('20260101000006'),

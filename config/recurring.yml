@@ -1,0 +1,4 @@
+daily_sutra_reset:
+  class: DailySutraJob
+  schedule: every day at 6am
+  queue: default

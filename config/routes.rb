@@ -14,6 +14,9 @@ Rails.application.routes.draw do
         resources :messages, only: [:index]
       end
 
+      # Daily Sutra
+      get '/daily_sutra', to: 'daily_sutra#show'
+
       # Subscriptions — implemented in Task 8
       get    '/subscriptions/plans',   to: 'subscriptions#plans'
       post   '/subscriptions',         to: 'subscriptions#create'

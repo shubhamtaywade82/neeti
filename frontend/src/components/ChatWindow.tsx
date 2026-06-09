@@ -20,9 +20,13 @@ interface ApiMessage {
 interface Props {
   conversationId?: number
   onConversationCreated?: (id: number) => void
+  prefillQuery?: string
+  onPrefillConsumed?: () => void
+  cagMode?: boolean
+  onToggleCag?: () => void
 }
 
-export function ChatWindow({ conversationId, onConversationCreated }: Props) {
+export function ChatWindow({ conversationId, onConversationCreated, prefillQuery, onPrefillConsumed, cagMode = false, onToggleCag = () => {} }: Props) {
   const [messages, setMessages]       = useState<Message[]>([])
   const { streamedText, isStreaming, result, error, ask, cancel } = useAdvisor()
   const bottomRef                     = useRef<HTMLDivElement>(null)
@@ -47,13 +51,21 @@ export function ChatWindow({ conversationId, onConversationCreated }: Props) {
     }
   }, [result, onConversationCreated])
 
+  useEffect(() => {
+    if (prefillQuery) {
+      handleSubmit(prefillQuery)
+      onPrefillConsumed?.()
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [prefillQuery])
+
   const handleSubmit = async (query: string) => {
     setMessages((prev) => [
       ...prev,
       { role: 'user',      content: query },
       { role: 'assistant', content: '', isStreaming: true }
     ])
-    const finalText = await ask(query, conversationId)
+    const finalText = await ask(query, conversationId, cagMode ? 'cag' : 'retrieval')
     setMessages((prev) => {
       const updated = [...prev]
       updated[updated.length - 1] = {
@@ -108,6 +120,8 @@ export function ChatWindow({ conversationId, onConversationCreated }: Props) {
         onSubmit={handleSubmit}
         onCancel={cancel}
         isStreaming={isStreaming}
+        cagMode={cagMode}
+        onToggleCag={onToggleCag}
       />
     </div>
   )

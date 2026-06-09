@@ -20,11 +20,13 @@ module Api
           sse.write({ type: 'token', content: token }.to_json)
         }
 
+        mode = params[:mode]&.to_sym == :cag ? :cag : :retrieval
         result = agent.advise(
           params.require(:query),
           user:         current_user,
           conversation: conversation,
-          stream_proc:  stream_proc
+          stream_proc:  stream_proc,
+          mode:         mode
         )
 
         conversation.messages.create!(role: 'user',    content: params[:query])
@@ -45,7 +47,8 @@ module Api
           type:             'complete',
           conversation_id:  conversation.id,
           cited_sutras:     cited,
-          reflection_score: result[:reflection_score]
+          reflection_score: result[:reflection_score],
+          mode:             mode
         }.to_json)
 
       rescue ActionController::Live::ClientDisconnected
