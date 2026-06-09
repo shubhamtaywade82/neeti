@@ -1,0 +1,68 @@
+service: neeti
+image: YOUR_DOCKERHUB_USERNAME/neeti
+
+servers:
+  web:
+    hosts:
+      - YOUR_SERVER_IP
+    labels:
+      traefik.http.routers.neeti.rule: "Host(`neeti.one`)"
+      traefik.http.routers.neeti-secure.tls: true
+      traefik.http.routers.neeti-secure.tls.certresolver: letsencrypt
+  worker:
+    hosts:
+      - YOUR_SERVER_IP
+    cmd: bundle exec rails solid_queue:work
+
+proxy:
+  ssl: true
+  host: neeti.one
+
+registry:
+  username: YOUR_DOCKERHUB_USERNAME
+  password:
+    - KAMAL_REGISTRY_PASSWORD
+
+env:
+  clear:
+    RAILS_ENV: production
+    RAILS_LOG_TO_STDOUT: "true"
+    OLLAMA_URL: http://localhost:11434
+    OLLAMA_MODEL: llama3.3:70b
+  secret:
+    - DATABASE_URL
+    - JWT_SECRET_KEY
+    - ANTHROPIC_API_KEY
+    - RAZORPAY_KEY_ID
+    - RAZORPAY_KEY_SECRET
+    - RAZORPAY_WEBHOOK_SECRET
+    - RAZORPAY_PLAN_SEEKER
+    - RAZORPAY_PLAN_STRATEGIST
+    - RAZORPAY_PLAN_RAJA
+
+accessories:
+  db:
+    image: postgres:16-alpine
+    host: YOUR_SERVER_IP
+    port: 5432
+    env:
+      clear:
+        POSTGRES_DB: neeti_production
+      secret:
+        - POSTGRES_USER
+        - POSTGRES_PASSWORD
+    volumes:
+      - /var/neeti/postgres:/var/lib/postgresql/data
+  ollama:
+    image: ollama/ollama:latest
+    host: YOUR_SERVER_IP
+    port: 11434
+    volumes:
+      - /var/neeti/ollama:/root/.ollama
+
+builder:
+  multiarch: false
+
+healthcheck:
+  path: /up
+  port: 3000
