@@ -43,13 +43,19 @@ export function SubscriptionModal({ open, onClose }: Props) {
     setError(null)
     setSuccess(null)
     try {
-      const res = await apiClient.post<{ short_url?: string; activated?: boolean; plan?: string }>('/subscriptions', { plan })
+      const res = await apiClient.post<{
+        mode:             'dev' | 'razorpay'
+        activated:        boolean
+        plan:             string
+        short_url:        string | null
+        subscription_id?: string
+      }>('/subscriptions', { plan })
+
       if (res.data.short_url) {
         window.location.href = res.data.short_url
       } else if (res.data.activated && user && token) {
-        // dev bypass — plan upgraded directly
-        setAuth(token, { ...user, plan: res.data.plan ?? plan })
-        setSuccess(`Upgraded to ${plan}!`)
+        setAuth(token, { ...user, plan: res.data.plan })
+        setSuccess(`Upgraded to ${res.data.plan}!`)
         setLoading(null)
       }
     } catch {

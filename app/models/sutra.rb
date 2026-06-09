@@ -4,19 +4,45 @@ class Sutra < ApplicationRecord
   pg_search_scope :full_text_search,
     using: { tsearch: { tsvector_column: 'search_vector', dictionary: 'english' } }
 
-  scope :by_theme,     ->(t) { where("? = ANY(themes)", t) }
-  scope :by_virtue,    ->(v) { where("? = ANY(virtues)", v) }
-  scope :by_vice,      ->(v) { where("? = ANY(vices)", v) }
-  scope :by_situation, ->(s) { where("? = ANY(situations)", s) }
-  scope :by_emotion,   ->(e) { where("? = ANY(emotions)", e) }
+  # --- Normalized associations (Phase 2) ---
+  has_many :sutra_themes,     dependent: :delete_all
+  has_many :themes,     through: :sutra_themes
 
-  SEARCHABLE_COLUMNS = %w[themes virtues vices situations emotions].freeze
+  has_many :sutra_virtues,    dependent: :delete_all
+  has_many :virtues,    through: :sutra_virtues, source: :theme
 
-  scope :matching_any, ->(arr, column) {
-    col = column.to_s
-    raise ArgumentError, "Invalid column: #{col}" unless SEARCHABLE_COLUMNS.include?(col)
-    where("#{col} && ARRAY[?]::text[]", arr)
-  }
+  has_many :sutra_vices,      dependent: :delete_all
+  has_many :vices,      through: :sutra_vices, source: :theme
+
+  has_many :sutra_situations, dependent: :delete_all
+  has_many :situations, through: :sutra_situations, source: :theme
+
+  has_many :sutra_emotions,   dependent: :delete_all
+  has_many :emotions,   through: :sutra_emotions, source: :theme
+
+  # --- Scopes on normalized schema ---
+  scope :by_theme,     ->(t) { joins(:sutra_themes).where(sutra_themes: { theme_id: Theme.where(name: t) }) }
+  scope :by_virtue,    ->(v) { joins(:sutra_virtues).where(sutra_virtues: { theme_id: Theme.where(name: v) }) }
+  scope :by_vice,      ->(v) { joins(:sutra_vices).where(sutra_vices: { theme_id: Theme.where(name: v) }) }
+  scope :by_situation, ->(s) { joins(:sutra_situations).where(sutra_situations: { theme_id: Theme.where(name: s) }) }
+  scope :by_emotion,   ->(e) { joins(:sutra_emotions).where(sutra_emotions: { theme_id: Theme.where(name: e) }) }
+
+  # Generic OR-match scope across any metadata association
+  def self.matching_any(arr, association)
+    join_table = {
+      themes:     :sutra_themes,
+      virtues:    :sutra_virtues,
+      vices:      :sutra_vices,
+      situations: :sutra_situations,
+      emotions:   :sutra_emotions
+    }[association.to_sym]
+
+    raise ArgumentError, "Invalid association: #{association}" unless join_table
+
+    joins(join_table)
+      .where(join_table => { theme_id: Theme.where(name: arr) })
+      .distinct
+  end
 
   validates :canonical_id,   presence: true, uniqueness: true
   validates :translation_en, presence: true

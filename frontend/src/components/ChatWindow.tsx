@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { useAdvisor } from '../hooks/useAdvisor'
+import { apiClient } from '../api/client'
 import { MessageBubble } from './MessageBubble'
 import { SourceCitation } from './SourceCitation'
 import { QueryInput } from './QueryInput'
@@ -8,6 +9,12 @@ interface Message {
   role:        'user' | 'assistant'
   content:     string
   isStreaming?: boolean
+}
+
+interface ApiMessage {
+  id:      number
+  role:    'user' | 'assistant'
+  content: string
 }
 
 interface Props {
@@ -19,6 +26,16 @@ export function ChatWindow({ conversationId, onConversationCreated }: Props) {
   const [messages, setMessages]       = useState<Message[]>([])
   const { streamedText, isStreaming, result, error, ask, cancel } = useAdvisor()
   const bottomRef                     = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!conversationId) {
+      setMessages([])
+      return
+    }
+    apiClient.get<ApiMessage[]>(`/conversations/${conversationId}/messages`)
+      .then((r) => setMessages(r.data.map((m) => ({ role: m.role, content: m.content }))))
+      .catch(() => {})
+  }, [conversationId])
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -60,7 +77,7 @@ export function ChatWindow({ conversationId, onConversationCreated }: Props) {
       </header>
 
       <div className="flex-1 overflow-y-auto px-4 py-6">
-        {messages.length === 0 && (
+        {messages.length === 0 && !conversationId && (
           <div className="text-center text-stone-600 mt-20">
             <p className="text-5xl mb-4 font-serif">नीति</p>
             <p className="text-sm">Ask for strategic counsel. Receive timeless wisdom.</p>

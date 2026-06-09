@@ -15,11 +15,22 @@ module Api
 
         if ENV['RAZORPAY_KEY_ID'].blank?
           current_user.update!(plan: plan)
-          return render json: { activated: true, plan: plan }, status: :created
+          return render json: {
+            mode:      'dev',
+            activated: true,
+            plan:      plan,
+            short_url: nil
+          }, status: :created
         end
 
         result = RazorpayService.new.create_subscription(current_user, plan)
-        render json: result, status: :created
+        render json: {
+          mode:            'razorpay',
+          activated:       false,
+          plan:            plan,
+          subscription_id: result[:subscription_id],
+          short_url:       result[:short_url]
+        }, status: :created
       rescue => e
         render json: { error: e.message }, status: :unprocessable_entity
       end

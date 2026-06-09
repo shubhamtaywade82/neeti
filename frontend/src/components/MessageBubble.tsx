@@ -1,4 +1,6 @@
 import { clsx } from 'clsx'
+import ReactMarkdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
 
 interface Props {
   role:        'user' | 'assistant'
@@ -26,7 +28,44 @@ export function MessageBubble({ role, content, isStreaming }: Props) {
       >
         {content ? (
           <>
-            {content}
+            {isUser ? (
+              <span>{content}</span>
+            ) : (
+              <ReactMarkdown
+                remarkPlugins={[remarkGfm]}
+                components={{
+                  p:          ({ children }) => <p className="mb-2 last:mb-0">{children}</p>,
+                  strong:     ({ children }) => <strong className="font-semibold text-amber-300">{children}</strong>,
+                  em:         ({ children }) => <em className="italic text-stone-300">{children}</em>,
+                  h1:         ({ children }) => <h1 className="text-lg font-bold text-amber-400 mt-3 mb-1">{children}</h1>,
+                  h2:         ({ children }) => <h2 className="text-base font-bold text-amber-400 mt-3 mb-1">{children}</h2>,
+                  h3:         ({ children }) => <h3 className="text-sm font-bold text-amber-300 mt-2 mb-1">{children}</h3>,
+                  ul:         ({ children }) => <ul className="list-disc list-inside space-y-1 my-2 pl-2">{children}</ul>,
+                  ol:         ({ children }) => <ol className="list-decimal list-inside space-y-1 my-2 pl-2">{children}</ol>,
+                  li:         ({ children }) => <li className="text-stone-200">{children}</li>,
+                  blockquote: ({ children }) => (
+                    <blockquote className="border-l-2 border-amber-600 pl-3 my-2 text-stone-400 italic">
+                      {children}
+                    </blockquote>
+                  ),
+                  code: ({ children, className }) => {
+                    const isBlock = className?.includes('language-')
+                    return isBlock ? (
+                      <code className="block bg-stone-950 rounded-lg px-3 py-2 my-2 text-xs font-mono text-amber-200 overflow-x-auto whitespace-pre">
+                        {children}
+                      </code>
+                    ) : (
+                      <code className="bg-stone-950 rounded px-1 py-0.5 text-xs font-mono text-amber-200">
+                        {children}
+                      </code>
+                    )
+                  },
+                  hr: () => <hr className="border-stone-700 my-3" />,
+                }}
+              >
+                {content}
+              </ReactMarkdown>
+            )}
             {isStreaming && (
               <span className="inline-block w-0.5 h-4 bg-amber-400 ml-0.5 animate-pulse" />
             )}
