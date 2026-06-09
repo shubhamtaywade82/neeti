@@ -142,26 +142,35 @@
           "id": "step-2",
           "index": 2,
           "description": "Populate join tables from existing array column data and theme related_theme_names arrays",
-          "status": "running",
+          "status": "verified",
           "verification": {
             "command": "rails runner \"puts SutraTheme.count + ThemeRelationship.count\" RAILS_ENV=test | grep -q '[1-9]'",
             "retries": 2,
             "retryDelayMs": 1000
           },
           "parallel": false,
-          "startedAt": "2026-06-09T12:23:36.017Z"
+          "startedAt": "2026-06-09T12:23:36.017Z",
+          "completedAt": "2026-06-09T12:40:34.871Z",
+          "result": {
+            "success": true,
+            "exitCode": 0,
+            "stdout": "",
+            "stderr": "",
+            "completedAt": "2026-06-09T12:40:34.871Z"
+          }
         },
         {
           "id": "step-3",
           "index": 3,
           "description": "Update Sutra model: replace array scopes with join-based associations and scopes",
-          "status": "pending",
+          "status": "running",
           "verification": {
             "command": "bundle exec rspec spec/models/sutra_spec.rb",
             "retries": 2,
             "retryDelayMs": 1000
           },
-          "parallel": false
+          "parallel": false,
+          "startedAt": "2026-06-09T12:41:04.406Z"
         },
         {
           "id": "step-4",
@@ -407,7 +416,7 @@
   "decisions": [],
   "memories": [],
   "createdAt": "2026-06-09T08:24:51.950Z",
-  "updatedAt": "2026-06-09T12:23:36.017Z",
+  "updatedAt": "2026-06-09T12:41:04.406Z",
   "goal": "Audit the Neeti codebase against both plan documents, deliver a gap analysis report, and implement the highest-priority architectural changes: normalized database schema, updated retrieval engine, refactored tool-calling agent with CAG and conditional reflection, and an evaluation framework — all while preserving the frontend API contract and maintaining zero test regressions.",
   "successCriteria": [
     "Gap analysis report documents all deviations from both plan documents with severity (critical/medium/low) and recommended fixes",

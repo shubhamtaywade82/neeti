@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { apiClient } from '../api/client'
+import { useAuthStore } from '../stores/authStore'
 
 const PLANS = [
   {
@@ -30,15 +31,27 @@ interface Props {
 export function SubscriptionModal({ open, onClose }: Props) {
   const [loading, setLoading] = useState<string | null>(null)
   const [error, setError]     = useState<string | null>(null)
+  const [success, setSuccess] = useState<string | null>(null)
+  const setAuth               = useAuthStore((s) => s.setAuth)
+  const token                 = useAuthStore((s) => s.token)
+  const user                  = useAuthStore((s) => s.user)
 
   if (!open) return null
 
   const subscribe = async (plan: string) => {
     setLoading(plan)
     setError(null)
+    setSuccess(null)
     try {
-      const res = await apiClient.post<{ short_url: string }>('/subscriptions', { plan })
-      window.location.href = res.data.short_url
+      const res = await apiClient.post<{ short_url?: string; activated?: boolean; plan?: string }>('/subscriptions', { plan })
+      if (res.data.short_url) {
+        window.location.href = res.data.short_url
+      } else if (res.data.activated && user && token) {
+        // dev bypass — plan upgraded directly
+        setAuth(token, { ...user, plan: res.data.plan ?? plan })
+        setSuccess(`Upgraded to ${plan}!`)
+        setLoading(null)
+      }
     } catch {
       setLoading(null)
       setError('Could not start subscription. Please try again.')
@@ -56,6 +69,10 @@ export function SubscriptionModal({ open, onClose }: Props) {
             ✕
           </button>
         </div>
+
+        {success && (
+          <p className="text-green-400 text-sm mb-4 font-medium">{success} <button onClick={onClose} className="underline ml-1">Close</button></p>
+        )}
 
         {error && (
           <p className="text-red-400 text-sm mb-4">{error}</p>
