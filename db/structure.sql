@@ -142,6 +142,56 @@ CREATE TABLE public.schema_migrations (
 
 
 --
+-- Name: sutra_emotions; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.sutra_emotions (
+    sutra_id bigint NOT NULL,
+    theme_id bigint NOT NULL
+);
+
+
+--
+-- Name: sutra_situations; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.sutra_situations (
+    sutra_id bigint NOT NULL,
+    theme_id bigint NOT NULL
+);
+
+
+--
+-- Name: sutra_themes; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.sutra_themes (
+    sutra_id bigint NOT NULL,
+    theme_id bigint NOT NULL
+);
+
+
+--
+-- Name: sutra_vices; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.sutra_vices (
+    sutra_id bigint NOT NULL,
+    theme_id bigint NOT NULL
+);
+
+
+--
+-- Name: sutra_virtues; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.sutra_virtues (
+    sutra_id bigint NOT NULL,
+    theme_id bigint NOT NULL
+);
+
+
+--
 -- Name: sutras; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -183,6 +233,40 @@ CREATE SEQUENCE public.sutras_id_seq
 --
 
 ALTER SEQUENCE public.sutras_id_seq OWNED BY public.sutras.id;
+
+
+--
+-- Name: theme_relationships; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.theme_relationships (
+    id bigint NOT NULL,
+    source_theme_id bigint NOT NULL,
+    target_theme_id bigint NOT NULL,
+    relationship_type character varying DEFAULT 'related'::character varying NOT NULL,
+    weight double precision DEFAULT 1.0,
+    created_at timestamp(6) without time zone NOT NULL,
+    updated_at timestamp(6) without time zone NOT NULL
+);
+
+
+--
+-- Name: theme_relationships_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.theme_relationships_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: theme_relationships_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.theme_relationships_id_seq OWNED BY public.theme_relationships.id;
 
 
 --
@@ -311,6 +395,13 @@ ALTER TABLE ONLY public.sutras ALTER COLUMN id SET DEFAULT nextval('public.sutra
 
 
 --
+-- Name: theme_relationships id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.theme_relationships ALTER COLUMN id SET DEFAULT nextval('public.theme_relationships_id_seq'::regclass);
+
+
+--
 -- Name: themes id; Type: DEFAULT; Schema: public; Owner: -
 --
 
@@ -372,6 +463,14 @@ ALTER TABLE ONLY public.sutras
 
 
 --
+-- Name: theme_relationships theme_relationships_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.theme_relationships
+    ADD CONSTRAINT theme_relationships_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: themes themes_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -396,6 +495,13 @@ ALTER TABLE ONLY public.users
 
 
 --
+-- Name: idx_theme_relationships_unique; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX idx_theme_relationships_unique ON public.theme_relationships USING btree (source_theme_id, target_theme_id, relationship_type);
+
+
+--
 -- Name: index_conversations_on_user_id; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -414,6 +520,76 @@ CREATE INDEX index_messages_on_conversation_id ON public.messages USING btree (c
 --
 
 CREATE INDEX index_messages_on_role ON public.messages USING btree (role);
+
+
+--
+-- Name: index_sutra_emotions_on_sutra_id_and_theme_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX index_sutra_emotions_on_sutra_id_and_theme_id ON public.sutra_emotions USING btree (sutra_id, theme_id);
+
+
+--
+-- Name: index_sutra_emotions_on_theme_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_sutra_emotions_on_theme_id ON public.sutra_emotions USING btree (theme_id);
+
+
+--
+-- Name: index_sutra_situations_on_sutra_id_and_theme_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX index_sutra_situations_on_sutra_id_and_theme_id ON public.sutra_situations USING btree (sutra_id, theme_id);
+
+
+--
+-- Name: index_sutra_situations_on_theme_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_sutra_situations_on_theme_id ON public.sutra_situations USING btree (theme_id);
+
+
+--
+-- Name: index_sutra_themes_on_sutra_id_and_theme_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX index_sutra_themes_on_sutra_id_and_theme_id ON public.sutra_themes USING btree (sutra_id, theme_id);
+
+
+--
+-- Name: index_sutra_themes_on_theme_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_sutra_themes_on_theme_id ON public.sutra_themes USING btree (theme_id);
+
+
+--
+-- Name: index_sutra_vices_on_sutra_id_and_theme_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX index_sutra_vices_on_sutra_id_and_theme_id ON public.sutra_vices USING btree (sutra_id, theme_id);
+
+
+--
+-- Name: index_sutra_vices_on_theme_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_sutra_vices_on_theme_id ON public.sutra_vices USING btree (theme_id);
+
+
+--
+-- Name: index_sutra_virtues_on_sutra_id_and_theme_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX index_sutra_virtues_on_sutra_id_and_theme_id ON public.sutra_virtues USING btree (sutra_id, theme_id);
+
+
+--
+-- Name: index_sutra_virtues_on_theme_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_sutra_virtues_on_theme_id ON public.sutra_virtues USING btree (theme_id);
 
 
 --
@@ -473,6 +649,27 @@ CREATE INDEX index_sutras_on_virtues ON public.sutras USING gin (virtues);
 
 
 --
+-- Name: index_theme_relationships_on_relationship_type; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_theme_relationships_on_relationship_type ON public.theme_relationships USING btree (relationship_type);
+
+
+--
+-- Name: index_theme_relationships_on_source_theme_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_theme_relationships_on_source_theme_id ON public.theme_relationships USING btree (source_theme_id);
+
+
+--
+-- Name: index_theme_relationships_on_target_theme_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_theme_relationships_on_target_theme_id ON public.theme_relationships USING btree (target_theme_id);
+
+
+--
 -- Name: index_themes_on_name; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -522,6 +719,14 @@ CREATE TRIGGER user_insights_sv_trigger BEFORE INSERT OR UPDATE ON public.user_i
 
 
 --
+-- Name: theme_relationships fk_rails_4caaef8d50; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.theme_relationships
+    ADD CONSTRAINT fk_rails_4caaef8d50 FOREIGN KEY (source_theme_id) REFERENCES public.themes(id);
+
+
+--
 -- Name: user_insights fk_rails_7b73695c72; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -546,12 +751,22 @@ ALTER TABLE ONLY public.messages
 
 
 --
+-- Name: theme_relationships fk_rails_ead6e0014c; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.theme_relationships
+    ADD CONSTRAINT fk_rails_ead6e0014c FOREIGN KEY (target_theme_id) REFERENCES public.themes(id);
+
+
+--
 -- PostgreSQL database dump complete
 --
 
 SET search_path TO "$user", public;
 
 INSERT INTO "schema_migrations" (version) VALUES
+('20260609000002'),
+('20260609000001'),
 ('20260101000006'),
 ('20260101000005'),
 ('20260101000004'),

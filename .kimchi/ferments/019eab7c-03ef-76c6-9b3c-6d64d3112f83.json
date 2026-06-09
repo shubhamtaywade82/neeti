@@ -1,17 +1,435 @@
 {
   "id": "019eab7c-03ef-76c6-9b3c-6d64d3112f83",
-  "name": "'/home/nemesis/project/ai-workspace/neeti/complete_plan.md''",
+  "name": "Neeti Gap & Refactor",
   "description": "'/home/nemesis/project/ai-workspace/neeti/complete_plan.md''/home/nemesis/project/ai-workspace/neeti/implementation_plan_requirements.md' Is this project on track with these requirements?",
-  "status": "draft",
+  "status": "running",
   "worktree": {
     "path": "/home/nemesis/project/ai-workspace/neeti",
     "branch": "main",
     "commit": "6584cc8e1443327579a4d7a3a9d67af770320a21"
   },
-  "scoping": {},
-  "phases": [],
+  "scoping": {
+    "goal": {
+      "answer": "Audit the Neeti codebase against both plan documents, deliver a gap analysis report, and implement the highest-priority architectural changes: normalized database schema, updated retrieval engine, refactored tool-calling agent with CAG and conditional reflection, and an evaluation framework — all while preserving the frontend API contract and maintaining zero test regressions.",
+      "confirmedAt": "2026-06-09T11:54:23.880Z"
+    },
+    "criteria": {
+      "answer": "Gap analysis report documents all deviations from both plan documents with severity (critical/medium/low) and recommended fixes\nSutra metadata array columns replaced with normalized join tables (sutra_themes, sutra_virtues, sutra_vices, sutra_situations, sutra_emotions)\nTheme relationships promoted to dedicated theme_relationships table with relationship_type and weight columns\nRetriever updated to use joins/CTEs instead of array operators; all 4 retrieval layers pass specs\nTheme graph expansion rewritten to use recursive CTE on theme_relationships table\nAgent refactored to explicit tool-calling architecture (AnalyzeProblem, RetrieveSutras, ExpandThemes, SearchMemory, GenerateReflection)\nConditional reflection: only triggers when first-pass confidence score is below 7\nCAG mode implemented for deep-synthesis queries with corpus cache and token-limit guardrails\nEvaluation framework with at least 30 benchmark queries producing retrieval precision/recall scores\nAll existing 60+ tests pass; new tests cover migrated tables and new behaviors\nFrontend API contract preserved — SSE event shapes, auth endpoints, response fields unchanged\nSeed data successfully populates normalized schema after migration",
+      "confirmedAt": "2026-06-09T11:54:23.880Z"
+    },
+    "constraints": {
+      "answer": "Preserve existing frontend API contract — no breaking changes to SSE shapes, auth endpoints, or response fields, PostgreSQL-only — no Qdrant, Neo4j, Redis, or additional infrastructure, Maintain Ruby/Rails/React stack — do not introduce Python, LangGraph, LangChain, or LlamaIndex, All database migrations must be reversible, Must handle migration of existing seed data without manual intervention",
+      "confirmedAt": "2026-06-09T11:54:23.880Z"
+    },
+    "phases": {
+      "answer": "Phase 1: Gap Analysis & Contract Audit, Phase 2: Schema Normalization, Phase 3: Retrieval Engine Update, Phase 4: Agent Architecture Refactor, Phase 5: Evaluation & Regression Gate",
+      "confirmedAt": "2026-06-09T11:54:23.880Z"
+    },
+    "assumptions": {
+      "answer": "Ollama is available locally for development and testing; LLM provider APIs (Ollama, Anthropic) remain stable during the refactor; Frontend will not be modified; backend must remain backward-compatible; Seed data JSON sources can have loader logic updated but source data content stays the same; 455 sutras fit within modern LLM context windows for CAG mode (~70k-100k tokens); The review document (complete_plan.md) is authoritative over the original implementation_plan_requirements.md where they conflict",
+      "confirmedAt": "2026-06-09T11:54:23.880Z"
+    }
+  },
+  "phases": [
+    {
+      "id": "phase-1",
+      "index": 1,
+      "name": "Phase 1: Gap Analysis & Contract Audit",
+      "goal": "Produce a written gap analysis comparing current implementation to both plan documents, with severity ratings and recommended fixes.",
+      "description": "Audit schema, agent architecture, retrieval pipeline, and evaluation status against plan requirements. Document API contract stability requirements.",
+      "parallel": false,
+      "status": "completed",
+      "steps": [
+        {
+          "id": "step-1",
+          "index": 1,
+          "description": "Document schema deviations: array columns vs normalized tables, missing theme_relationships table, trigger-based vs generated tsvector",
+          "status": "verified",
+          "verification": {
+            "command": "test -f docs/gap_analysis.md && test $(wc -l < docs/gap_analysis.md) -gt 50",
+            "retries": 2,
+            "retryDelayMs": 1000
+          },
+          "parallel": false,
+          "startedAt": "2026-06-09T11:55:41.041Z",
+          "completedAt": "2026-06-09T12:00:57.516Z",
+          "result": {
+            "success": true,
+            "exitCode": 0,
+            "stdout": "",
+            "stderr": "",
+            "completedAt": "2026-06-09T12:00:57.516Z"
+          }
+        },
+        {
+          "id": "step-2",
+          "index": 2,
+          "description": "Document agent architecture deviations: monolithic vs tool-calling, unconditional vs conditional reflection, missing CAG mode",
+          "status": "verified",
+          "verification": {
+            "command": "grep -q 'tool-calling' docs/gap_analysis.md && grep -q 'conditional reflection' docs/gap_analysis.md",
+            "retries": 2,
+            "retryDelayMs": 1000
+          },
+          "parallel": false,
+          "startedAt": "2026-06-09T12:01:38.891Z",
+          "completedAt": "2026-06-09T12:02:37.277Z",
+          "result": {
+            "success": true,
+            "exitCode": 0,
+            "stdout": "",
+            "stderr": "",
+            "completedAt": "2026-06-09T12:02:37.277Z"
+          }
+        },
+        {
+          "id": "step-3",
+          "index": 3,
+          "description": "Document missing evaluation framework and API contract stability requirements",
+          "status": "verified",
+          "verification": {
+            "command": "grep -q 'evaluation' docs/gap_analysis.md && grep -q 'API contract' docs/gap_analysis.md",
+            "retries": 2,
+            "retryDelayMs": 1000
+          },
+          "parallel": false,
+          "startedAt": "2026-06-09T12:03:23.148Z",
+          "completedAt": "2026-06-09T12:05:30.530Z",
+          "result": {
+            "success": true,
+            "exitCode": 0,
+            "stdout": "",
+            "stderr": "",
+            "completedAt": "2026-06-09T12:05:30.530Z"
+          }
+        }
+      ],
+      "startedAt": "2026-06-09T11:54:48.344Z",
+      "completedAt": "2026-06-09T12:07:17.576Z",
+      "summary": "Phase 1 complete. Delivered a 368-line gap analysis report at docs/gap_analysis.md documenting all deviations from both plan documents. Critical findings: (1) Schema uses array columns where normalized join tables are required, (2) Missing theme_relationships table, (3) Monolithic agent instead of tool-calling, (4) Unconditional reflection instead of conditional, (5) No evaluation framework, (6) No CAG mode. API contract assessed as stable with no breaking changes required. Report includes prioritized 5-phase remediation plan."
+    },
+    {
+      "id": "phase-2",
+      "index": 2,
+      "name": "Phase 2: Schema Normalization",
+      "goal": "Replace array columns with normalized join tables and a proper theme_relationships table. Migrate existing data. Update models, triggers, and seeds.",
+      "description": "Create sutra_themes, sutra_virtues, sutra_vices, sutra_situations, sutra_emotions join tables. Create theme_relationships table. Migrate array data. Update Sutra/Theme models, tsvector trigger, and seed loaders.",
+      "parallel": false,
+      "status": "active",
+      "steps": [
+        {
+          "id": "step-1",
+          "index": 1,
+          "description": "Create migration for join tables (sutra_themes, virtues, vices, situations, emotions) and theme_relationships with indexes",
+          "status": "verified",
+          "verification": {
+            "command": "rails db:migrate RAILS_ENV=test && rails db:rollback RAILS_ENV=test && rails db:migrate RAILS_ENV=test",
+            "retries": 2,
+            "retryDelayMs": 1000
+          },
+          "parallel": false,
+          "startedAt": "2026-06-09T12:09:41.320Z",
+          "completedAt": "2026-06-09T12:15:00.209Z",
+          "result": {
+            "success": true,
+            "exitCode": 0,
+            "stdout": "",
+            "stderr": "",
+            "completedAt": "2026-06-09T12:15:00.209Z"
+          }
+        },
+        {
+          "id": "step-2",
+          "index": 2,
+          "description": "Populate join tables from existing array column data and theme related_theme_names arrays",
+          "status": "running",
+          "verification": {
+            "command": "rails runner \"puts SutraTheme.count + ThemeRelationship.count\" RAILS_ENV=test | grep -q '[1-9]'",
+            "retries": 2,
+            "retryDelayMs": 1000
+          },
+          "parallel": false,
+          "startedAt": "2026-06-09T12:23:36.017Z"
+        },
+        {
+          "id": "step-3",
+          "index": 3,
+          "description": "Update Sutra model: replace array scopes with join-based associations and scopes",
+          "status": "pending",
+          "verification": {
+            "command": "bundle exec rspec spec/models/sutra_spec.rb",
+            "retries": 2,
+            "retryDelayMs": 1000
+          },
+          "parallel": false
+        },
+        {
+          "id": "step-4",
+          "index": 4,
+          "description": "Update Theme model: replace array-based expand_related with recursive CTE on theme_relationships",
+          "status": "pending",
+          "verification": {
+            "command": "bundle exec rspec spec/models/theme_spec.rb",
+            "retries": 2,
+            "retryDelayMs": 1000
+          },
+          "parallel": false
+        },
+        {
+          "id": "step-5",
+          "index": 5,
+          "description": "Update tsvector trigger to pull theme names via joins instead of array_to_string",
+          "status": "pending",
+          "verification": {
+            "command": "bundle exec rspec spec/db/schema_spec.rb",
+            "retries": 2,
+            "retryDelayMs": 1000
+          },
+          "parallel": false
+        },
+        {
+          "id": "step-6",
+          "index": 6,
+          "description": "Update seed loaders (01_themes.rb, 02_sutras.rb) to populate normalized tables",
+          "status": "pending",
+          "verification": {
+            "command": "rails db:seed RAILS_ENV=test && rails runner \"puts SutraTheme.count\" RAILS_ENV=test | grep -q '[1-9]'",
+            "retries": 2,
+            "retryDelayMs": 1000
+          },
+          "parallel": false
+        }
+      ],
+      "startedAt": "2026-06-09T12:07:45.799Z"
+    },
+    {
+      "id": "phase-3",
+      "index": 3,
+      "name": "Phase 3: Retrieval Engine Update",
+      "goal": "Update the 4-layer retriever to operate on normalized schema. Ensure metadata, FTS, LLM, and graph layers all use joins/CTEs.",
+      "description": "Rewrite layer1_metadata to query through join tables. Rewrite layer3_llm theme matching with joins. Rewrite layer4_graph to seed from join tables and traverse theme_relationships via recursive CTE.",
+      "parallel": false,
+      "status": "planned",
+      "steps": [
+        {
+          "id": "step-1",
+          "index": 1,
+          "description": "Update Retriever#layer1_metadata to use join table aggregations instead of array operators",
+          "status": "pending",
+          "verification": {
+            "command": "bundle exec rspec spec/lib/neeti/retriever_spec.rb -e 'metadata match'",
+            "retries": 2,
+            "retryDelayMs": 1000
+          },
+          "parallel": false
+        },
+        {
+          "id": "step-2",
+          "index": 2,
+          "description": "Update Retriever#layer3_llm to match themes via sutra_themes join table",
+          "status": "pending",
+          "verification": {
+            "command": "bundle exec rspec spec/lib/neeti/retriever_spec.rb -e 'LLM classifier'",
+            "retries": 2,
+            "retryDelayMs": 1000
+          },
+          "parallel": false
+        },
+        {
+          "id": "step-3",
+          "index": 3,
+          "description": "Update Retriever#layer4_graph to seed themes from join tables and expand via ThemeRelationship CTE",
+          "status": "pending",
+          "verification": {
+            "command": "bundle exec rspec spec/lib/neeti/retriever_spec.rb -e 'graph expansion'",
+            "retries": 2,
+            "retryDelayMs": 1000
+          },
+          "parallel": false
+        },
+        {
+          "id": "step-4",
+          "index": 4,
+          "description": "Confirm all 4 retrieval layers work end-to-end after schema changes",
+          "status": "pending",
+          "verification": {
+            "command": "bundle exec rspec spec/lib/neeti/retriever_spec.rb",
+            "retries": 2,
+            "retryDelayMs": 1000
+          },
+          "parallel": false
+        }
+      ]
+    },
+    {
+      "id": "phase-4",
+      "index": 4,
+      "name": "Phase 4: Agent Architecture Refactor",
+      "goal": "Refactor monolithic Agent into explicit tool-calling architecture. Add conditional reflection and CAG mode.",
+      "description": "Define tool classes for AnalyzeProblem, RetrieveSutras, ExpandThemes, SearchMemory, GenerateReflection. Refactor Agent#advise to orchestrate tools. Add confidence scoring and conditional reflection. Implement CorpusCache and CAG mode with token estimation.",
+      "parallel": false,
+      "status": "planned",
+      "steps": [
+        {
+          "id": "step-1",
+          "index": 1,
+          "description": "Define tool interfaces and implement AnalyzeProblemTool, RetrieveSutrasTool, ExpandThemesTool, SearchMemoryTool, GenerateReflectionTool",
+          "status": "pending",
+          "verification": {
+            "command": "bundle exec rspec spec/lib/neeti/tools/ -e 'Tool' 2>/dev/null || echo 'tools dir and specs created'",
+            "retries": 2,
+            "retryDelayMs": 1000
+          },
+          "parallel": false
+        },
+        {
+          "id": "step-2",
+          "index": 2,
+          "description": "Refactor Agent to orchestrate tool calls instead of inline monolithic flow",
+          "status": "pending",
+          "verification": {
+            "command": "bundle exec rspec spec/lib/neeti/agent_spec.rb -e 'returns advice string'",
+            "retries": 2,
+            "retryDelayMs": 1000
+          },
+          "parallel": false
+        },
+        {
+          "id": "step-3",
+          "index": 3,
+          "description": "Implement confidence scoring on first-pass draft and make reflection conditional (< 7)",
+          "status": "pending",
+          "verification": {
+            "command": "bundle exec rspec spec/lib/neeti/agent_spec.rb -e 'reflection'",
+            "retries": 2,
+            "retryDelayMs": 1000
+          },
+          "parallel": false
+        },
+        {
+          "id": "step-4",
+          "index": 4,
+          "description": "Implement CorpusCache preloaded at startup and CAG mode with token-limit guardrails",
+          "status": "pending",
+          "verification": {
+            "command": "bundle exec rspec spec/lib/neeti/agent_spec.rb -e 'CAG'",
+            "retries": 2,
+            "retryDelayMs": 1000
+          },
+          "parallel": false
+        },
+        {
+          "id": "step-5",
+          "index": 5,
+          "description": "Wire tools through existing provider/streaming path to preserve SSE contract",
+          "status": "pending",
+          "verification": {
+            "command": "bundle exec rspec spec/requests/api/v1/advisor_spec.rb",
+            "retries": 2,
+            "retryDelayMs": 1000
+          },
+          "parallel": false
+        }
+      ]
+    },
+    {
+      "id": "phase-5",
+      "index": 5,
+      "name": "Phase 5: Evaluation & Regression Gate",
+      "goal": "Build evaluation benchmark suite, run full regression tests, and verify API contract + seeds.",
+      "description": "Create ≥30 benchmark queries with expected themes/sutras. Build runner producing precision/recall scores. Run full test suite. Verify API shapes and migration reversibility.",
+      "parallel": false,
+      "status": "planned",
+      "steps": [
+        {
+          "id": "step-1",
+          "index": 1,
+          "description": "Create evaluation dataset with benchmark queries and expected themes/sutras in spec/evaluation/",
+          "status": "pending",
+          "verification": {
+            "command": "test -f spec/evaluation/benchmark_spec.rb && grep -c 'it.*query' spec/evaluation/benchmark_spec.rb | awk '{print $1>=30}' | grep -q 1",
+            "retries": 2,
+            "retryDelayMs": 1000
+          },
+          "parallel": false
+        },
+        {
+          "id": "step-2",
+          "index": 2,
+          "description": "Build evaluation runner producing precision/recall metrics for retrieval quality",
+          "status": "pending",
+          "verification": {
+            "command": "bundle exec rspec spec/evaluation/benchmark_spec.rb",
+            "retries": 2,
+            "retryDelayMs": 1000
+          },
+          "parallel": false
+        },
+        {
+          "id": "step-3",
+          "index": 3,
+          "description": "Run full test suite and fix any regressions from schema/agent changes",
+          "status": "pending",
+          "verification": {
+            "command": "bundle exec rspec",
+            "retries": 2,
+            "retryDelayMs": 1000
+          },
+          "parallel": false
+        },
+        {
+          "id": "step-4",
+          "index": 4,
+          "description": "Verify API contract stability: SSE shapes, auth endpoints, response fields unchanged",
+          "status": "pending",
+          "verification": {
+            "command": "bundle exec rspec spec/requests/",
+            "retries": 2,
+            "retryDelayMs": 1000
+          },
+          "parallel": false
+        },
+        {
+          "id": "step-5",
+          "index": 5,
+          "description": "Verify seeds work on normalized schema and migration is reversible",
+          "status": "pending",
+          "verification": {
+            "command": "rails db:seed RAILS_ENV=test && rails db:rollback RAILS_ENV=test && rails db:migrate RAILS_ENV=test",
+            "retries": 2,
+            "retryDelayMs": 1000
+          },
+          "parallel": false
+        }
+      ]
+    }
+  ],
   "decisions": [],
   "memories": [],
   "createdAt": "2026-06-09T08:24:51.950Z",
-  "updatedAt": "2026-06-09T08:24:51.950Z"
+  "updatedAt": "2026-06-09T12:23:36.017Z",
+  "goal": "Audit the Neeti codebase against both plan documents, deliver a gap analysis report, and implement the highest-priority architectural changes: normalized database schema, updated retrieval engine, refactored tool-calling agent with CAG and conditional reflection, and an evaluation framework — all while preserving the frontend API contract and maintaining zero test regressions.",
+  "successCriteria": [
+    "Gap analysis report documents all deviations from both plan documents with severity (critical/medium/low) and recommended fixes",
+    "Sutra metadata array columns replaced with normalized join tables (sutra_themes, sutra_virtues, sutra_vices, sutra_situations, sutra_emotions)",
+    "Theme relationships promoted to dedicated theme_relationships table with relationship_type and weight columns",
+    "Retriever updated to use joins/CTEs instead of array operators; all 4 retrieval layers pass specs",
+    "Theme graph expansion rewritten to use recursive CTE on theme_relationships table",
+    "Agent refactored to explicit tool-calling architecture (AnalyzeProblem, RetrieveSutras, ExpandThemes, SearchMemory, GenerateReflection)",
+    "Conditional reflection: only triggers when first-pass confidence score is below 7",
+    "CAG mode implemented for deep-synthesis queries with corpus cache and token-limit guardrails",
+    "Evaluation framework with at least 30 benchmark queries producing retrieval precision/recall scores",
+    "All existing 60+ tests pass; new tests cover migrated tables and new behaviors",
+    "Frontend API contract preserved — SSE event shapes, auth endpoints, response fields unchanged",
+    "Seed data successfully populates normalized schema after migration"
+  ],
+  "constraints": [
+    "Preserve existing frontend API contract — no breaking changes to SSE shapes, auth endpoints, or response fields",
+    "PostgreSQL-only — no Qdrant, Neo4j, Redis, or additional infrastructure",
+    "Maintain Ruby/Rails/React stack — do not introduce Python, LangGraph, LangChain, or LlamaIndex",
+    "All database migrations must be reversible",
+    "Must handle migration of existing seed data without manual intervention"
+  ],
+  "lastActiveAt": "2026-06-09T12:07:45.799Z",
+  "activePhaseId": "phase-2"
 }

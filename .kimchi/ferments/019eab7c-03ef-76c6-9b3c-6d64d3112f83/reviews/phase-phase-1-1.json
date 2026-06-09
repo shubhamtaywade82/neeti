@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "fermentId": "019eab7c-03ef-76c6-9b3c-6d64d3112f83",
+  "phaseId": "phase-1",
+  "phaseName": "Phase 1: Gap Analysis & Contract Audit",
+  "attempt": 1,
+  "timestamp": "2026-06-09T12:07:17.572Z",
+  "goal": "Produce a written gap analysis comparing current implementation to both plan documents, with severity ratings and recommended fixes.",
+  "summary": "Phase 1 complete. Delivered a 368-line gap analysis report at docs/gap_analysis.md documenting all deviations from both plan documents. Critical findings: (1) Schema uses array columns where normalized join tables are required, (2) Missing theme_relationships table, (3) Monolithic agent instead of tool-calling, (4) Unconditional reflection instead of conditional, (5) No evaluation framework, (6) No CAG mode. API contract assessed as stable with no breaking changes required. Report includes prioritized 5-phase remediation plan.",
+  "stepSummaries": "  1. Document schema deviations: array columns vs normalized tables, missing theme_relationships table, trigger-based vs generated tsvector [verified]\n  2. Document agent architecture deviations: monolithic vs tool-calling, unconditional vs conditional reflection, missing CAG mode [verified]\n  3. Document missing evaluation framework and API contract stability requirements [verified]",
+  "diffAvailable": true,
+  "diffFilesChanged": "...9eab7c-03ef-76c6-9b3c-6d64d3112f83.events.jsonl |  15 +\n .../019eab7c-03ef-76c6-9b3c-6d64d3112f83.json      | 416 ++++++++++++++++++++-\n 2 files changed, 426 insertions(+), 5 deletions(-)",
+  "flags": [],
+  "derivedGrade": "A",
+  "reviewerRationale": "All gates pass; project checks validate.",
+  "gateVerdicts": [
+    {
+      "id": "F1",
+      "verdict": "pass",
+      "rationale": "All 3 steps had real verification: step-1 verified file existence and line count (368 lines), step-2 verified grep for 'tool-calling' and 'conditional reflection', step-3 verified grep for 'evaluation' and 'API contract'. No proxy-only steps.",
+      "evidence": "Step-1: `wc -l docs/gap_analysis.md` = 368. Step-2: `grep -q 'tool-calling'` and `grep -q 'conditional reflection'` both PASS. Step-3: `grep -q 'evaluation'` and `grep -q 'API contract'` both PASS."
+    },
+    {
+      "id": "F2",
+      "verdict": "pass",
+      "rationale": "Phase goal was to produce a written gap analysis. The artifact is a 368-line report covering schema deviations (Section 1), agent architecture deviations (Section 2), missing evaluation framework (Section 3), API contract stability (Section 4), frontend status (Section 5), prioritized remediation plan (Section 6), and key decisions (Section 7).",
+      "evidence": "docs/gap_analysis.md exists with all required sections. File size: 13717 bytes, 368 lines."
+    },
+    {
+      "id": "F3",
+      "verdict": "pass",
+      "rationale": "Nothing deferred. Phase 1 scope was purely analytical/reporting. All planned documentation (schema, agent, evaluation, API contract) is present in the report. Next phase (Schema Normalization) can proceed immediately using the report's remediation plan.",
+      "evidence": "Report Section 6 contains a prioritized checklist for Phases 1-5. No items marked as deferred or out-of-scope."
+    }
+  ],
+  "projectChecks": {
+    "discovered": false,
+    "anyFailed": false,
+    "commands": []
+  }
+}
