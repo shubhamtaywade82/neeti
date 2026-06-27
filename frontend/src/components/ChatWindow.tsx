@@ -4,6 +4,7 @@ import { apiClient } from '../api/client'
 import { MessageBubble } from './MessageBubble'
 import { SourceCitation } from './SourceCitation'
 import { QueryInput } from './QueryInput'
+import { Sparkles } from 'lucide-react'
 
 interface Message {
   role:        'user' | 'assistant'
@@ -25,6 +26,13 @@ interface Props {
   cagMode?: boolean
   onToggleCag?: () => void
 }
+
+const SUGGESTION_CHIPS = [
+  'Leadership wisdom',
+  'Dealing with adversity',
+  'Career strategy',
+  'Self-discipline',
+]
 
 export function ChatWindow({ conversationId, onConversationCreated, prefillQuery, onPrefillConsumed, cagMode = false, onToggleCag = () => {} }: Props) {
   const [messages, setMessages]       = useState<Message[]>([])
@@ -78,21 +86,36 @@ export function ChatWindow({ conversationId, onConversationCreated, prefillQuery
   }
 
   return (
-    <div className="flex flex-col h-full bg-stone-950">
-      <header className="px-6 py-4 border-b border-stone-800">
-        <h1 className="text-amber-400 font-serif text-xl font-semibold tracking-wide">
-          नीति — Neeti
-        </h1>
-        <p className="text-stone-500 text-xs mt-0.5">
-          Wisdom of Chanakya, grounded in sutras
-        </p>
-      </header>
-
-      <div className="flex-1 overflow-y-auto px-4 py-6">
+    <div className="flex flex-col h-full bg-wisdom-950">
+      {/* Messages area */}
+      <div className="flex-1 overflow-y-auto scroll-smooth px-4 py-6 md:px-6">
         {messages.length === 0 && !conversationId && (
-          <div className="text-center text-stone-600 mt-20">
-            <p className="text-5xl mb-4 font-serif">नीति</p>
-            <p className="text-sm">Ask for strategic counsel. Receive timeless wisdom.</p>
+          <div className="flex flex-col items-center justify-center h-full animate-fade-in select-none">
+            {/* Floating watermark */}
+            <p className="animate-float animate-pulse-glow font-display text-7xl text-saffron-500/30 mb-6">
+              नीति
+            </p>
+
+            {/* Tagline */}
+            <p className="animate-fade-in-up delay-200 text-wisdom-400 font-body text-sm md:text-base mb-8">
+              Ask for strategic counsel. Receive timeless wisdom.
+            </p>
+
+            {/* Suggestion chips */}
+            <div className="animate-fade-in-up delay-400 flex flex-wrap justify-center gap-3 max-w-md">
+              {SUGGESTION_CHIPS.map((chip) => (
+                <button
+                  key={chip}
+                  onClick={() => handleSubmit(chip)}
+                  className="badge-saffron px-4 py-2 rounded-full cursor-pointer text-sm font-body
+                    transition-all duration-200 hover:scale-105 hover:shadow-glow
+                    active:scale-95 flex items-center gap-1.5"
+                >
+                  <Sparkles className="w-3.5 h-3.5" />
+                  {chip}
+                </button>
+              ))}
+            </div>
           </div>
         )}
 
@@ -108,7 +131,7 @@ export function ChatWindow({ conversationId, onConversationCreated, prefillQuery
         {result && <SourceCitation sutras={result.cited_sutras} />}
 
         {error && (
-          <div className="text-red-400 text-sm text-center mt-2 px-4 py-2 bg-red-950/30 rounded">
+          <div className="animate-fade-in text-red-400 text-sm text-center mt-2 px-4 py-2.5 bg-red-950/30 border border-red-800/40 rounded-xl">
             {error}
           </div>
         )}
