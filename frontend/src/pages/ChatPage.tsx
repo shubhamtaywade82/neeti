@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Menu, Settings, LogOut, Sparkles, X } from 'lucide-react'
+import { Menu, Settings, LogOut, Sparkles } from 'lucide-react'
 import { ChatWindow } from '../components/ChatWindow'
 import { ConversationSidebar } from '../components/ConversationSidebar'
 import { DailySutraWidget } from '../components/DailySutraWidget'

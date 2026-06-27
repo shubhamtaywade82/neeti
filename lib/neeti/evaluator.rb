@@ -13,7 +13,7 @@ module Neeti
 
       results = queries.map do |q|
         sutras   = retriever.retrieve(q['query'])
-        ret_themes = sutras.flat_map(&:themes).map(&:downcase).uniq
+        ret_themes = sutras.flat_map { |s| s.themes.map(&:name) }.map(&:downcase).uniq
         expected   = q['expected_themes'].map(&:downcase)
         hits       = (expected & ret_themes).size
         recall     = expected.empty? ? 1.0 : hits.to_f / expected.size

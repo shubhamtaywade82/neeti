@@ -10,8 +10,7 @@ RUN apt-get update -qq && \
     rm -rf /var/lib/apt/lists/*
 
 COPY Gemfile Gemfile.lock ./
-RUN bundle install --without development test && \
-    bundle exec bootsnap precompile --gemfile
+RUN bundle config set --local without 'development test' && bundle install && bundle exec bootsnap precompile --gemfile
 
 COPY . .
 RUN bundle exec bootsnap precompile app/ lib/
