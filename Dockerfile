@@ -5,8 +5,7 @@ WORKDIR /rails
 
 RUN apt-get update -qq && \
     apt-get install --no-install-recommends -y \
-      build-essential curl git libpq-dev nodejs npm postgresql-client && \
-    npm install -g yarn && \
+      build-essential curl git libpq-dev postgresql-client && \
     rm -rf /var/lib/apt/lists/*
 
 COPY Gemfile Gemfile.lock ./
@@ -14,9 +13,6 @@ RUN bundle config set --local without 'development test' && bundle install && bu
 
 COPY . .
 RUN bundle exec bootsnap precompile app/ lib/
-
-RUN cd frontend && npm ci && npm run build && cd .. && \
-    mkdir -p public && cp -r frontend/dist/. public/
 
 RUN chmod +x bin/docker-entrypoint.sh
 
