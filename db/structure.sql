@@ -711,6 +711,13 @@ CREATE INDEX index_messages_on_role ON public.messages USING btree (role);
 
 
 --
+-- Name: index_sutra_emotions_on_sutra_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_sutra_emotions_on_sutra_id ON public.sutra_emotions USING btree (sutra_id);
+
+
+--
 -- Name: index_sutra_emotions_on_sutra_id_and_theme_id; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -722,6 +729,13 @@ CREATE UNIQUE INDEX index_sutra_emotions_on_sutra_id_and_theme_id ON public.sutr
 --
 
 CREATE INDEX index_sutra_emotions_on_theme_id ON public.sutra_emotions USING btree (theme_id);
+
+
+--
+-- Name: index_sutra_situations_on_sutra_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_sutra_situations_on_sutra_id ON public.sutra_situations USING btree (sutra_id);
 
 
 --
@@ -739,6 +753,13 @@ CREATE INDEX index_sutra_situations_on_theme_id ON public.sutra_situations USING
 
 
 --
+-- Name: index_sutra_themes_on_sutra_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_sutra_themes_on_sutra_id ON public.sutra_themes USING btree (sutra_id);
+
+
+--
 -- Name: index_sutra_themes_on_sutra_id_and_theme_id; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -753,6 +774,13 @@ CREATE INDEX index_sutra_themes_on_theme_id ON public.sutra_themes USING btree (
 
 
 --
+-- Name: index_sutra_vices_on_sutra_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_sutra_vices_on_sutra_id ON public.sutra_vices USING btree (sutra_id);
+
+
+--
 -- Name: index_sutra_vices_on_sutra_id_and_theme_id; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -764,6 +792,13 @@ CREATE UNIQUE INDEX index_sutra_vices_on_sutra_id_and_theme_id ON public.sutra_v
 --
 
 CREATE INDEX index_sutra_vices_on_theme_id ON public.sutra_vices USING btree (theme_id);
+
+
+--
+-- Name: index_sutra_virtues_on_sutra_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_sutra_virtues_on_sutra_id ON public.sutra_virtues USING btree (sutra_id);
 
 
 --
@@ -914,11 +949,51 @@ CREATE TRIGGER user_insights_sv_trigger BEFORE INSERT OR UPDATE ON public.user_i
 
 
 --
+-- Name: sutra_vices fk_rails_175c91a4ce; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.sutra_vices
+    ADD CONSTRAINT fk_rails_175c91a4ce FOREIGN KEY (sutra_id) REFERENCES public.sutras(id) ON DELETE CASCADE;
+
+
+--
+-- Name: sutra_situations fk_rails_1de77a5a26; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.sutra_situations
+    ADD CONSTRAINT fk_rails_1de77a5a26 FOREIGN KEY (theme_id) REFERENCES public.themes(id) ON DELETE CASCADE;
+
+
+--
+-- Name: sutra_situations fk_rails_42530d284e; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.sutra_situations
+    ADD CONSTRAINT fk_rails_42530d284e FOREIGN KEY (sutra_id) REFERENCES public.sutras(id) ON DELETE CASCADE;
+
+
+--
+-- Name: sutra_emotions fk_rails_4b8db2778a; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.sutra_emotions
+    ADD CONSTRAINT fk_rails_4b8db2778a FOREIGN KEY (theme_id) REFERENCES public.themes(id) ON DELETE CASCADE;
+
+
+--
 -- Name: theme_relationships fk_rails_4caaef8d50; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.theme_relationships
     ADD CONSTRAINT fk_rails_4caaef8d50 FOREIGN KEY (source_theme_id) REFERENCES public.themes(id);
+
+
+--
+-- Name: sutra_virtues fk_rails_6a68fe41ad; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.sutra_virtues
+    ADD CONSTRAINT fk_rails_6a68fe41ad FOREIGN KEY (theme_id) REFERENCES public.themes(id) ON DELETE CASCADE;
 
 
 --
@@ -946,11 +1021,51 @@ ALTER TABLE ONLY public.messages
 
 
 --
+-- Name: sutra_themes fk_rails_9e6ec9a518; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.sutra_themes
+    ADD CONSTRAINT fk_rails_9e6ec9a518 FOREIGN KEY (theme_id) REFERENCES public.themes(id) ON DELETE CASCADE;
+
+
+--
+-- Name: sutra_themes fk_rails_a00117ff1e; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.sutra_themes
+    ADD CONSTRAINT fk_rails_a00117ff1e FOREIGN KEY (sutra_id) REFERENCES public.sutras(id) ON DELETE CASCADE;
+
+
+--
+-- Name: sutra_emotions fk_rails_d2d4f6c425; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.sutra_emotions
+    ADD CONSTRAINT fk_rails_d2d4f6c425 FOREIGN KEY (sutra_id) REFERENCES public.sutras(id) ON DELETE CASCADE;
+
+
+--
 -- Name: theme_relationships fk_rails_ead6e0014c; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.theme_relationships
     ADD CONSTRAINT fk_rails_ead6e0014c FOREIGN KEY (target_theme_id) REFERENCES public.themes(id);
+
+
+--
+-- Name: sutra_virtues fk_rails_fb177f4673; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.sutra_virtues
+    ADD CONSTRAINT fk_rails_fb177f4673 FOREIGN KEY (sutra_id) REFERENCES public.sutras(id) ON DELETE CASCADE;
+
+
+--
+-- Name: sutra_vices fk_rails_fda326cd00; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.sutra_vices
+    ADD CONSTRAINT fk_rails_fda326cd00 FOREIGN KEY (theme_id) REFERENCES public.themes(id) ON DELETE CASCADE;
 
 
 --
@@ -960,6 +1075,7 @@ ALTER TABLE ONLY public.theme_relationships
 SET search_path TO "$user", public;
 
 INSERT INTO "schema_migrations" (version) VALUES
+('20260627000010'),
 ('20260609100000'),
 ('20260609000004'),
 ('20260609000003'),
