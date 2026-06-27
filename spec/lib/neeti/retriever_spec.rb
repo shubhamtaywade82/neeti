@@ -23,11 +23,12 @@ RSpec.describe Neeti::Retriever do
       end
     end
 
-    context "Layer 3 — LLM classifier called when layers 1+2 insufficient" do
+context "Layer 3 — LLM classifier called when layers 1+2 insufficient" do
       it "calls classify_themes and queries sutras by returned theme names" do
+        # Use query with no synonym matches to force layer 3
         3.times { create(:sutra, themes: ["self-discipline"]) }
         allow(classifier).to receive(:classify_themes).and_return(["self-discipline"])
-        result = retriever.retrieve("how to overcome procrastination")
+        result = retriever.retrieve("xyzabc123 qwertyuiop asdfghjkl")  # no keyword matches
         expect(result.size).to be >= 3
         expect(classifier).to have_received(:classify_themes)
       end
