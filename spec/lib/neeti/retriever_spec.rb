@@ -35,8 +35,10 @@ RSpec.describe Neeti::Retriever do
 
     context "Layer 4 — graph expansion as last resort" do
       before do
-        create(:theme, name: "greed",   category: "vice",    related_theme_names: ["desire"])
+        # Create target themes FIRST so relationship setters can find them
+        create(:theme, name: "contentment", related_theme_names: [])
         create(:theme, name: "desire",  category: "emotion", related_theme_names: ["contentment"])
+        create(:theme, name: "greed",   category: "vice",    related_theme_names: ["desire"])
         create(:sutra, themes: ["greed"])
         create(:sutra, themes: ["greed"])
         allow(classifier).to receive(:classify_themes).and_return([])

@@ -462,7 +462,8 @@ CREATE TABLE public.users (
     razorpay_customer_id text,
     razorpay_subscription_id text,
     created_at timestamp(6) without time zone NOT NULL,
-    updated_at timestamp(6) without time zone NOT NULL
+    updated_at timestamp(6) without time zone NOT NULL,
+    role character varying DEFAULT 'user'::character varying NOT NULL
 );
 
 
@@ -892,6 +893,13 @@ CREATE UNIQUE INDEX index_users_on_email ON public.users USING btree (email);
 
 
 --
+-- Name: index_users_on_role; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_users_on_role ON public.users USING btree (role);
+
+
+--
 -- Name: sutras sutras_search_vector_trigger; Type: TRIGGER; Schema: public; Owner: -
 --
 
@@ -952,6 +960,7 @@ ALTER TABLE ONLY public.theme_relationships
 SET search_path TO "$user", public;
 
 INSERT INTO "schema_migrations" (version) VALUES
+('20260609100000'),
 ('20260609000004'),
 ('20260609000003'),
 ('20260609000002'),

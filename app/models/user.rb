@@ -5,6 +5,9 @@ class User < ApplicationRecord
   has_many :user_insights,  dependent: :destroy
 
   PLANS = %w[free seeker strategist raja].freeze
+  ROLES = %w[user admin].freeze
+  validates :role, inclusion: { in: ROLES }
+  def admin? = role == 'admin'
 
   validates :email,
             presence: true,
