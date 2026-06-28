@@ -16,7 +16,9 @@ import {
   Shield,
   Layers,
   Clock,
-  Compass
+  Compass,
+  CreditCard,
+  Gem
 } from 'lucide-react'
 
 interface UsageStats {
@@ -43,7 +45,7 @@ export function SettingsPage() {
   const navigate = useNavigate()
 
   // Tab State
-  const [activeTab, setActiveTab] = useState<'profile' | 'models' | 'beta'>('profile')
+  const [activeTab, setActiveTab] = useState<'profile' | 'models' | 'beta' | 'billing'>('profile')
 
   // Profile forms
   const [email, setEmail]                     = useState(user?.email ?? '')
@@ -55,6 +57,15 @@ export function SettingsPage() {
   const [pwMsg, setPwMsg]                     = useState<{ type: 'ok' | 'err'; text: string } | null>(null)
   const [deleteMsg, setDeleteMsg]             = useState<string | null>(null)
   const [usage, setUsage]                     = useState<UsageStats | null>(null)
+
+  // Subscription states
+  const [plans, setPlans] = useState<any>({
+    free: { name: 'Free', price_inr: 0, queries_per_day: 3, features: ['3 queries/day', 'Basic wisdom'] },
+    seeker: { name: 'Seeker', price_inr: 199, queries_per_day: 'unlimited', features: ['Unlimited queries', 'Daily sutra', 'Session history'] },
+    strategist: { name: 'Strategist', price_inr: 499, queries_per_day: 'unlimited', features: ['Everything in Seeker', 'Persistent memory', 'Goal tracking'] },
+    raja: { name: 'Raja', price_inr: 1999, queries_per_day: 'unlimited', features: ['Everything in Strategist', 'Human expert review', 'Priority support'] }
+  })
+  const [billingMsg, setBillingMsg] = useState<{ type: 'ok' | 'err'; text: string } | null>(null)
 
   // LLM routers state
   const [models, setModels] = useState<LLMModel[]>([
@@ -69,7 +80,51 @@ export function SettingsPage() {
     apiClient.get<UsageStats>('/users/usage')
       .then((r) => setUsage(r.data))
       .catch(() => {})
+
+    apiClient.get('/subscriptions/plans')
+      .then((r) => {
+        if (r.data?.plans) setPlans(r.data.plans)
+      })
+      .catch(() => {})
   }, [])
+
+  const handleUpdateSubscription = async (targetPlan: string) => {
+    setBillingMsg(null)
+    try {
+      const { data } = await apiClient.post<{ mode: string; activated: boolean; plan: string; short_url?: string }>('/subscriptions', { plan: targetPlan })
+      if (data.activated) {
+        setBillingMsg({ type: 'ok', text: `Successfully updated to the ${data.plan} plan!` })
+        apiClient.get<UsageStats>('/users/usage')
+          .then((r) => setUsage(r.data))
+          .catch(() => {})
+        if (user && token) {
+          setAuth(token, { ...user, plan: data.plan })
+        }
+      } else if (data.short_url) {
+        setBillingMsg({ type: 'ok', text: 'Opening Razorpay checkout...' })
+        window.open(data.short_url, '_blank')
+      }
+    } catch (e: any) {
+      setBillingMsg({ type: 'err', text: e.response?.data?.error ?? 'Failed to update subscription.' })
+    }
+  }
+
+  const handleCancelSubscription = async () => {
+    if (!window.confirm('Are you sure you want to cancel your subscription and downgrade to the Free tier?')) return
+    setBillingMsg(null)
+    try {
+      await apiClient.delete('/subscriptions')
+      setBillingMsg({ type: 'ok', text: 'Your subscription has been cancelled and downgraded to Free.' })
+      apiClient.get<UsageStats>('/users/usage')
+        .then((r) => setUsage(r.data))
+        .catch(() => {})
+      if (user && token) {
+        setAuth(token, { ...user, plan: 'free' })
+      }
+    } catch (e: any) {
+      setBillingMsg({ type: 'err', text: e.response?.data?.error ?? 'Failed to cancel subscription.' })
+    }
+  }
 
   const updateEmail = async () => {
     try {
@@ -159,7 +214,8 @@ export function SettingsPage() {
           {[
             { id: 'profile', label: 'Profile & Security', icon: User },
             { id: 'models', label: 'AI Models', icon: Cpu },
-            { id: 'beta', label: 'Beta Toggles', icon: ToggleLeft },
+            { id: 'billing', label: 'Billing & Plans', icon: CreditCard },
+            ...(user?.role === 'admin' ? [{ id: 'beta', label: 'Beta Toggles', icon: ToggleLeft }] : []),
           ].map((tab) => {
             const Icon = tab.icon
             const isActive = activeTab === tab.id
@@ -389,7 +445,7 @@ export function SettingsPage() {
           )}
 
           {/* BETA TOGGLES TAB */}
-          {activeTab === 'beta' && (
+          {activeTab === 'beta' && user?.role === 'admin' && (
             <div className="space-y-6">
               <h3 className="text-lg font-bold font-display text-wisdom-100 border-b border-wisdom-700/20 pb-3">
                 Beta Feature Flags
@@ -432,6 +488,110 @@ export function SettingsPage() {
                     )
                   })}
                 </div>
+              </div>
+            </div>
+          )}
+
+          {/* BILLING & SUBSCRIPTIONS TAB */}
+          {activeTab === 'billing' && (
+            <div className="space-y-6">
+              <h3 className="text-lg font-bold font-display text-wisdom-100 border-b border-wisdom-700/20 pb-3">
+                Billing & Subscription Plans
+              </h3>
+
+              {billingMsg && <Msg type={billingMsg.type} text={billingMsg.text} />}
+
+              {/* Current Plan Overview */}
+              {usage && (
+                <div className="glass-card border border-wisdom-700/40 p-5 rounded-2xl space-y-4">
+                  <div className="flex justify-between items-center select-none">
+                    <span className="text-xs font-bold text-wisdom-400 uppercase tracking-widest flex items-center gap-1.5">
+                      <Shield className="w-4 h-4 text-saffron-500" />
+                      Active Plan
+                    </span>
+                    <span className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-saffron-500/10 border border-saffron-500/20 text-saffron-400 uppercase tracking-widest">
+                      {usage.plan}
+                    </span>
+                  </div>
+
+                  <div className="flex justify-between items-center text-xs">
+                    <div>
+                      <p className="text-wisdom-300 font-semibold">Daily queries quota:</p>
+                      <span className="text-wisdom-500">
+                        {isUnlimited ? 'Unlimited reasoning capacity' : 'Resets daily at midnight'}
+                      </span>
+                    </div>
+                    <span className="text-sm font-bold text-wisdom-200 uppercase">
+                      {isUnlimited ? 'Unlimited' : `${usage.daily_query_count} / ${usage.plan_limit}`}
+                    </span>
+                  </div>
+
+                  {usage.plan !== 'free' && (
+                    <button
+                      onClick={handleCancelSubscription}
+                      className="px-4 py-2 border border-red-500/25 bg-red-500/5 hover:bg-red-500/10 text-red-400 hover:text-red-300 text-[10px] font-bold uppercase tracking-wider rounded-lg transition-colors flex items-center justify-center gap-1"
+                    >
+                      Cancel Plan Subscription
+                    </button>
+                  )}
+                </div>
+              )}
+
+              {/* Pricing Cards Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 select-none">
+                {Object.keys(plans).filter(k => k !== 'free').map((key) => {
+                  const plan = plans[key]
+                  const isCurrent = usage?.plan === key
+                  return (
+                    <div
+                      key={key}
+                      className={`glass-card border p-5 rounded-2xl flex flex-col justify-between h-80 hover:border-wisdom-700/80 transition-all duration-200 ${
+                        isCurrent ? 'border-saffron-500/40 bg-saffron-500/[0.02]' : 'border-wisdom-700/40'
+                      }`}
+                    >
+                      <div>
+                        <div className="flex items-center justify-between">
+                          <h4 className="text-sm font-bold text-wisdom-100 capitalize">{key} Plan</h4>
+                          {isCurrent && (
+                            <span className="inline-flex items-center gap-1 text-[9px] font-bold text-emerald-400 uppercase tracking-widest bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full">
+                              Current
+                            </span>
+                          )}
+                        </div>
+                        <div className="mt-3.5">
+                          <span className="text-2xl font-bold font-display text-wisdom-100">
+                            ₹{plan.price_inr}
+                          </span>
+                          <span className="text-[10px] text-wisdom-500 font-semibold block mt-0.5">
+                            per month
+                          </span>
+                        </div>
+
+                        {/* Features */}
+                        <ul className="mt-5 space-y-2 text-[11px] text-wisdom-400 font-medium">
+                          {plan.features?.map((feat: string, idx: number) => (
+                            <li key={idx} className="flex gap-1.5 items-start">
+                              <span className="text-saffron-400">✓</span>
+                              <span className="line-clamp-1">{feat}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+
+                      <button
+                        onClick={() => handleUpdateSubscription(key)}
+                        disabled={isCurrent}
+                        className={`w-full py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all duration-200 mt-6 ${
+                          isCurrent
+                            ? 'bg-wisdom-800 text-wisdom-500 border border-wisdom-700/30 cursor-not-allowed'
+                            : 'bg-saffron-500 hover:bg-saffron-400 text-wisdom-950 shadow-glow'
+                        }`}
+                      >
+                        {isCurrent ? 'Active Plan' : 'Select Plan'}
+                      </button>
+                    </div>
+                  )
+                })}
               </div>
             </div>
           )}

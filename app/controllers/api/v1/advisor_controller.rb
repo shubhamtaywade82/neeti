@@ -13,7 +13,15 @@ module Api
         response.headers['X-Accel-Buffering'] = 'no'
 
         sse          = SSE.new(response.stream, retry: 300)
-        conversation = load_or_create_conversation
+        advisor_param = params[:advisor]
+        advisor_name = if advisor_param.is_a?(ActionController::Parameters)
+                         advisor_param[:advisor]
+                       elsif advisor_param.is_a?(String)
+                         advisor_param
+                       end
+        advisor_name ||= 'chanakya'
+
+        conversation = load_or_create_conversation(advisor_name)
         agent        = Neeti::Agent.new
 
         stream_proc = ->(token) {
@@ -21,7 +29,7 @@ module Api
         }
 
         mode = params[:mode]&.to_sym == :cag ? :cag : :retrieval
-        advisor = params[:advisor]&.to_sym || :chanakya
+        advisor = advisor_name.to_sym
         result = agent.advise(
           params.require(:query),
           user:         current_user,
@@ -78,13 +86,13 @@ module Api
 
       private
 
-      def load_or_create_conversation
+      def load_or_create_conversation(advisor_name)
         if params[:conversation_id]
           current_user.conversations.find(params[:conversation_id])
         else
           current_user.conversations.create!(
             title: params[:query].truncate(60),
-            advisor: params[:advisor] || 'chanakya'
+            advisor: advisor_name
           )
         end
       end

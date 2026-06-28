@@ -53,4 +53,7 @@ Rails.application.configure do
 
   # Use test adapter so have_enqueued_job matcher works.
   config.active_job.queue_adapter = :test
+
+  # Allow all hosts in test environment
+  config.hosts << "www.example.com"
 end
