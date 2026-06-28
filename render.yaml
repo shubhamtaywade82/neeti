@@ -1,0 +1,43 @@
+databases:
+  - name: neeti-db
+    databaseName: neeti_production
+    user: neeti
+    plan: free
+
+services:
+  # Rails API
+  - type: web
+    name: neeti-api
+    env: ruby
+    plan: free
+    buildCommand: |
+      bundle install
+      bundle exec rails db:migrate
+    startCommand: bundle exec puma -C config/puma.rb
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: neeti-db
+          property: connectionString
+      - key: SECRET_KEY_BASE
+        generateValue: true
+      - key: RAILS_ENV
+        value: production
+      - key: RAILS_LOG_TO_STDOUT
+        value: "true"
+      - key: CORS_ORIGINS
+        value: https://neeti-frontend.onrender.com
+
+  # React Frontend
+  - type: web
+    name: neeti-frontend
+    env: static
+    buildCommand: cd frontend && npm ci && npm run build
+    staticPublishPath: ./frontend/dist
+    envVars:
+      - key: VITE_API_URL
+        value: https://neeti-api.onrender.com
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html   # SPA fallback

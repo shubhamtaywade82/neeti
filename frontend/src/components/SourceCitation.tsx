@@ -1,11 +1,27 @@
 import { BookOpen } from 'lucide-react'
 
-interface Sutra {
-  id:      string
+export interface CitedSutra {
+  id: string
   preview: string
+  sanskrit?: string
+  transliteration?: string
+  translation_en?: string
+  translation_hi?: string
+  chapter?: number
+  chapter_title?: string
+  themes?: string[]
+  virtues?: string[]
+  vices?: string[]
+  situations?: string[]
+  emotions?: string[]
 }
 
-export function SourceCitation({ sutras }: { sutras: Sutra[] }) {
+interface Props {
+  sutras: CitedSutra[]
+  onSelectSutra: (sutra: CitedSutra) => void
+}
+
+export function SourceCitation({ sutras, onSelectSutra }: Props) {
   if (!sutras?.length) return null
 
   return (
@@ -16,15 +32,16 @@ export function SourceCitation({ sutras }: { sutras: Sutra[] }) {
       </p>
       <div className="flex flex-wrap gap-2">
         {sutras.map((s) => (
-          <div
+          <button
             key={s.id}
-            className="badge-saffron flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-lg cursor-default
-              transition-all duration-200 hover:scale-105 hover:shadow-glow"
+            onClick={() => onSelectSutra(s)}
+            className="badge-saffron flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-lg cursor-pointer
+              transition-all duration-200 hover:scale-105 hover:shadow-glow focus:outline-none focus:ring-1 focus:ring-saffron-500"
             title={s.preview}
           >
             <BookOpen className="w-3 h-3 shrink-0" />
             {s.id}
-          </div>
+          </button>
         ))}
       </div>
     </div>

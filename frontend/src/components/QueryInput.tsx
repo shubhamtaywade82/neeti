@@ -48,21 +48,21 @@ export function QueryInput({ onSubmit, onCancel, isStreaming, cagMode, onToggleC
   }
 
   return (
-    <div className="glass border-t border-wisdom-800/60 px-4 py-3">
+    <div className="bg-wisdom-950/80 border-t border-wisdom-700/40 px-4 py-4 shrink-0 select-none">
       <div className="max-w-3xl mx-auto">
-        {/* Input row */}
+        {/* Input Card Wrapper */}
         <div
           className={clsx(
-            'flex items-end gap-2 rounded-2xl border bg-wisdom-900/80 px-3 py-2 transition-all duration-200',
-            'border-wisdom-700/50',
-            'focus-within:border-saffron-600/60 focus-within:shadow-glow focus-within:ring-1 focus-within:ring-saffron-600/20'
+            'flex items-end gap-2.5 rounded-2xl border bg-wisdom-900 border-wisdom-700/40 px-4.5 py-3 transition-all duration-200 shadow-lg',
+            'focus-within:border-saffron-600/60 focus-within:shadow-glow focus-within:ring-1 focus-within:ring-saffron-600/10'
           )}
         >
+          {/* Text Area */}
           <textarea
             ref={textareaRef}
-            className="flex-1 bg-transparent text-wisdom-100 placeholder-wisdom-600 text-sm font-body
-              focus:outline-none resize-none max-h-32 overflow-y-auto py-1.5"
-            placeholder="Seek counsel from Chanakya..."
+            className="flex-1 bg-transparent text-wisdom-100 placeholder-wisdom-500 text-xs sm:text-sm font-body
+              focus:outline-none resize-none max-h-32 overflow-y-auto py-1.5 leading-relaxed"
+            placeholder="Ask across your active knowledge packs..."
             value={value}
             rows={1}
             onChange={(e) => setValue(e.target.value)}
@@ -71,41 +71,41 @@ export function QueryInput({ onSubmit, onCancel, isStreaming, cagMode, onToggleC
             disabled={isStreaming}
           />
 
-          {/* CAG toggle */}
+          {/* CAG Toggle */}
           <button
             onClick={onToggleCag}
             title="CAG mode: use full corpus instead of retrieval"
             className={clsx(
-              'shrink-0 p-2 rounded-xl transition-all duration-200',
+              'shrink-0 p-2 rounded-xl transition-all duration-200 border',
               cagMode
-                ? 'bg-saffron-700/30 text-saffron-300 ring-1 ring-saffron-600/50'
-                : 'text-wisdom-600 hover:text-wisdom-400 hover:bg-wisdom-800'
+                ? 'bg-saffron-500/10 border-saffron-500/30 text-saffron-400'
+                : 'bg-wisdom-800 border-wisdom-700/40 text-wisdom-500 hover:text-wisdom-200'
             )}
           >
-            <Infinity className="w-4.5 h-4.5" />
+            <Infinity className="w-4 h-4" />
           </button>
 
           {/* Send / Stop button */}
           <button
             onClick={handleClick}
             className={clsx(
-              'shrink-0 p-2 rounded-xl transition-all duration-200',
+              'shrink-0 p-2 rounded-xl transition-all duration-200 border flex items-center justify-center',
               isStreaming
-                ? 'bg-red-600 hover:bg-red-500 text-white'
-                : 'btn-primary disabled:opacity-40 disabled:cursor-not-allowed'
+                ? 'bg-red-500/10 border-red-500/30 text-red-400 hover:bg-red-500/20'
+                : 'bg-saffron-500 hover:bg-saffron-400 text-wisdom-950 border-transparent shadow-glow disabled:opacity-40 disabled:cursor-not-allowed'
             )}
             disabled={!isStreaming && !value.trim()}
           >
             {isStreaming ? (
-              <Square className="w-4 h-4" />
+              <Square className="w-4 h-4 fill-red-400" />
             ) : (
-              <Send className="w-4 h-4" />
+              <Send className="w-4 h-4 fill-wisdom-950" />
             )}
           </button>
         </div>
 
-        {/* Keyboard hint */}
-        <p className="text-wisdom-500 text-xs font-body mt-1.5 text-center select-none">
+        {/* Keyboard hints */}
+        <p className="text-wisdom-500 text-[10px] font-semibold text-center mt-2 tracking-wider">
           Press Enter to send · Shift+Enter for new line
         </p>
       </div>

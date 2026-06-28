@@ -1,0 +1,3106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEETI — Knowledge Intelligence Platform</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #020617;
+            --bg-secondary: #0f172a;
+            --bg-card: rgba(15, 23, 42, 0.6);
+            --border: rgba(51, 65, 85, 0.4);
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --amber: #f59e0b;
+            --amber-light: #fbbf24;
+            --amber-dark: #d97706;
+            --emerald: #10b981;
+            --rose: #f43f5e;
+            --indigo: #6366f1;
+            --purple: #a855f7;
+            --blue: #3b82f6;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            height: 100vh;
+            overflow: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #475569; }
+
+        /* Layout */
+        .app {
+            display: flex;
+            height: 100vh;
+            width: 100vw;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 280px;
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(20px);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            transition: width 0.3s ease;
+            z-index: 50;
+        }
+
+        .sidebar.collapsed {
+            width: 72px;
+        }
+
+        .sidebar-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-icon {
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(135deg, var(--amber), var(--amber-dark));
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 20px -5px rgba(245, 158, 11, 0.4);
+            flex-shrink: 0;
+        }
+
+        .logo-icon svg {
+            width: 20px;
+            height: 20px;
+            color: #0f172a;
+        }
+
+        .logo-text h1 {
+            font-size: 20px;
+            font-weight: 800;
+            background: linear-gradient(90deg, var(--amber-light), var(--amber));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            line-height: 1;
+        }
+
+        .logo-text span {
+            font-size: 10px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .nav {
+            flex: 1;
+            padding: 12px;
+            overflow-y: auto;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 12px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 1px solid transparent;
+            margin-bottom: 4px;
+            color: var(--text-secondary);
+            text-decoration: none;
+        }
+
+        .nav-item:hover {
+            background: rgba(51, 65, 85, 0.3);
+            color: var(--text-primary);
+        }
+
+        .nav-item.active {
+            background: rgba(245, 158, 11, 0.08);
+            color: var(--amber-light);
+            border-color: rgba(245, 158, 11, 0.15);
+        }
+
+        .nav-item svg {
+            width: 20px;
+            height: 20px;
+            flex-shrink: 0;
+        }
+
+        .nav-item span {
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .sidebar-footer {
+            padding: 16px;
+            border-top: 1px solid var(--border);
+        }
+
+        .active-packs-label {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 12px;
+        }
+
+        .active-pack-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-bottom: 6px;
+        }
+
+        .active-pack-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--emerald);
+        }
+
+        /* Main Content */
+        .main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .view {
+            display: none;
+            flex: 1;
+            overflow-y: auto;
+            padding: 32px 40px;
+        }
+
+        .view.active {
+            display: block;
+        }
+
+        /* Glass Card */
+        .glass-card {
+            background: var(--bg-card);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 24px;
+        }
+
+        .glass-panel {
+            background: rgba(15, 23, 42, 0.7);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+        }
+
+        /* Dashboard */
+        .dashboard-header h2 {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+
+        .gradient-text {
+            background: linear-gradient(90deg, var(--amber-light), var(--amber));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .dashboard-header p {
+            color: var(--text-secondary);
+            font-size: 15px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin: 24px 0 32px;
+        }
+
+        .stat-card {
+            background: var(--bg-card);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card:hover {
+            background: rgba(30, 41, 59, 0.6);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 32px -8px rgba(0,0,0,0.3);
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--accent), transparent);
+            opacity: 0.5;
+        }
+
+        .stat-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 12px;
+        }
+
+        .stat-card h3 {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .stat-card .label {
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            margin-bottom: 2px;
+        }
+
+        .stat-card .sub {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 24px;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .section-header h3 {
+            font-size: 16px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .section-header a {
+            font-size: 13px;
+            color: var(--amber);
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .section-header a:hover {
+            color: var(--amber-light);
+        }
+
+        .conversation-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 14px;
+            padding: 16px;
+            background: rgba(30, 41, 59, 0.3);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .conversation-item:hover {
+            background: rgba(30, 41, 59, 0.5);
+            border-color: rgba(100, 116, 139, 0.5);
+        }
+
+        .conv-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, rgba(245,158,11,0.15), rgba(217,119,6,0.15));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid rgba(245,158,11,0.2);
+            flex-shrink: 0;
+        }
+
+        .conv-content {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .conv-title-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 4px;
+        }
+
+        .conv-title {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-primary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .conv-badge {
+            font-size: 10px;
+            padding: 2px 8px;
+            background: rgba(51, 65, 85, 0.5);
+            color: var(--text-muted);
+            border-radius: 20px;
+            white-space: nowrap;
+        }
+
+        .conv-preview {
+            font-size: 13px;
+            color: var(--text-muted);
+            line-height: 1.5;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            margin-bottom: 8px;
+        }
+
+        .conv-meta {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        .conv-packs {
+            display: flex;
+            gap: 6px;
+        }
+
+        .conv-pack-tag {
+            font-size: 10px;
+            padding: 2px 8px;
+            background: rgba(51, 65, 85, 0.4);
+            color: var(--text-secondary);
+            border-radius: 4px;
+        }
+
+        /* Quick Actions */
+        .quick-prompt {
+            display: block;
+            width: 100%;
+            text-align: left;
+            padding: 12px 16px;
+            background: rgba(30, 41, 59, 0.3);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            margin-bottom: 8px;
+            color: var(--text-secondary);
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+        }
+
+        .quick-prompt:hover {
+            background: rgba(30, 41, 59, 0.5);
+            border-color: rgba(245, 158, 11, 0.2);
+            color: var(--text-primary);
+        }
+
+        .insight-card {
+            padding: 16px;
+            background: rgba(16, 185, 129, 0.05);
+            border: 1px solid rgba(16, 185, 129, 0.15);
+            border-radius: 10px;
+        }
+
+        .insight-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+            color: var(--emerald);
+            background: rgba(16, 185, 129, 0.1);
+            padding: 4px 10px;
+            border-radius: 20px;
+            margin-bottom: 8px;
+        }
+
+        .insight-card p {
+            font-size: 13px;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        /* Packs */
+        .packs-header {
+            margin-bottom: 28px;
+        }
+
+        .packs-header h2 {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+
+        .packs-header p {
+            color: var(--text-secondary);
+            font-size: 15px;
+        }
+
+        .search-bar {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 28px;
+        }
+
+        .search-input-wrapper {
+            flex: 1;
+            position: relative;
+        }
+
+        .search-input-wrapper svg {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 18px;
+            height: 18px;
+            color: var(--text-muted);
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 12px 14px 12px 42px;
+            background: rgba(30, 41, 59, 0.5);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            color: var(--text-primary);
+            font-size: 14px;
+            outline: none;
+            transition: all 0.2s;
+        }
+
+        .search-input:focus {
+            border-color: rgba(245, 158, 11, 0.3);
+            box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.05);
+        }
+
+        .search-input::placeholder {
+            color: var(--text-muted);
+        }
+
+        .filter-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        .filter-btn {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 10px 16px;
+            background: rgba(30, 41, 59, 0.5);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: var(--text-secondary);
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .filter-btn:hover {
+            background: rgba(30, 41, 59, 0.7);
+            color: var(--text-primary);
+        }
+
+        .filter-btn.active {
+            background: rgba(245, 158, 11, 0.08);
+            color: var(--amber-light);
+            border-color: rgba(245, 158, 11, 0.2);
+        }
+
+        .packs-section-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .packs-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-bottom: 40px;
+        }
+
+        .pack-card {
+            background: var(--bg-card);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            transition: all 0.2s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .pack-card:hover {
+            background: rgba(30, 41, 59, 0.6);
+            transform: translateY(-2px);
+        }
+
+        .pack-card.installed {
+            border-left: 3px solid var(--amber);
+        }
+
+        .pack-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+
+        .pack-icon-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .pack-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .pack-icon.purple { background: rgba(168, 85, 247, 0.1); color: #c084fc; }
+        .pack-icon.orange { background: rgba(249, 115, 22, 0.1); color: #fb923c; }
+        .pack-icon.emerald { background: rgba(16, 185, 129, 0.1); color: #34d399; }
+        .pack-icon.blue { background: rgba(59, 130, 246, 0.1); color: #60a5fa; }
+        .pack-icon.slate { background: rgba(100, 116, 139, 0.1); color: #94a3b8; }
+        .pack-icon.indigo { background: rgba(99, 102, 241, 0.1); color: #818cf8; }
+        .pack-icon.rose { background: rgba(244, 63, 94, 0.1); color: #fb7185; }
+        .pack-icon.cyan { background: rgba(6, 182, 212, 0.1); color: #67e8f9; }
+
+        .pack-title-group h4 {
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+        }
+
+        .pack-tags {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .pack-tag {
+            font-size: 10px;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-weight: 500;
+        }
+
+        .pack-tag.philosophy { background: rgba(168, 85, 247, 0.1); color: #c084fc; border: 1px solid rgba(168, 85, 247, 0.2); }
+        .pack-tag.business { background: rgba(59, 130, 246, 0.1); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.2); }
+        .pack-tag.personal { background: rgba(16, 185, 129, 0.1); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.2); }
+        .pack-tag.enterprise { background: rgba(6, 182, 212, 0.1); color: #67e8f9; border: 1px solid rgba(6, 182, 212, 0.2); }
+
+        .pack-tag.official {
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--amber-light);
+            border: 1px solid rgba(245, 158, 11, 0.2);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .pack-desc {
+            font-size: 13px;
+            color: var(--text-secondary);
+            line-height: 1.6;
+            margin-bottom: 16px;
+            flex: 1;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .pack-stats {
+            display: flex;
+            gap: 16px;
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-bottom: 16px;
+        }
+
+        .pack-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding-top: 14px;
+            border-top: 1px solid var(--border);
+        }
+
+        .pack-author {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .pack-action-btn {
+            padding: 8px 18px;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+        }
+
+        .pack-action-btn.install {
+            background: var(--amber);
+            color: #0f172a;
+        }
+
+        .pack-action-btn.install:hover {
+            background: var(--amber-light);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 16px -4px rgba(245, 158, 11, 0.4);
+        }
+
+        .pack-action-btn.uninstall {
+            background: rgba(51, 65, 85, 0.5);
+            color: var(--text-secondary);
+        }
+
+        .pack-action-btn.uninstall:hover {
+            background: rgba(51, 65, 85, 0.7);
+            color: var(--text-primary);
+        }
+
+        .pack-premium-badge {
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--amber-light);
+        }
+
+        /* Chat Interface */
+        .chat-container {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            padding: 0;
+        }
+
+        .chat-header {
+            height: 64px;
+            background: rgba(15, 23, 42, 0.7);
+            backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            flex-shrink: 0;
+        }
+
+        .chat-header-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .chat-header h3 {
+            font-size: 15px;
+            font-weight: 600;
+        }
+
+        .chat-packs {
+            display: flex;
+            gap: 6px;
+        }
+
+        .chat-pack-pill {
+            font-size: 10px;
+            padding: 3px 10px;
+            background: rgba(51, 65, 85, 0.5);
+            color: var(--text-muted);
+            border-radius: 20px;
+            border: 1px solid var(--border);
+        }
+
+        .chat-header-right {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .chat-btn {
+            padding: 8px 14px;
+            background: rgba(245, 158, 11, 0.08);
+            color: var(--amber-light);
+            border: 1px solid rgba(245, 158, 11, 0.15);
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s;
+        }
+
+        .chat-btn:hover {
+            background: rgba(245, 158, 11, 0.15);
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 32px 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .message {
+            display: flex;
+            gap: 14px;
+            max-width: 85%;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .message.user {
+            align-self: flex-end;
+            flex-direction: row-reverse;
+        }
+
+        .message-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .message.user .message-avatar {
+            background: rgba(51, 65, 85, 0.5);
+            color: var(--text-secondary);
+        }
+
+        .message.assistant .message-avatar {
+            background: linear-gradient(135deg, var(--amber), var(--amber-dark));
+            color: #0f172a;
+        }
+
+        .message-content {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            padding: 16px 20px;
+            font-size: 14px;
+            line-height: 1.7;
+            color: var(--text-secondary);
+        }
+
+        .message.user .message-content {
+            background: rgba(51, 65, 85, 0.4);
+            color: var(--text-primary);
+            border-radius: 18px 18px 4px 18px;
+        }
+
+        .message.assistant .message-content {
+            border-radius: 18px 18px 18px 4px;
+        }
+
+        .message-content strong {
+            color: var(--text-primary);
+        }
+
+        .citations-toggle {
+            margin-top: 12px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            color: var(--amber);
+            cursor: pointer;
+            background: none;
+            border: none;
+            padding: 0;
+        }
+
+        .citations-toggle:hover {
+            color: var(--amber-light);
+        }
+
+        .citations-panel {
+            margin-top: 10px;
+            display: none;
+        }
+
+        .citations-panel.open {
+            display: block;
+        }
+
+        .citation-item {
+            padding: 12px;
+            background: rgba(30, 41, 59, 0.4);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            margin-bottom: 8px;
+        }
+
+        .citation-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 4px;
+        }
+
+        .citation-title {
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .citation-confidence {
+            font-size: 10px;
+            padding: 2px 8px;
+            background: rgba(51, 65, 85, 0.5);
+            color: var(--text-muted);
+            border-radius: 20px;
+        }
+
+        .citation-pack {
+            font-size: 11px;
+            color: var(--amber);
+            margin-bottom: 4px;
+        }
+
+        .citation-excerpt {
+            font-size: 12px;
+            color: var(--text-muted);
+            font-style: italic;
+        }
+
+        .reasoning-toggle {
+            margin-top: 12px;
+        }
+
+        .reasoning-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 12px;
+            background: rgba(30, 41, 59, 0.3);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .reasoning-header:hover {
+            background: rgba(30, 41, 59, 0.5);
+        }
+
+        .reasoning-panel {
+            display: none;
+            padding: 12px;
+            background: rgba(15, 23, 42, 0.3);
+            border: 1px solid var(--border);
+            border-top: none;
+            border-radius: 0 0 10px 10px;
+        }
+
+        .reasoning-panel.open {
+            display: block;
+        }
+
+        .reasoning-step {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .reasoning-step:last-child {
+            margin-bottom: 0;
+        }
+
+        .step-number {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: rgba(245, 158, 11, 0.1);
+            border: 1px solid rgba(245, 158, 11, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            font-weight: 700;
+            color: var(--amber-light);
+            flex-shrink: 0;
+        }
+
+        .step-content h5 {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 2px;
+        }
+
+        .step-content p {
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        .step-meta {
+            font-size: 10px;
+            color: var(--text-muted);
+            background: rgba(51, 65, 85, 0.3);
+            padding: 2px 8px;
+            border-radius: 4px;
+            display: inline-block;
+            margin-bottom: 4px;
+        }
+
+        .message-meta {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-top: 6px;
+            margin-left: 50px;
+            font-size: 10px;
+            color: var(--text-muted);
+        }
+
+        .typing-indicator {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 16px 20px;
+        }
+
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--text-muted);
+            animation: typingBounce 1.4s infinite ease-in-out;
+        }
+
+        .typing-dot:nth-child(1) { animation-delay: 0s; }
+        .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes typingBounce {
+            0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; }
+            40% { transform: scale(1); opacity: 1; }
+        }
+
+        .chat-empty {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 40px;
+        }
+
+        .chat-empty-icon {
+            width: 64px;
+            height: 64px;
+            border-radius: 20px;
+            background: linear-gradient(135deg, rgba(245,158,11,0.15), rgba(217,119,6,0.15));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+            border: 1px solid rgba(245,158,11,0.2);
+        }
+
+        .chat-empty h3 {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .chat-empty p {
+            color: var(--text-muted);
+            font-size: 14px;
+            max-width: 400px;
+            margin-bottom: 24px;
+        }
+
+        .quick-prompts-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            max-width: 500px;
+            width: 100%;
+        }
+
+        .chat-input-area {
+            padding: 16px 24px;
+            border-top: 1px solid var(--border);
+            background: rgba(2, 6, 23, 0.8);
+            backdrop-filter: blur(20px);
+            flex-shrink: 0;
+        }
+
+        .chat-input-wrapper {
+            max-width: 800px;
+            margin: 0 auto;
+            display: flex;
+            align-items: flex-end;
+            gap: 10px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 10px 14px;
+            transition: all 0.2s;
+        }
+
+        .chat-input-wrapper:focus-within {
+            border-color: rgba(245, 158, 11, 0.3);
+            box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.05);
+        }
+
+        .chat-input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            outline: none;
+            color: var(--text-primary);
+            font-size: 14px;
+            line-height: 1.5;
+            resize: none;
+            min-height: 24px;
+            max-height: 120px;
+            font-family: inherit;
+        }
+
+        .chat-input::placeholder {
+            color: var(--text-muted);
+        }
+
+        .chat-send-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            background: var(--amber);
+            color: #0f172a;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            flex-shrink: 0;
+        }
+
+        .chat-send-btn:hover {
+            background: var(--amber-light);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 16px -4px rgba(245, 158, 11, 0.4);
+        }
+
+        .chat-send-btn:disabled {
+            background: rgba(51, 65, 85, 0.5);
+            color: var(--text-muted);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .chat-hint {
+            text-align: center;
+            margin-top: 8px;
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        /* Graph Explorer */
+        .graph-layout {
+            display: flex;
+            height: 100%;
+            padding: 0;
+        }
+
+        .graph-sidebar {
+            width: 320px;
+            background: rgba(15, 23, 42, 0.7);
+            backdrop-filter: blur(16px);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+        }
+
+        .graph-sidebar h3 {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .graph-search {
+            position: relative;
+            margin-bottom: 16px;
+        }
+
+        .graph-search svg {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 16px;
+            height: 16px;
+            color: var(--text-muted);
+        }
+
+        .graph-search input {
+            width: 100%;
+            padding: 10px 12px 10px 36px;
+            background: rgba(30, 41, 59, 0.5);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: var(--text-primary);
+            font-size: 13px;
+            outline: none;
+        }
+
+        .graph-themes {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-bottom: 16px;
+        }
+
+        .theme-chip {
+            font-size: 11px;
+            padding: 5px 12px;
+            border-radius: 20px;
+            border: 1px solid var(--border);
+            background: rgba(30, 41, 59, 0.4);
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .theme-chip:hover, .theme-chip.active {
+            background: rgba(245, 158, 11, 0.08);
+            color: var(--amber-light);
+            border-color: rgba(245, 158, 11, 0.2);
+        }
+
+        .graph-nodes-list {
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .graph-node-item {
+            width: 100%;
+            text-align: left;
+            padding: 12px;
+            background: rgba(30, 41, 59, 0.3);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: inherit;
+        }
+
+        .graph-node-item:hover, .graph-node-item.active {
+            background: rgba(30, 41, 59, 0.5);
+            border-color: rgba(245, 158, 11, 0.2);
+        }
+
+        .graph-node-item.active {
+            background: rgba(245, 158, 11, 0.05);
+        }
+
+        .node-item-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 4px;
+        }
+
+        .node-type-badge {
+            font-size: 10px;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-weight: 500;
+        }
+
+        .node-type-badge.sutra { background: rgba(168, 85, 247, 0.1); color: #c084fc; }
+        .node-type-badge.verse { background: rgba(59, 130, 246, 0.1); color: #60a5fa; }
+        .node-type-badge.concept { background: rgba(16, 185, 129, 0.1); color: #34d399; }
+
+        .node-item-title {
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-primary);
+            line-height: 1.4;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .graph-main {
+            flex: 1;
+            padding: 32px 40px;
+            overflow-y: auto;
+        }
+
+        .node-detail h1 {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+
+        .node-badges {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 24px;
+        }
+
+        .node-badge {
+            font-size: 12px;
+            padding: 5px 14px;
+            border-radius: 20px;
+            font-weight: 500;
+        }
+
+        .node-badge.amber {
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--amber-light);
+            border: 1px solid rgba(245, 158, 11, 0.2);
+        }
+
+        .node-badge.muted {
+            background: rgba(51, 65, 85, 0.3);
+            color: var(--text-muted);
+        }
+
+        .node-detail-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 24px;
+        }
+
+        .node-content-box {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+
+        .node-content-box h3 {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .node-content-box p {
+            font-size: 14px;
+            line-height: 1.7;
+            color: var(--text-secondary);
+        }
+
+        .node-original {
+            margin-top: 16px;
+            padding: 16px;
+            background: rgba(30, 41, 59, 0.4);
+            border-radius: 10px;
+            border: 1px solid var(--border);
+        }
+
+        .node-original-label {
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+        }
+
+        .node-original p {
+            font-size: 14px;
+            color: var(--text-muted);
+            font-family: Georgia, serif;
+        }
+
+        .related-node-card {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 14px;
+            background: rgba(30, 41, 59, 0.3);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: left;
+            color: inherit;
+            width: 100%;
+        }
+
+        .related-node-card:hover {
+            background: rgba(30, 41, 59, 0.5);
+        }
+
+        .relation-badge {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .relation-type {
+            font-size: 10px;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-weight: 500;
+        }
+
+        .relation-type.supports { background: rgba(16, 185, 129, 0.1); color: #34d399; }
+        .relation-type.contradicts { background: rgba(244, 63, 94, 0.1); color: #fb7185; }
+        .relation-type.relates { background: rgba(100, 116, 139, 0.2); color: #94a3b8; }
+
+        .relation-strength {
+            font-size: 10px;
+            color: var(--text-muted);
+        }
+
+        .related-node-info h4 {
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-primary);
+            margin-bottom: 2px;
+        }
+
+        .related-node-info span {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .meta-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .meta-tag {
+            font-size: 12px;
+            padding: 6px 14px;
+            background: rgba(51, 65, 85, 0.3);
+            color: var(--text-secondary);
+            border-radius: 20px;
+            border: 1px solid var(--border);
+        }
+
+        .meta-tag.amber {
+            background: rgba(245, 158, 11, 0.05);
+            color: rgba(251, 191, 36, 0.8);
+            border-color: rgba(245, 158, 11, 0.1);
+        }
+
+        .provenance-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            padding: 8px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .provenance-row:last-child {
+            border-bottom: none;
+        }
+
+        .provenance-row span:first-child {
+            color: var(--text-muted);
+        }
+
+        .provenance-row span:last-child {
+            color: var(--text-primary);
+        }
+
+        /* Memory */
+        .memory-stats {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+
+        .memory-stat {
+            padding: 20px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            border-left: 3px solid;
+        }
+
+        .memory-stat.goal { border-left-color: var(--emerald); }
+        .memory-stat.preference { border-left-color: var(--rose); }
+        .memory-stat.pattern { border-left-color: var(--blue); }
+        .memory-stat.challenge { border-left-color: var(--amber); }
+        .memory-stat.value { border-left-color: var(--purple); }
+
+        .memory-stat-icon {
+            margin-bottom: 10px;
+        }
+
+        .memory-stat h4 {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 2px;
+        }
+
+        .memory-stat span {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .insight-group {
+            margin-bottom: 32px;
+        }
+
+        .insight-group-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+
+        .insight-group-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .insight-group-icon.goal { background: rgba(16, 185, 129, 0.1); color: #34d399; }
+        .insight-group-icon.preference { background: rgba(244, 63, 94, 0.1); color: #fb7185; }
+        .insight-group-icon.pattern { background: rgba(59, 130, 246, 0.1); color: #60a5fa; }
+        .insight-group-icon.challenge { background: rgba(245, 158, 11, 0.1); color: #fbbf24; }
+        .insight-group-icon.value { background: rgba(168, 85, 247, 0.1); color: #c084fc; }
+
+        .insight-group h3 {
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .insight-group-count {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-left: 4px;
+        }
+
+        .insight-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 14px;
+            padding: 16px 20px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            margin-bottom: 10px;
+            transition: all 0.2s;
+        }
+
+        .insight-item:hover {
+            background: rgba(30, 41, 59, 0.6);
+        }
+
+        .insight-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-top: 6px;
+            flex-shrink: 0;
+        }
+
+        .insight-dot.explicit { background: var(--amber); }
+        .insight-dot.inferred { background: var(--text-muted); }
+
+        .insight-content {
+            flex: 1;
+        }
+
+        .insight-content p {
+            font-size: 14px;
+            color: var(--text-secondary);
+            line-height: 1.6;
+            margin-bottom: 8px;
+        }
+
+        .insight-meta {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        .insight-type-badge {
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+            padding: 3px 10px;
+            border-radius: 20px;
+        }
+
+        .insight-type-badge.goal { background: rgba(16, 185, 129, 0.1); color: #34d399; }
+        .insight-type-badge.preference { background: rgba(244, 63, 94, 0.1); color: #fb7185; }
+        .insight-type-badge.pattern { background: rgba(59, 130, 246, 0.1); color: #60a5fa; }
+        .insight-type-badge.challenge { background: rgba(245, 158, 11, 0.1); color: #fbbf24; }
+        .insight-type-badge.value { background: rgba(168, 85, 247, 0.1); color: #c084fc; }
+
+        /* Settings */
+        .settings-layout {
+            display: flex;
+            height: 100%;
+            padding: 0;
+        }
+
+        .settings-nav {
+            width: 260px;
+            background: rgba(15, 23, 42, 0.7);
+            backdrop-filter: blur(16px);
+            border-right: 1px solid var(--border);
+            padding: 20px;
+        }
+
+        .settings-nav h3 {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            padding: 0 8px;
+        }
+
+        .settings-nav-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 12px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-bottom: 4px;
+            border: 1px solid transparent;
+        }
+
+        .settings-nav-item:hover {
+            background: rgba(51, 65, 85, 0.3);
+            color: var(--text-primary);
+        }
+
+        .settings-nav-item.active {
+            background: rgba(245, 158, 11, 0.08);
+            color: var(--amber-light);
+            border-color: rgba(245, 158, 11, 0.15);
+        }
+
+        .settings-nav-item svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        .settings-content {
+            flex: 1;
+            padding: 32px 40px;
+            overflow-y: auto;
+        }
+
+        .settings-content h3 {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 24px;
+        }
+
+        .settings-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+
+        .settings-card h4 {
+            font-size: 15px;
+            font-weight: 600;
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .settings-card > p {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-bottom: 16px;
+        }
+
+        .model-option {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 14px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .model-option:hover {
+            background: rgba(30, 41, 59, 0.3);
+        }
+
+        .model-option.selected {
+            background: rgba(245, 158, 11, 0.05);
+            border-color: rgba(245, 158, 11, 0.2);
+        }
+
+        .model-option input[type="radio"] {
+            width: 18px;
+            height: 18px;
+            accent-color: var(--amber);
+            cursor: pointer;
+        }
+
+        .model-info {
+            flex: 1;
+        }
+
+        .model-info h5 {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+        }
+
+        .model-provider {
+            font-size: 11px;
+            padding: 2px 10px;
+            border-radius: 20px;
+            font-weight: 500;
+        }
+
+        .model-provider.local {
+            background: rgba(16, 185, 129, 0.1);
+            color: #34d399;
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+
+        .model-provider.cloud {
+            background: rgba(59, 130, 246, 0.1);
+            color: #60a5fa;
+            border: 1px solid rgba(59, 130, 246, 0.2);
+        }
+
+        .model-status {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--emerald);
+            flex-shrink: 0;
+        }
+
+        .toggle-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .toggle-row:last-child {
+            border-bottom: none;
+        }
+
+        .toggle-row span {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .toggle-switch {
+            width: 44px;
+            height: 24px;
+            background: rgba(51, 65, 85, 0.5);
+            border-radius: 12px;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+        }
+
+        .toggle-switch.active {
+            background: var(--amber);
+        }
+
+        .toggle-switch::after {
+            content: '';
+            position: absolute;
+            width: 18px;
+            height: 18px;
+            background: white;
+            border-radius: 50%;
+            top: 3px;
+            left: 3px;
+            transition: all 0.2s;
+        }
+
+        .toggle-switch.active::after {
+            left: 23px;
+        }
+
+        .storage-bar {
+            width: 100%;
+            height: 8px;
+            background: rgba(51, 65, 85, 0.3);
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 12px 0;
+        }
+
+        .storage-fill {
+            height: 100%;
+            width: 12%;
+            background: linear-gradient(90deg, var(--amber), var(--amber-light));
+            border-radius: 4px;
+        }
+
+        /* Mobile */
+        .mobile-toggle {
+            display: none;
+            position: fixed;
+            top: 16px;
+            left: 16px;
+            z-index: 100;
+            padding: 10px;
+            background: rgba(15, 23, 42, 0.9);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: var(--text-primary);
+            cursor: pointer;
+        }
+
+        @media (max-width: 1024px) {
+            .sidebar {
+                position: fixed;
+                left: -280px;
+                height: 100vh;
+            }
+            .sidebar.open {
+                left: 0;
+            }
+            .mobile-toggle {
+                display: block;
+            }
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+            .packs-grid { grid-template-columns: repeat(2, 1fr); }
+            .dashboard-grid { grid-template-columns: 1fr; }
+            .graph-layout { flex-direction: column; }
+            .graph-sidebar { width: 100%; height: auto; max-height: 40vh; }
+            .settings-layout { flex-direction: column; }
+            .settings-nav { width: 100%; }
+            .memory-stats { grid-template-columns: repeat(2, 1fr); }
+            .node-detail-grid { grid-template-columns: 1fr; }
+        }
+
+        @media (max-width: 640px) {
+            .stats-grid { grid-template-columns: 1fr; }
+            .packs-grid { grid-template-columns: 1fr; }
+            .view { padding: 20px; }
+            .quick-prompts-grid { grid-template-columns: 1fr; }
+            .memory-stats { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="app">
+        <!-- Mobile Toggle -->
+        <button class="mobile-toggle" onclick="toggleSidebar()">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </button>
+
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="logo-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg>
+                </div>
+                <div class="logo-text">
+                    <h1>NEETI</h1>
+                    <span>Knowledge OS</span>
+                </div>
+            </div>
+            <nav class="nav">
+                <a class="nav-item active" onclick="showView('dashboard')">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>
+                    <span>Dashboard</span>
+                </a>
+                <a class="nav-item" onclick="showView('chat')">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                    <span>AI Advisor</span>
+                </a>
+                <a class="nav-item" onclick="showView('packs')">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>
+                    <span>Knowledge Packs</span>
+                </a>
+                <a class="nav-item" onclick="showView('graph')">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+                    <span>Graph Explorer</span>
+                </a>
+                <a class="nav-item" onclick="showView('memory')">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5a3 3 0 1 0-5.997.125 4 4 0 0 0-2.526 5.77 4 4 0 0 0 .556 6.588A4 4 0 1 0 12 18Z"/><path d="M12 5a3 3 0 1 1 5.997.125 4 4 0 0 1 2.526 5.77 4 4 0 0 1-.556 6.588A4 4 0 1 1 12 18Z"/><path d="M15 13a4.5 4.5 0 0 1-3-4 4.5 4.5 0 0 1-3 4"/><path d="M17.599 6.5a3 3 0 0 0 .399-1.375"/><path d="M6.003 5.125A3 3 0 0 0 6.401 6.5"/><path d="M3.477 10.896a4 4 0 0 1 .585-.396"/><path d="M19.938 10.5a4 4 0 0 1 .585.396"/><path d="M6 18a4 4 0 0 1-1.967-.516"/><path d="M19.967 17.484A4 4 0 0 1 18 18"/></svg>
+                    <span>Memory & Insights</span>
+                </a>
+                <a class="nav-item" onclick="showView('settings')">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
+                    <span>Settings</span>
+                </a>
+            </nav>
+            <div class="sidebar-footer">
+                <div class="active-packs-label">Active Packs (2)</div>
+                <div class="active-pack-item"><div class="active-pack-dot"></div>Chanakya Neeti</div>
+                <div class="active-pack-item"><div class="active-pack-dot"></div>Bhagavad Gita</div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main">
+            <!-- Dashboard View -->
+            <div class="view active" id="view-dashboard">
+                <div class="dashboard-header">
+                    <h2>Welcome back, <span class="gradient-text">Strategist</span></h2>
+                    <p>Your knowledge graph has <strong>3,849</strong> nodes across <strong>2</strong> installed packs.</p>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-card" onclick="showView('chat')">
+                        <div class="stat-icon" style="background: rgba(245,158,11,0.1); color: #fbbf24;">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                        </div>
+                        <h3>1</h3>
+                        <div class="label">Conversations</div>
+                        <div class="sub">This week</div>
+                    </div>
+                    <div class="stat-card" onclick="showView('packs')">
+                        <div class="stat-icon" style="background: rgba(16,185,129,0.1); color: #34d399;">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/></svg>
+                        </div>
+                        <h3>2/8</h3>
+                        <div class="label">Knowledge Packs</div>
+                        <div class="sub">Installed</div>
+                    </div>
+                    <div class="stat-card" onclick="showView('memory')">
+                        <div class="stat-icon" style="background: rgba(99,102,241,0.1); color: #818cf8;">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5a3 3 0 1 0-5.997.125 4 4 0 0 0-2.526 5.77 4 4 0 0 0 .556 6.588A4 4 0 1 0 12 18Z"/></svg>
+                        </div>
+                        <h3>5</h3>
+                        <div class="label">Insights Learned</div>
+                        <div class="sub">About you</div>
+                    </div>
+                    <div class="stat-card" onclick="showView('graph')">
+                        <div class="stat-icon" style="background: rgba(244,63,94,0.1); color: #fb7185;">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+                        </div>
+                        <h3>3.9K</h3>
+                        <div class="label">Graph Connections</div>
+                        <div class="sub">Cross-references</div>
+                    </div>
+                </div>
+
+                <div class="dashboard-grid">
+                    <div class="glass-card">
+                        <div class="section-header">
+                            <h3>
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                                Recent Conversations
+                            </h3>
+                            <a onclick="showView('chat')">View all</a>
+                        </div>
+                        <div class="conversation-item" onclick="loadConversation()">
+                            <div class="conv-avatar">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                            </div>
+                            <div class="conv-content">
+                                <div class="conv-title-row">
+                                    <span class="conv-title">Should I take this risky trade?</span>
+                                    <span class="conv-badge">2 packs</span>
+                                </div>
+                                <p class="conv-preview">I have a trade setup that could give 3:1 returns but the market feels unstable. What would Chanakya say about this?</p>
+                                <div class="conv-meta">
+                                    <span>Jun 27, 2026</span>
+                                    <div class="conv-packs">
+                                        <span class="conv-pack-tag">Chanakya</span>
+                                        <span class="conv-pack-tag">Gita</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="glass-card" style="margin-bottom: 24px;">
+                            <div class="section-header">
+                                <h3>
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                                    Quick Start
+                                </h3>
+                            </div>
+                            <a class="quick-prompt" onclick="startChatPrompt('How do I handle a difficult team member?')">How do I handle a difficult team member?</a>
+                            <a class="quick-prompt" onclick="startChatPrompt('What does Chanakya say about patience?')">What does Chanakya say about patience?</a>
+                            <a class="quick-prompt" onclick="startChatPrompt('Compare Gita and Chanakya on detachment')">Compare Gita and Chanakya on detachment</a>
+                            <a class="quick-prompt" onclick="startChatPrompt('Help me build a morning discipline routine')">Help me build a morning discipline routine</a>
+                        </div>
+
+                        <div class="glass-card">
+                            <div class="section-header">
+                                <h3>
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+                                    Latest Insight
+                                </h3>
+                            </div>
+                            <div class="insight-card">
+                                <div class="insight-tag">
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+                                    Goal
+                                </div>
+                                <p>Building a sustainable trading system with strict risk management</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="margin-top: 32px;">
+                    <div class="section-header">
+                        <h3>
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#818cf8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+                            Your Knowledge Packs
+                        </h3>
+                        <a onclick="showView('packs')">Browse more</a>
+                    </div>
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;">
+                        <div class="glass-card" style="border-left: 3px solid var(--amber);">
+                            <div style="display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 12px;">
+                                <div style="display: flex; align-items: center; gap: 12px;">
+                                    <div class="pack-icon purple" style="width: 36px; height: 36px;">
+                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+                                    </div>
+                                    <div>
+                                        <h4 style="font-size: 15px; font-weight: 600; margin-bottom: 4px;">Chanakya Neeti</h4>
+                                    </div>
+                                </div>
+                                <span style="font-size: 10px; padding: 3px 10px; background: rgba(16,185,129,0.1); color: #34d399; border: 1px solid rgba(16,185,129,0.2); border-radius: 20px;">Active</span>
+                            </div>
+                            <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.6; margin-bottom: 12px;">Ancient Indian treatise on statecraft, economics, and political strategy.</p>
+                            <div style="font-size: 11px; color: var(--text-muted);">1,746 nodes • 3,892 edges</div>
+                        </div>
+                        <div class="glass-card" style="border-left: 3px solid #fb923c;">
+                            <div style="display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 12px;">
+                                <div style="display: flex; align-items: center; gap: 12px;">
+                                    <div class="pack-icon orange" style="width: 36px; height: 36px;">
+                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>
+                                    </div>
+                                    <div>
+                                        <h4 style="font-size: 15px; font-weight: 600; margin-bottom: 4px;">Bhagavad Gita</h4>
+                                    </div>
+                                </div>
+                                <span style="font-size: 10px; padding: 3px 10px; background: rgba(16,185,129,0.1); color: #34d399; border: 1px solid rgba(16,185,129,0.2); border-radius: 20px;">Active</span>
+                            </div>
+                            <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.6; margin-bottom: 12px;">700-verse Hindu scripture on duty and righteousness.</p>
+                            <div style="font-size: 11px; color: var(--text-muted);">2,103 nodes • 4,521 edges</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Packs View -->
+            <div class="view" id="view-packs">
+                <div class="packs-header">
+                    <h2>Knowledge Packs</h2>
+                    <p>Install structured knowledge modules to expand your advisor's reasoning capabilities.</p>
+                </div>
+
+                <div class="search-bar">
+                    <div class="search-input-wrapper">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                        <input type="text" class="search-input" placeholder="Search packs by name, description, or concept..." id="pack-search" oninput="filterPacks()">
+                    </div>
+                    <div class="filter-buttons">
+                        <button class="filter-btn active" onclick="setPackFilter('all')" id="filter-all">All</button>
+                        <button class="filter-btn" onclick="setPackFilter('installed')" id="filter-installed">Installed</button>
+                        <button class="filter-btn" onclick="setPackFilter('official')" id="filter-official">Official</button>
+                        <button class="filter-btn" onclick="setPackFilter('premium')" id="filter-premium">Premium</button>
+                    </div>
+                </div>
+
+                <div id="packs-container">
+                    <!-- Installed Section -->
+                    <div id="installed-section">
+                        <h3 class="packs-section-title">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                            Installed Packs <span style="font-weight: 400; color: var(--text-muted); margin-left: 4px;">(<span id="installed-count">2</span>)</span>
+                        </h3>
+                        <div class="packs-grid" id="installed-grid"></div>
+                    </div>
+
+                    <!-- Available Section -->
+                    <div>
+                        <h3 class="packs-section-title">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#818cf8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                            Available Packs <span style="font-weight: 400; color: var(--text-muted); margin-left: 4px;">(<span id="available-count">6</span>)</span>
+                        </h3>
+                        <div class="packs-grid" id="available-grid"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Chat View -->
+            <div class="view" id="view-chat" style="padding: 0;">
+                <div class="chat-container">
+                    <div class="chat-header">
+                        <div class="chat-header-left">
+                            <h3 id="chat-title">New Conversation</h3>
+                            <div class="chat-packs" id="chat-header-packs" style="display: none;">
+                                <span class="chat-pack-pill">Chanakya</span>
+                                <span class="chat-pack-pill">Gita</span>
+                            </div>
+                        </div>
+                        <div class="chat-header-right">
+                            <button class="chat-btn" onclick="newChat()">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                                New Chat
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="chat-messages" id="chat-messages">
+                        <div class="chat-empty" id="chat-empty">
+                            <div class="chat-empty-icon">
+                                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg>
+                            </div>
+                            <h3>How can NEETI advise you today?</h3>
+                            <p>Ask anything across your installed knowledge packs. Every answer will be grounded, explainable, and personalized.</p>
+                            <div class="quick-prompts-grid">
+                                <button class="quick-prompt" onclick="sendChatMessage('What does Chanakya say about handling betrayal?')">What does Chanakya say about handling betrayal?</button>
+                                <button class="quick-prompt" onclick="sendChatMessage('How do I build unshakeable discipline?')">How do I build unshakeable discipline?</button>
+                                <button class="quick-prompt" onclick="sendChatMessage('Compare Gita and Chanakya on detachment')">Compare Gita and Chanakya on detachment</button>
+                                <button class="quick-prompt" onclick="sendChatMessage('Should I prioritize growth or stability now?')">Should I prioritize growth or stability now?</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="chat-input-area">
+                        <div class="chat-input-wrapper">
+                            <button style="padding: 8px; background: none; border: none; color: var(--text-muted); cursor: pointer; flex-shrink: 0;">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
+                            </button>
+                            <textarea class="chat-input" id="chat-input" placeholder="Ask across your knowledge packs..." rows="1" onkeydown="handleChatKey(event)"></textarea>
+                            <button class="chat-send-btn" id="send-btn" onclick="sendChatFromInput()">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                            </button>
+                        </div>
+                        <div class="chat-hint">NEETI reasons across installed packs with explainable citations. Press Enter to send, Shift+Enter for new line.</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Graph Explorer View -->
+            <div class="view" id="view-graph" style="padding: 0;">
+                <div class="graph-layout">
+                    <div class="graph-sidebar">
+                        <h3>
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+                            Knowledge Graph
+                        </h3>
+                        <div class="graph-search">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                            <input type="text" placeholder="Search nodes..." id="graph-search" oninput="filterGraphNodes()">
+                        </div>
+                        <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 8px; font-weight: 500; text-transform: uppercase; letter-spacing: 1px;">Themes</div>
+                        <div class="graph-themes" id="graph-themes"></div>
+                        <div class="graph-nodes-list" id="graph-nodes-list"></div>
+                    </div>
+                    <div class="graph-main" id="graph-main">
+                        <div style="height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;">
+                            <div style="width: 64px; height: 64px; border-radius: 20px; background: rgba(51,65,85,0.3); display: flex; align-items: center; justify-content: center; margin-bottom: 16px; border: 1px solid var(--border);">
+                                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+                            </div>
+                            <h3 style="font-size: 20px; font-weight: 600; margin-bottom: 8px;">Explore the Knowledge Graph</h3>
+                            <p style="color: var(--text-muted); max-width: 400px;">Select a node from the sidebar to see its relationships, citations, and connected concepts across all installed packs.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Memory View -->
+            <div class="view" id="view-memory">
+                <div style="max-width: 1000px;">
+                    <div style="margin-bottom: 32px;">
+                        <h2 style="font-size: 28px; font-weight: 700; margin-bottom: 8px; display: flex; align-items: center; gap: 12px;">
+                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5a3 3 0 1 0-5.997.125 4 4 0 0 0-2.526 5.77 4 4 0 0 0 .556 6.588A4 4 0 1 0 12 18Z"/><path d="M12 5a3 3 0 1 1 5.997.125 4 4 0 0 1 2.526 5.77 4 4 0 0 1-.556 6.588A4 4 0 1 1 12 18Z"/></svg>
+                            Memory & Insights
+                        </h2>
+                        <p style="color: var(--text-secondary); font-size: 15px;">NEETI learns from every conversation. These insights personalize your advice and improve reasoning relevance.</p>
+                    </div>
+
+                    <div class="memory-stats" id="memory-stats"></div>
+                    <div id="insights-container"></div>
+                </div>
+            </div>
+
+            <!-- Settings View -->
+            <div class="view" id="view-settings" style="padding: 0;">
+                <div class="settings-layout">
+                    <div class="settings-nav">
+                        <h3>Settings</h3>
+                        <div class="settings-nav-item active" onclick="showSettingsTab('ai')">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5a3 3 0 1 0-5.997.125 4 4 0 0 0-2.526 5.77 4 4 0 0 0 .556 6.588A4 4 0 1 0 12 18Z"/><path d="M12 5a3 3 0 1 1 5.997.125 4 4 0 0 1 2.526 5.77 4 4 0 0 1-.556 6.588A4 4 0 1 1 12 18Z"/><path d="M15 13a4.5 4.5 0 0 1-3-4 4.5 4.5 0 0 1-3 4"/></svg>
+                            AI Models
+                        </div>
+                        <div class="settings-nav-item" onclick="showSettingsTab('language')">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+                            Language
+                        </div>
+                        <div class="settings-nav-item" onclick="showSettingsTab('notifications')">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
+                            Notifications
+                        </div>
+                        <div class="settings-nav-item" onclick="showSettingsTab('privacy')">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                            Privacy
+                        </div>
+                        <div class="settings-nav-item" onclick="showSettingsTab('data')">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5V19A9 3 0 0 0 21 19V5"/><path d="M3 12A9 3 0 0 0 21 12"/></svg>
+                            Data & Memory
+                        </div>
+                    </div>
+                    <div class="settings-content" id="settings-content">
+                        <!-- AI Models Tab -->
+                        <div id="tab-ai">
+                            <h3>AI Model Configuration</h3>
+                            <div class="settings-card">
+                                <h4>
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg>
+                                    Primary Model
+                                </h4>
+                                <div id="model-options"></div>
+                            </div>
+                            <div class="settings-card">
+                                <h4>Fallback Configuration</h4>
+                                <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 16px;">Enable automatic fallback if primary model fails</p>
+                                <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; margin-bottom: 12px;">
+                                    <input type="checkbox" checked style="width: 16px; height: 16px; accent-color: var(--amber);">
+                                    <span style="font-size: 14px; color: var(--text-secondary);">Enable automatic fallback chain</span>
+                                </label>
+                                <div style="font-size: 12px; color: var(--text-muted); background: rgba(30,41,59,0.5); padding: 12px; border-radius: 8px; border: 1px solid var(--border);">
+                                    Fallback chain: Ollama → OpenAI → Anthropic. Latency and cost are tracked per conversation.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // ==================== DATA ====================
+        const packs = [
+            { id: 'p1', name: 'Chanakya Neeti', desc: 'Ancient Indian treatise on statecraft, economics, and political strategy. The foundational text for leadership and governance wisdom.', version: '1.0.0', author: 'NEETI Official', category: 'philosophy', entities: 1746, relations: 3892, installed: true, official: true, premium: false, icon: 'purple', color: 'amber' },
+            { id: 'p2', name: 'Bhagavad Gita', desc: '700-verse Hindu scripture that is part of the Indian epic Mahabharata. Dialogue between Prince Arjuna and Krishna on duty and righteousness.', version: '1.0.0', author: 'NEETI Official', category: 'philosophy', entities: 2103, relations: 4521, installed: true, official: true, premium: false, icon: 'orange', color: 'orange' },
+            { id: 'p3', name: 'Arthashastra', desc: 'Comprehensive treatise on statecraft, economic policy, and military strategy attributed to Kautilya (Chanakya).', version: '0.9.0', author: 'NEETI Official', category: 'philosophy', entities: 3421, relations: 7802, installed: false, official: true, premium: true, icon: 'emerald', color: 'emerald' },
+            { id: 'p4', name: 'Atomic Habits', desc: "James Clear's framework for building good habits and breaking bad ones through tiny changes and compound growth.", version: '1.0.0', author: 'James Clear (Pack by NEETI)', category: 'personal', entities: 342, relations: 891, installed: false, official: true, premium: false, icon: 'blue', color: 'blue' },
+            { id: 'p5', name: 'Stoicism Collection', desc: 'Writings of Marcus Aurelius, Seneca, and Epictetus organized into actionable principles for modern resilience and clarity.', version: '1.0.0', author: 'NEETI Community', category: 'philosophy', entities: 1567, relations: 3204, installed: false, official: false, premium: false, icon: 'slate', color: 'slate' },
+            { id: 'p6', name: 'Deep Work', desc: "Cal Newport's rules for focused success in a distracted world. Knowledge work frameworks and attention management.", version: '1.0.0', author: 'Cal Newport (Pack by NEETI)', category: 'business', entities: 198, relations: 445, installed: false, official: true, premium: false, icon: 'indigo', color: 'indigo' },
+            { id: 'p7', name: 'Trading Playbook', desc: 'Risk management, position sizing, and technical analysis frameworks for disciplined trading decisions.', version: '1.0.0', author: 'NEETI Community', category: 'business', entities: 567, relations: 1234, installed: false, official: false, premium: true, icon: 'rose', color: 'rose' },
+            { id: 'p8', name: 'Engineering Handbook', desc: 'System design principles, architectural patterns, and best practices for software engineering teams.', version: '1.0.0', author: 'NEETI Enterprise', category: 'enterprise', entities: 890, relations: 2341, installed: false, official: true, premium: true, icon: 'cyan', color: 'cyan' },
+        ];
+
+        const categoryLabels = { philosophy: 'Philosophy', business: 'Business', personal: 'Personal Growth', enterprise: 'Enterprise' };
+        const categoryClasses = { philosophy: 'philosophy', business: 'business', personal: 'personal', enterprise: 'enterprise' };
+
+        const graphNodes = [
+            { id: 'n1', pack: 'Chanakya Neeti', type: 'sutra', title: 'Sutra 1.1: The Root of Prosperity', content: 'The root of prosperity is discipline. The root of discipline is humility. The root of humility is service to the guru.', original: 'आचार्यात् पादमादत्ते पादं शिष्यः स्वमेधया |', source: 'Chanakya Neeti, Ch. 1, Verse 1', themes: ['Discipline', 'Leadership'], concepts: ['Guru', 'Humility', 'Learning'], confidence: 0.98 },
+            { id: 'n2', pack: 'Chanakya Neeti', type: 'sutra', title: 'Sutra 6.11: The Enemy Within', content: 'A person should not be too honest. Straight trees are cut first and honest people are screwed first.', original: 'सत्यं ब्रूयात् प्रियं ब्रूयात् न ब्रूयात् सत्यमप्रियम् |', source: 'Chanakya Neeti, Ch. 6, Verse 11', themes: ['War & Strategy', 'Relationships'], concepts: ['Diplomacy', 'Truth', 'Pragmatism'], confidence: 0.94 },
+            { id: 'n3', pack: 'Bhagavad Gita', type: 'verse', title: 'Chapter 2, Verse 47: Duty Without Attachment', content: 'You have a right to perform your prescribed duties, but you are not entitled to the fruits of your actions. Never consider yourself to be the cause of the results of your activities, nor be attached to inaction.', original: 'कर्मण्येवाधिकारस्ते मा फलेषु कदाचन |', source: 'Bhagavad Gita, Ch. 2, Verse 47', themes: ['Discipline', 'Decision Making'], concepts: ['Karma', 'Detachment', 'Duty'], confidence: 0.99 },
+            { id: 'n4', pack: 'Chanakya Neeti', type: 'sutra', title: 'Sutra 3.2: The Wise and the Fool', content: 'A wise man should not reveal his knowledge to a fool, just as one should not sow seeds in barren land.', source: 'Chanakya Neeti, Ch. 3, Verse 2', themes: ['Leadership', 'Relationships'], concepts: ['Wisdom', 'Judgment', 'Investment'], confidence: 0.91 },
+        ];
+
+        const graphEdges = [
+            { source: 'n1', target: 'n3', type: 'supports', strength: 0.85 },
+            { source: 'n2', target: 'n4', type: 'relates', strength: 0.72 },
+            { source: 'n3', target: 'n1', type: 'supports', strength: 0.78 },
+        ];
+
+        const allThemes = ['Leadership', 'Wealth', 'Discipline', 'Decision Making', 'Relationships', 'War & Strategy', 'Focus', 'Risk'];
+
+        const insights = [
+            { id: 'i1', type: 'goal', content: 'Building a sustainable trading system with strict risk management', confidence: 0.92, date: 'Jun 25, 2026', explicit: true },
+            { id: 'i2', type: 'pattern', content: 'User frequently asks about patience and timing before making decisions', confidence: 0.78, date: 'Jun 24, 2026', explicit: false },
+            { id: 'i3', type: 'preference', content: 'Prefers direct, actionable advice over philosophical exposition', confidence: 0.85, date: 'Jun 23, 2026', explicit: false },
+            { id: 'i4', type: 'challenge', content: 'Struggles with emotional decision-making during market volatility', confidence: 0.81, date: 'Jun 22, 2026', explicit: false },
+            { id: 'i5', type: 'value', content: 'Prioritizes long-term wealth preservation over short-term gains', confidence: 0.88, date: 'Jun 20, 2026', explicit: true },
+        ];
+
+        const models = [
+            { id: 'm1', name: 'Mixtral 8x7B (Ollama)', provider: 'local', status: 'active', selected: true },
+            { id: 'm2', name: 'Llama 3 70B (Ollama)', provider: 'local', status: 'available', selected: false },
+            { id: 'm3', name: 'GPT-4 Turbo', provider: 'cloud', status: 'available', selected: false },
+            { id: 'm4', name: 'Claude 3 Opus', provider: 'cloud', status: 'available', selected: false },
+            { id: 'm5', name: 'Gemini 1.5 Pro', provider: 'cloud', status: 'available', selected: false },
+        ];
+
+        let currentPackFilter = 'all';
+        let currentGraphTheme = null;
+        let selectedGraphNode = null;
+        let chatHistory = [];
+        let isTyping = false;
+
+        // ==================== NAVIGATION ====================
+        function showView(viewId) {
+            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+            document.getElementById('view-' + viewId).classList.add('active');
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            event?.target?.closest('.nav-item')?.classList.add('active');
+            document.getElementById('sidebar').classList.remove('open');
+
+            if (viewId === 'packs') renderPacks();
+            if (viewId === 'graph') renderGraphSidebar();
+            if (viewId === 'memory') renderMemory();
+            if (viewId === 'settings') renderSettings();
+        }
+
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('open');
+        }
+
+        // ==================== PACKS ====================
+        function renderPacks() {
+            const search = document.getElementById('pack-search')?.value?.toLowerCase() || '';
+            const installed = packs.filter(p => p.installed && (search === '' || p.name.toLowerCase().includes(search) || p.desc.toLowerCase().includes(search)));
+            const available = packs.filter(p => !p.installed && (search === '' || p.name.toLowerCase().includes(search) || p.desc.toLowerCase().includes(search)));
+
+            let filteredInstalled = installed;
+            let filteredAvailable = available;
+
+            if (currentPackFilter === 'installed') {
+                filteredAvailable = [];
+            } else if (currentPackFilter === 'official') {
+                filteredInstalled = installed.filter(p => p.official);
+                filteredAvailable = available.filter(p => p.official);
+            } else if (currentPackFilter === 'premium') {
+                filteredInstalled = installed.filter(p => p.premium);
+                filteredAvailable = available.filter(p => p.premium);
+            }
+
+            document.getElementById('installed-count').textContent = filteredInstalled.length;
+            document.getElementById('available-count').textContent = filteredAvailable.length;
+            document.getElementById('installed-section').style.display = filteredInstalled.length ? 'block' : 'none';
+
+            document.getElementById('installed-grid').innerHTML = filteredInstalled.map(p => renderPackCard(p, true)).join('');
+            document.getElementById('available-grid').innerHTML = filteredAvailable.map(p => renderPackCard(p, false)).join('');
+        }
+
+        function renderPackCard(pack, isInstalled) {
+            const catClass = categoryClasses[pack.category] || 'philosophy';
+            const catLabel = categoryLabels[pack.category] || pack.category;
+
+            return `
+                <div class="pack-card ${isInstalled ? 'installed' : ''}">
+                    <div class="pack-header">
+                        <div class="pack-icon-wrapper">
+                            <div class="pack-icon ${pack.icon}">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+                            </div>
+                            <div class="pack-title-group">
+                                <h4>${pack.name}</h4>
+                                <div class="pack-tags">
+                                    <span class="pack-tag ${catClass}">${catLabel}</span>
+                                    ${pack.official ? '<span class="pack-tag official"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg> Official</span>' : ''}
+                                </div>
+                            </div>
+                        </div>
+                        ${pack.premium ? `<div class="pack-premium-badge"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>` : ''}
+                    </div>
+                    <p class="pack-desc">${pack.desc}</p>
+                    <div class="pack-stats">
+                        <span>${pack.entities.toLocaleString()} entities</span>
+                        <span>${pack.relations.toLocaleString()} relations</span>
+                        <span>v${pack.version}</span>
+                    </div>
+                    <div class="pack-footer">
+                        <span class="pack-author">By ${pack.author}</span>
+                        <button class="pack-action-btn ${isInstalled ? 'uninstall' : 'install'}" onclick="togglePack('${pack.id}')">
+                            ${isInstalled ? 'Uninstall' : 'Install'}
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function togglePack(id) {
+            const pack = packs.find(p => p.id === id);
+            if (pack) {
+                pack.installed = !pack.installed;
+                renderPacks();
+            }
+        }
+
+        function filterPacks() {
+            renderPacks();
+        }
+
+        function setPackFilter(filter) {
+            currentPackFilter = filter;
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById('filter-' + filter).classList.add('active');
+            renderPacks();
+        }
+
+        // ==================== CHAT ====================
+        function startChatPrompt(text) {
+            showView('chat');
+            setTimeout(() => sendChatMessage(text), 300);
+        }
+
+        function newChat() {
+            chatHistory = [];
+            selectedGraphNode = null;
+            document.getElementById('chat-messages').innerHTML = `
+                <div class="chat-empty" id="chat-empty">
+                    <div class="chat-empty-icon">
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg>
+                    </div>
+                    <h3>How can NEETI advise you today?</h3>
+                    <p>Ask anything across your installed knowledge packs. Every answer will be grounded, explainable, and personalized.</p>
+                    <div class="quick-prompts-grid">
+                        <button class="quick-prompt" onclick="sendChatMessage('What does Chanakya say about handling betrayal?')">What does Chanakya say about handling betrayal?</button>
+                        <button class="quick-prompt" onclick="sendChatMessage('How do I build unshakeable discipline?')">How do I build unshakeable discipline?</button>
+                        <button class="quick-prompt" onclick="sendChatMessage('Compare Gita and Chanakya on detachment')">Compare Gita and Chanakya on detachment</button>
+                        <button class="quick-prompt" onclick="sendChatMessage('Should I prioritize growth or stability now?')">Should I prioritize growth or stability now?</button>
+                    </div>
+                </div>
+            `;
+            document.getElementById('chat-title').textContent = 'New Conversation';
+            document.getElementById('chat-header-packs').style.display = 'none';
+        }
+
+        function loadConversation() {
+            showView('chat');
+            document.getElementById('chat-title').textContent = 'Should I take this risky trade?';
+            document.getElementById('chat-header-packs').style.display = 'flex';
+            document.getElementById('chat-messages').innerHTML = `
+                <div class="message user">
+                    <div class="message-avatar">You</div>
+                    <div class="message-content">I have a trade setup that could give 3:1 returns but the market feels unstable. What would Chanakya say about this?</div>
+                </div>
+                <div class="message assistant" id="loaded-response">
+                    <div class="message-avatar">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg>
+                    </div>
+                    <div class="message-content">
+                        <p>Based on <strong>Chanakya Neeti</strong> and the <strong>Bhagavad Gita</strong>, this situation calls for examining three dimensions: the certainty of your edge, the preservation of your capital base, and your emotional state.</p>
+                        <p style="margin-top: 12px;"><strong>Chanakya Sutra 6.11</strong> advises that one should not be too honest (or too direct) in unstable environments—straight trees are cut first. Applied to trading: when volatility is high and uncertainty is elevated, the market "punishes" the most obvious and exposed positions first.</p>
+                        <p style="margin-top: 12px;"><strong>Bhagavad Gita 2.47</strong> provides the complementary principle: you have the right to execute your system (duty), but you are not entitled to the profit (fruits). This means your validation should be on whether the setup meets your criteria—not on the potential 3:1 reward.</p>
+                        <p style="margin-top: 12px;"><strong>Recommendation:</strong> If your edge is verified by your system rules and the risk is within your predefined limits (not more than 1-2% of capital), execute with discipline. If the "unstable feeling" means your edge is unverified, stand aside. Chanakya would prefer the preservation of the army (capital) over a risky battle with uncertain terrain.</p>
+
+                        <button class="citations-toggle" onclick="toggleCitations(this)">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+                            2 Sources
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-left: 4px;"><polyline points="6 9 12 15 18 9"/></svg>
+                        </button>
+                        <div class="citations-panel">
+                            <div class="citation-item">
+                                <div class="citation-header">
+                                    <span class="citation-title">Sutra 6.11: The Enemy Within</span>
+                                    <span class="citation-confidence">94%</span>
+                                </div>
+                                <div class="citation-pack">Chanakya Neeti</div>
+                                <p class="citation-excerpt">"A person should not be too honest. Straight trees are cut first..."</p>
+                            </div>
+                            <div class="citation-item">
+                                <div class="citation-header">
+                                    <span class="citation-title">Chapter 2, Verse 47: Duty Without Attachment</span>
+                                    <span class="citation-confidence">99%</span>
+                                </div>
+                                <div class="citation-pack">Bhagavad Gita</div>
+                                <p class="citation-excerpt">"You have a right to perform your prescribed duties..."</p>
+                            </div>
+                        </div>
+
+                        <div class="reasoning-toggle">
+                            <div class="reasoning-header" onclick="toggleReasoning(this)">
+                                <div style="display: flex; align-items: center; gap: 6px;">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                                    <span>Reasoning Path</span>
+                                    <span style="margin-left: 4px;">• 6 steps</span>
+                                </div>
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+                            </div>
+                            <div class="reasoning-panel">
+                                <div class="reasoning-step">
+                                    <div class="step-number">1</div>
+                                    <div class="step-content">
+                                        <span class="step-meta">System</span>
+                                        <h5>Intent Classification</h5>
+                                        <p>User seeks advice on risk-taking under uncertainty</p>
+                                    </div>
+                                </div>
+                                <div class="reasoning-step">
+                                    <div class="step-number">2</div>
+                                    <div class="step-content">
+                                        <span class="step-meta">Router</span>
+                                        <h5>Pack Selection</h5>
+                                        <p>Selected Chanakya Neeti (strategy) and Bhagavad Gita (detachment)</p>
+                                    </div>
+                                </div>
+                                <div class="reasoning-step">
+                                    <div class="step-number">3</div>
+                                    <div class="step-content">
+                                        <span class="step-meta">Graph Query</span>
+                                        <h5>Knowledge Retrieval</h5>
+                                        <p>Retrieved sutras on risk, honesty, and duty from installed packs</p>
+                                    </div>
+                                </div>
+                                <div class="reasoning-step">
+                                    <div class="step-number">4</div>
+                                    <div class="step-content">
+                                        <span class="step-meta">Memory Engine</span>
+                                        <h5>Context Integration</h5>
+                                        <p>User has goal of sustainable trading; pattern shows concern with timing</p>
+                                    </div>
+                                </div>
+                                <div class="reasoning-step">
+                                    <div class="step-number">5</div>
+                                    <div class="step-content">
+                                        <span class="step-meta">LLM</span>
+                                        <h5>Reasoning Synthesis</h5>
+                                        <p>Constructed analogy between market exposure and battlefield exposure</p>
+                                    </div>
+                                </div>
+                                <div class="reasoning-step">
+                                    <div class="step-number">6</div>
+                                    <div class="step-content">
+                                        <span class="step-meta">Advisor</span>
+                                        <h5>Recommendation</h5>
+                                        <p>Conditional execution based on system verification, not reward size</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="message-meta">
+                    <span style="display: flex; align-items: center; gap: 4px;">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5a3 3 0 1 0-5.997.125 4 4 0 0 0-2.526 5.77 4 4 0 0 0 .556 6.588A4 4 0 1 0 12 18Z"/></svg>
+                        mixtral-8x7b (Ollama)
+                    </span>
+                    <span style="display: flex; align-items: center; gap: 4px;">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                        2,340ms
+                    </span>
+                    <span>342 tokens</span>
+                </div>
+            `;
+        }
+
+        function sendChatFromInput() {
+            const input = document.getElementById('chat-input');
+            const text = input.value.trim();
+            if (!text || isTyping) return;
+            input.value = '';
+            input.style.height = 'auto';
+            sendChatMessage(text);
+        }
+
+        function handleChatKey(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendChatFromInput();
+            }
+        }
+
+        function sendChatMessage(text) {
+            const container = document.getElementById('chat-messages');
+            const emptyEl = document.getElementById('chat-empty');
+            if (emptyEl) emptyEl.remove();
+
+            // User message
+            const userMsg = document.createElement('div');
+            userMsg.className = 'message user';
+            userMsg.innerHTML = `
+                <div class="message-avatar">You</div>
+                <div class="message-content">${escapeHtml(text)}</div>
+            `;
+            container.appendChild(userMsg);
+
+            // Update title on first message
+            if (chatHistory.length === 0) {
+                document.getElementById('chat-title').textContent = text.length > 40 ? text.slice(0, 40) + '...' : text;
+                document.getElementById('chat-header-packs').style.display = 'flex';
+            }
+            chatHistory.push({ role: 'user', text });
+
+            // Typing indicator
+            isTyping = true;
+            document.getElementById('send-btn').disabled = true;
+            const typingDiv = document.createElement('div');
+            typingDiv.className = 'message assistant';
+            typingDiv.id = 'typing-msg';
+            typingDiv.innerHTML = `
+                <div class="message-avatar">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg>
+                </div>
+                <div class="message-content">
+                    <div class="typing-indicator">
+                        <div class="typing-dot"></div>
+                        <div class="typing-dot"></div>
+                        <div class="typing-dot"></div>
+                    </div>
+                </div>
+            `;
+            container.appendChild(typingDiv);
+            container.scrollTop = container.scrollHeight;
+
+            // Simulate response
+            setTimeout(() => {
+                typingDiv.remove();
+                isTyping = false;
+                document.getElementById('send-btn').disabled = false;
+
+                const responseDiv = document.createElement('div');
+                responseDiv.className = 'message assistant';
+                responseDiv.innerHTML = `
+                    <div class="message-avatar">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg>
+                    </div>
+                    <div class="message-content">
+                        <p>I've analyzed your question across your installed knowledge packs. Based on the structured reasoning from <strong>Chanakya Neeti</strong> and cross-referenced principles from the <strong>Bhagavad Gita</strong>, here's my guidance:</p>
+                        <p style="margin-top: 12px;">Your query touches on <strong>discipline</strong> and <strong>strategic patience</strong>—two highly interconnected themes in your current knowledge graph. The system identified <strong>3 primary nodes</strong> and <strong>7 supporting relationships</strong> to construct this response.</p>
+                        <p style="margin-top: 12px;">Would you like me to explore the specific sutras that support this reasoning, or shall we examine how this compares to other frameworks in your library?</p>
+
+                        <button class="citations-toggle" onclick="toggleCitations(this)">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+                            1 Source
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-left: 4px;"><polyline points="6 9 12 15 18 9"/></svg>
+                        </button>
+                        <div class="citations-panel">
+                            <div class="citation-item">
+                                <div class="citation-header">
+                                    <span class="citation-title">Sutra 1.1: The Root of Prosperity</span>
+                                    <span class="citation-confidence">94%</span>
+                                </div>
+                                <div class="citation-pack">Chanakya Neeti</div>
+                                <p class="citation-excerpt">"The root of prosperity is discipline..."</p>
+                            </div>
+                        </div>
+
+                        <div class="reasoning-toggle">
+                            <div class="reasoning-header" onclick="toggleReasoning(this)">
+                                <div style="display: flex; align-items: center; gap: 6px;">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                                    <span>Reasoning Path</span>
+                                    <span style="margin-left: 4px;">• 3 steps</span>
+                                </div>
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+                            </div>
+                            <div class="reasoning-panel">
+                                <div class="reasoning-step">
+                                    <div class="step-number">1</div>
+                                    <div class="step-content">
+                                        <span class="step-meta">System</span>
+                                        <h5>Intent Analysis</h5>
+                                        <p>Identified request for strategic advice</p>
+                                    </div>
+                                </div>
+                                <div class="reasoning-step">
+                                    <div class="step-number">2</div>
+                                    <div class="step-content">
+                                        <span class="step-meta">Graph Engine</span>
+                                        <h5>Pack Selection</h5>
+                                        <p>Retrieved nodes from Chanakya Neeti and Gita</p>
+                                    </div>
+                                </div>
+                                <div class="reasoning-step">
+                                    <div class="step-number">3</div>
+                                    <div class="step-content">
+                                        <span class="step-meta">LLM</span>
+                                        <h5>Response Generation</h5>
+                                        <p>Generated contextual response with citations</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(responseDiv);
+
+                // Meta
+                const metaDiv = document.createElement('div');
+                metaDiv.className = 'message-meta';
+                metaDiv.innerHTML = `
+                    <span style="display: flex; align-items: center; gap: 4px;">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5a3 3 0 1 0-5.997.125 4 4 0 0 0-2.526 5.77 4 4 0 0 0 .556 6.588A4 4 0 1 0 12 18Z"/></svg>
+                        mixtral-8x7b (Ollama)
+                    </span>
+                    <span style="display: flex; align-items: center; gap: 4px;">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                        1,842ms
+                    </span>
+                    <span>298 tokens</span>
+                `;
+                container.appendChild(metaDiv);
+                container.scrollTop = container.scrollHeight;
+            }, 2000);
+
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function toggleCitations(btn) {
+            const panel = btn.nextElementSibling;
+            panel.classList.toggle('open');
+            const arrow = btn.querySelector('svg:last-child');
+            if (panel.classList.contains('open')) {
+                arrow.innerHTML = '<polyline points="18 15 12 9 6 15"/>';
+            } else {
+                arrow.innerHTML = '<polyline points="6 9 12 15 18 9"/>';
+            }
+        }
+
+        function toggleReasoning(header) {
+            const panel = header.nextElementSibling;
+            panel.classList.toggle('open');
+            const arrow = header.querySelector('svg:last-child');
+            if (panel.classList.contains('open')) {
+                arrow.innerHTML = '<polyline points="18 15 12 9 6 15"/>';
+            } else {
+                arrow.innerHTML = '<polyline points="6 9 12 15 18 9"/>';
+            }
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Auto-resize textarea
+        document.addEventListener('input', function(e) {
+            if (e.target.id === 'chat-input') {
+                e.target.style.height = 'auto';
+                e.target.style.height = Math.min(e.target.scrollHeight, 120) + 'px';
+            }
+        });
+
+        // ==================== GRAPH EXPLORER ====================
+        function renderGraphSidebar() {
+            const themesContainer = document.getElementById('graph-themes');
+            themesContainer.innerHTML = allThemes.map(t => `
+                <button class="theme-chip ${currentGraphTheme === t ? 'active' : ''}" onclick="setGraphTheme('${t}')">${t}</button>
+            `).join('');
+
+            renderGraphNodes();
+        }
+
+        function renderGraphNodes() {
+            const search = document.getElementById('graph-search')?.value?.toLowerCase() || '';
+            const list = document.getElementById('graph-nodes-list');
+
+            const filtered = graphNodes.filter(n => {
+                const matchesSearch = !search || n.title.toLowerCase().includes(search) || n.content.toLowerCase().includes(search);
+                const matchesTheme = !currentGraphTheme || n.themes.includes(currentGraphTheme);
+                return matchesSearch && matchesTheme;
+            });
+
+            list.innerHTML = filtered.map(n => `
+                <button class="graph-node-item ${selectedGraphNode?.id === n.id ? 'active' : ''}" onclick="selectGraphNode('${n.id}')">
+                    <div class="node-item-header">
+                        <span class="node-type-badge ${n.type}">${n.type}</span>
+                        <span style="font-size: 11px; color: var(--text-muted);">${n.pack}</span>
+                    </div>
+                    <div class="node-item-title">${n.title}</div>
+                </button>
+            `).join('');
+        }
+
+        function setGraphTheme(theme) {
+            currentGraphTheme = currentGraphTheme === theme ? null : theme;
+            renderGraphSidebar();
+        }
+
+        function filterGraphNodes() {
+            renderGraphNodes();
+        }
+
+        function selectGraphNode(id) {
+            selectedGraphNode = graphNodes.find(n => n.id === id);
+            renderGraphNodes();
+            renderGraphDetail();
+        }
+
+        function renderGraphDetail() {
+            const node = selectedGraphNode;
+            if (!node) return;
+
+            const related = graphEdges.filter(e => e.source === node.id || e.target === node.id).map(e => {
+                const otherId = e.source === node.id ? e.target : e.source;
+                const other = graphNodes.find(n => n.id === otherId);
+                return { edge: e, node: other };
+            }).filter(r => r.node);
+
+            document.getElementById('graph-main').innerHTML = `
+                <div class="node-detail">
+                    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px; font-size: 12px; color: var(--text-muted);">
+                        <span style="cursor: pointer;" onclick="clearGraphSelection()">Graph Explorer</span>
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+                        <span style="color: var(--amber-light);">${node.pack}</span>
+                    </div>
+                    <h1>${node.title}</h1>
+                    <div class="node-badges">
+                        <span class="node-badge amber">${node.type}</span>
+                        <span class="node-badge muted">Source: ${node.source}</span>
+                        <span class="node-badge muted">Confidence: ${Math.round(node.confidence * 100)}%</span>
+                    </div>
+
+                    <div class="node-detail-grid">
+                        <div>
+                            <div class="node-content-box">
+                                <h3>
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+                                    Content
+                                </h3>
+                                <p>${node.content}</p>
+                                ${node.original ? `
+                                <div class="node-original">
+                                    <div class="node-original-label">Original Text</div>
+                                    <p>${node.original}</p>
+                                </div>
+                                ` : ''}
+                            </div>
+
+                            <div class="node-content-box">
+                                <h3>
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fb7185" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+                                    Connected Nodes
+                                </h3>
+                                ${related.map(r => `
+                                    <button class="related-node-card" onclick="selectGraphNode('${r.node.id}')">
+                                        <div class="relation-badge">
+                                            <span class="relation-type ${r.edge.type}">${r.edge.type.replace('_', ' ')}</span>
+                                            <span class="relation-strength">${Math.round(r.edge.strength * 100)}% strength</span>
+                                        </div>
+                                        <div class="related-node-info">
+                                            <h4>${r.node.title}</h4>
+                                            <span>${r.node.pack}</span>
+                                        </div>
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+                                    </button>
+                                `).join('')}
+                                ${related.length === 0 ? '<p style="color: var(--text-muted); font-size: 13px;">No direct connections found.</p>' : ''}
+                            </div>
+                        </div>
+
+                        <div>
+                            <div class="node-content-box">
+                                <h3>Themes</h3>
+                                <div class="meta-tags">
+                                    ${node.themes.map(t => `<span class="meta-tag">${t}</span>`).join('')}
+                                </div>
+                            </div>
+                            <div class="node-content-box">
+                                <h3>Concepts</h3>
+                                <div class="meta-tags">
+                                    ${node.concepts.map(c => `<span class="meta-tag amber">${c}</span>`).join('')}
+                                </div>
+                            </div>
+                            <div class="node-content-box">
+                                <h3>Provenance</h3>
+                                <div class="provenance-row">
+                                    <span>Book</span>
+                                    <span>${node.pack}</span>
+                                </div>
+                                <div class="provenance-row">
+                                    <span>Reference</span>
+                                    <span>${node.source}</span>
+                                </div>
+                                <div class="provenance-row">
+                                    <span>Confidence</span>
+                                    <span>${Math.round(node.confidence * 100)}%</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function clearGraphSelection() {
+            selectedGraphNode = null;
+            renderGraphNodes();
+            document.getElementById('graph-main').innerHTML = `
+                <div style="height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;">
+                    <div style="width: 64px; height: 64px; border-radius: 20px; background: rgba(51,65,85,0.3); display: flex; align-items: center; justify-content: center; margin-bottom: 16px; border: 1px solid var(--border);">
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+                    </div>
+                    <h3 style="font-size: 20px; font-weight: 600; margin-bottom: 8px;">Explore the Knowledge Graph</h3>
+                    <p style="color: var(--text-muted); max-width: 400px;">Select a node from the sidebar to see its relationships, citations, and connected concepts across all installed packs.</p>
+                </div>
+            `;
+        }
+
+        // ==================== MEMORY ====================
+        function renderMemory() {
+            const grouped = {};
+            insights.forEach(i => {
+                if (!grouped[i.type]) grouped[i.type] = [];
+                grouped[i.type].push(i);
+            });
+
+            const typeConfig = {
+                goal: { color: '#34d399', icon: 'target', label: 'Goals' },
+                preference: { color: '#fb7185', icon: 'heart', label: 'Preferences' },
+                pattern: { color: '#60a5fa', icon: 'trend', label: 'Patterns' },
+                challenge: { color: '#fbbf24', icon: 'alert', label: 'Challenges' },
+                value: { color: '#c084fc', icon: 'user', label: 'Values' },
+            };
+
+            const statsContainer = document.getElementById('memory-stats');
+            statsContainer.innerHTML = Object.entries(grouped).map(([type, items]) => {
+                const config = typeConfig[type];
+                return `
+                    <div class="memory-stat ${type}">
+                        <div class="memory-stat-icon" style="color: ${config.color};">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                ${type === 'goal' ? '<circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>' : 
+                                  type === 'preference' ? '<path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/>' :
+                                  type === 'pattern' ? '<polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/>' :
+                                  type === 'challenge' ? '<path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>' :
+                                  '<path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>'}
+                            </svg>
+                        </div>
+                        <h4>${items.length}</h4>
+                        <span>${config.label}</span>
+                    </div>
+                `;
+            }).join('');
+
+            const container = document.getElementById('insights-container');
+            container.innerHTML = Object.entries(grouped).map(([type, items]) => {
+                const config = typeConfig[type];
+                return `
+                    <div class="insight-group">
+                        <div class="insight-group-header">
+                            <div class="insight-group-icon ${type}">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    ${type === 'goal' ? '<circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>' : 
+                                      type === 'preference' ? '<path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/>' :
+                                      type === 'pattern' ? '<polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/>' :
+                                      type === 'challenge' ? '<path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>' :
+                                      '<path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>'}
+                                </svg>
+                            </div>
+                            <h3>${config.label}</h3>
+                            <span class="insight-group-count">${items.length} insights</span>
+                        </div>
+                        <div>
+                            ${items.map(i => `
+                                <div class="insight-item">
+                                    <div class="insight-dot ${i.explicit ? 'explicit' : 'inferred'}"></div>
+                                    <div class="insight-content">
+                                        <p>${i.content}</p>
+                                        <div class="insight-meta">
+                                            <span class="insight-type-badge ${i.type}">${i.type}</span>
+                                            <span>${i.date}</span>
+                                            <span>Confidence: ${Math.round(i.confidence * 100)}%</span>
+                                            <span style="color: ${i.explicit ? 'var(--amber)' : 'var(--text-muted)'}">${i.explicit ? 'Explicit' : 'Inferred'}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // ==================== SETTINGS ====================
+        function renderSettings() {
+            const modelOptions = document.getElementById('model-options');
+            if (modelOptions) {
+                modelOptions.innerHTML = models.map(m => `
+                    <label class="model-option ${m.selected ? 'selected' : ''}" onclick="selectModel('${m.id}')">
+                        <input type="radio" name="model" ${m.selected ? 'checked' : ''}>
+                        <div class="model-info">
+                            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+                                <h5>${m.name}</h5>
+                                <span class="model-provider ${m.provider}">${m.provider === 'local' ? 'Local' : 'Cloud'}</span>
+                            </div>
+                        </div>
+                        <div class="model-status" style="background: ${m.status === 'active' ? 'var(--emerald)' : 'var(--text-muted)'}"></div>
+                    </label>
+                `).join('');
+            }
+        }
+
+        function selectModel(id) {
+            models.forEach(m => m.selected = m.id === id);
+            renderSettings();
+        }
+
+        function showSettingsTab(tab) {
+            document.querySelectorAll('.settings-nav-item').forEach(i => i.classList.remove('active'));
+            event.target.classList.add('active');
+
+            const content = document.getElementById('settings-content');
+            if (tab === 'ai') {
+                content.innerHTML = document.getElementById('tab-ai').innerHTML;
+                renderSettings();
+            } else if (tab === 'language') {
+                content.innerHTML = `
+                    <h3>Language & Region</h3>
+                    <div class="settings-card">
+                        <div class="toggle-row"><span>English</span><input type="checkbox" checked class="toggle-switch active" onclick="this.classList.toggle('active')"></div>
+                        <div class="toggle-row"><span>Hindi</span><input type="checkbox" class="toggle-switch" onclick="this.classList.toggle('active')"></div>
+                        <div class="toggle-row"><span>Marathi</span><input type="checkbox" class="toggle-switch" onclick="this.classList.toggle('active')"></div>
+                        <div class="toggle-row"><span>Sanskrit</span><input type="checkbox" class="toggle-switch" onclick="this.classList.toggle('active')"></div>
+                    </div>
+                `;
+            } else if (tab === 'notifications') {
+                content.innerHTML = `
+                    <h3>Notifications</h3>
+                    <div class="settings-card">
+                        <div class="toggle-row"><span>Daily wisdom notification</span><input type="checkbox" checked class="toggle-switch active" onclick="this.classList.toggle('active')"></div>
+                        <div class="toggle-row"><span>New insight discovered</span><input type="checkbox" checked class="toggle-switch active" onclick="this.classList.toggle('active')"></div>
+                        <div class="toggle-row"><span>Pack update available</span><input type="checkbox" class="toggle-switch" onclick="this.classList.toggle('active')"></div>
+                        <div class="toggle-row"><span>Conversation summary</span><input type="checkbox" checked class="toggle-switch active" onclick="this.classList.toggle('active')"></div>
+                    </div>
+                `;
+            } else if (tab === 'privacy') {
+                content.innerHTML = `
+                    <h3>Privacy & Security</h3>
+                    <div class="settings-card">
+                        <h4>Data Handling</h4>
+                        <p>Your conversations and insights are stored locally-first. Cloud sync is encrypted end-to-end.</p>
+                        <div style="display: flex; gap: 10px;">
+                            <button style="padding: 8px 16px; background: rgba(51,65,85,0.5); border: 1px solid var(--border); border-radius: 8px; color: var(--text-secondary); font-size: 13px; cursor: pointer;">Export My Data</button>
+                            <button style="padding: 8px 16px; background: rgba(244,63,94,0.1); border: 1px solid rgba(244,63,94,0.2); border-radius: 8px; color: #fb7185; font-size: 13px; cursor: pointer;">Delete All Memory</button>
+                        </div>
+                    </div>
+                `;
+            } else if (tab === 'data') {
+                content.innerHTML = `
+                    <h3>Data & Memory</h3>
+                    <div class="settings-card">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                            <h4>Memory Storage</h4>
+                            <span style="font-size: 12px; color: var(--text-muted);">142 KB used</span>
+                        </div>
+                        <div class="storage-bar"><div class="storage-fill"></div></div>
+                        <p style="font-size: 12px; color: var(--text-muted);">5 insights stored across 3 conversation threads</p>
+                    </div>
+                    <div class="settings-card">
+                        <h4>Memory Controls</h4>
+                        <div class="toggle-row"><span>Auto-extract insights</span><input type="checkbox" checked class="toggle-switch active" onclick="this.classList.toggle('active')"></div>
+                        <div class="toggle-row"><span>Use insights for personalization</span><input type="checkbox" checked class="toggle-switch active" onclick="this.classList.toggle('active')"></div>
+                        <div class="toggle-row"><span>Share insights across devices</span><input type="checkbox" class="toggle-switch" onclick="this.classList.toggle('active')"></div>
+                    </div>
+                `;
+            }
+        }
+
+        // ==================== INIT ====================
+        document.addEventListener('DOMContentLoaded', () => {
+            renderPacks();
+        });
+    </script>
+</body>
+</html>

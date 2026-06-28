@@ -31,89 +31,63 @@ export function ConversationSidebar({ activeId, refreshTrigger, onSelect, onNewC
   }
 
   return (
-    <aside className="w-72 bg-wisdom-900 border-r border-wisdom-700/50 flex flex-col h-full">
-      {/* ── Branding ── */}
-      <div className="px-5 pt-6 pb-2 animate-fade-in">
-        <h1 className="font-display text-saffron-400 text-2xl leading-none tracking-wide">
-          नीति
-        </h1>
-        <span className="font-body text-wisdom-400 text-xs tracking-widest uppercase mt-1 block">
-          Neeti
-        </span>
-      </div>
-
+    <aside className="w-full flex flex-col h-full bg-wisdom-900/10 select-none">
       {/* ── New Chat Button ── */}
-      <div className="px-4 pt-3 pb-4 animate-fade-in delay-100">
+      <div className="px-4 py-4 shrink-0">
         <button
           onClick={onNewChat}
-          className="btn-primary w-full flex items-center justify-center gap-2 text-sm py-2.5"
+          className="w-full flex items-center justify-center gap-1.5 px-3 py-2 bg-saffron-500 text-wisdom-950 font-bold text-xs uppercase tracking-wider rounded-xl shadow-glow transition-all duration-200 hover:-translate-y-px active:translate-y-0"
         >
-          <Plus className="h-4 w-4" />
+          <Plus className="h-4 w-4 stroke-[2.5]" />
           New Chat
         </button>
       </div>
 
       {/* ── Separator ── */}
-      <div className="mx-4 border-t border-wisdom-700/40" />
+      <div className="mx-4 border-t border-wisdom-700/10 shrink-0" />
 
       {/* ── Conversation List ── */}
-      <div className="flex-1 overflow-y-auto px-3 py-3 scrollbar-thin scrollbar-thumb-wisdom-700 scrollbar-track-transparent">
+      <div className="flex-1 overflow-y-auto px-3 py-3 space-y-1">
         {conversations.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-full text-center animate-fade-in delay-200 select-none">
-            <ScrollText className="h-8 w-8 text-wisdom-600 mb-3" />
-            <p className="text-wisdom-500 text-sm font-body">
-              No conversations yet
-            </p>
-            <p className="text-wisdom-600 text-xs font-body mt-1">
-              Start a new chat to begin
+          <div className="flex flex-col items-center justify-center h-full text-center py-10 opacity-60">
+            <ScrollText className="h-7 w-7 text-wisdom-600 mb-2" />
+            <p className="text-wisdom-500 text-xs font-semibold uppercase tracking-wider">
+              No history
             </p>
           </div>
         ) : (
-          conversations.map((c, i) => {
+          conversations.map((c) => {
             const isActive = activeId === c.id
-            const delayClass =
-              i < 6
-                ? (`delay-${(i + 1) * 100}` as string)
-                : 'delay-600'
 
             return (
               <button
                 key={c.id}
                 onClick={() => handleSelect(c.id)}
                 className={clsx(
-                  'w-full text-left px-3 py-2.5 rounded-lg text-sm mb-1 transition-all duration-200 truncate',
-                  'flex items-center gap-2.5 group animate-fade-in',
-                  delayClass,
+                  'w-full text-left px-3 py-2.5 rounded-xl text-xs font-semibold leading-relaxed transition-all duration-200 truncate border relative',
                   isActive
-                    ? 'bg-saffron-700/20 text-saffron-300 border-l-2 border-saffron-500'
-                    : 'text-wisdom-400 hover:bg-wisdom-800/60 hover:text-wisdom-200 border-l-2 border-transparent'
+                    ? 'bg-saffron-500/10 border-saffron-500/20 text-saffron-300 font-bold'
+                    : 'border-transparent text-wisdom-400 hover:bg-wisdom-800/40 hover:text-wisdom-200'
                 )}
               >
-                <MessageSquare
-                  className={clsx(
-                    'h-4 w-4 shrink-0 transition-colors duration-200',
-                    isActive
-                      ? 'text-saffron-400'
-                      : 'text-wisdom-600 group-hover:text-wisdom-400'
-                  )}
-                />
-                <span className="truncate">
-                  {c.title || 'Untitled'}
-                </span>
+                {isActive && (
+                  <div className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-4 bg-saffron-500 rounded-r-md" />
+                )}
+                <div className="flex items-center gap-2">
+                  <MessageSquare
+                    className={clsx(
+                      'h-3.5 w-3.5 shrink-0 transition-colors duration-200',
+                      isActive ? 'text-saffron-400' : 'text-wisdom-600'
+                    )}
+                  />
+                  <span className="truncate flex-1">
+                    {c.title || 'Untitled'}
+                  </span>
+                </div>
               </button>
             )
           })
         )}
-      </div>
-
-      {/* ── Bottom pinned section ── */}
-      <div className="mt-auto">
-        <div className="mx-4 border-t border-wisdom-700/30" />
-        <div className="px-5 py-3">
-          <p className="text-wisdom-600 text-[10px] font-body tracking-wider uppercase text-center select-none">
-            Chanakya Neeti Advisor
-          </p>
-        </div>
       </div>
     </aside>
   )

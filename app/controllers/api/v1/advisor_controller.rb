@@ -21,12 +21,14 @@ module Api
         }
 
         mode = params[:mode]&.to_sym == :cag ? :cag : :retrieval
+        advisor = params[:advisor]&.to_sym || :chanakya
         result = agent.advise(
           params.require(:query),
           user:         current_user,
           conversation: conversation,
           stream_proc:  stream_proc,
-          mode:         mode
+          mode:         mode,
+          advisor:      advisor
         )
 
         conversation.messages.create!(role: 'user',    content: params[:query])
@@ -39,9 +41,23 @@ module Api
 
         current_user.increment!(:daily_query_count)
 
-        cited = Sutra.where(id: result[:cited_sutra_ids])
-                     .pluck(:canonical_id, :translation_en)
-                     .map { |id, txt| { id: id, preview: txt.truncate(80) } }
+        cited = Sutra.where(id: result[:cited_sutra_ids]).map do |s|
+          {
+            id: s.canonical_id,
+            preview: s.translation_en&.truncate(80),
+            sanskrit: s.sanskrit,
+            transliteration: s.transliteration,
+            translation_en: s.translation_en,
+            translation_hi: s.translation_hi,
+            chapter: s.chapter,
+            chapter_title: s.chapter_title,
+            themes: s.themes || [],
+            virtues: s.virtues || [],
+            vices: s.vices || [],
+            situations: s.situations || [],
+            emotions: s.emotions || []
+          }
+        end
 
         sse.write({
           type:             'complete',
@@ -66,7 +82,10 @@ module Api
         if params[:conversation_id]
           current_user.conversations.find(params[:conversation_id])
         else
-          current_user.conversations.create!(title: params[:query].truncate(60))
+          current_user.conversations.create!(
+            title: params[:query].truncate(60),
+            advisor: params[:advisor] || 'chanakya'
+          )
         end
       end
 

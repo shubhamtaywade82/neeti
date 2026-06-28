@@ -1,51 +1,72 @@
-import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { Menu, Settings, LogOut, Sparkles } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
+import { Plus, MessageSquare, Menu, BookOpen } from 'lucide-react'
 import { ChatWindow } from '../components/ChatWindow'
 import { ConversationSidebar } from '../components/ConversationSidebar'
-import { DailySutraWidget } from '../components/DailySutraWidget'
-import { SubscriptionModal } from '../components/SubscriptionModal'
-import { useAuthStore } from '../stores/authStore'
+import { SutraDetailDrawer } from '../components/SutraDetailDrawer'
+import type { CitedSutra } from '../components/SourceCitation'
+import { apiClient } from '../api/client'
 
 export function ChatPage() {
   const [activeConvoId, setActiveConvoId] = useState<number | undefined>()
-  const [showUpgrade, setShowUpgrade]     = useState(false)
-  const [prefillQuery, setPrefillQuery]   = useState<string>('')
-  const [cagMode, setCagMode]             = useState(false)
-  const [sidebarOpen, setSidebarOpen]     = useState(false)
+  const [prefillQuery, setPrefillQuery] = useState<string>('')
+  const [cagMode, setCagMode] = useState(false)
+  const [convoSidebarOpen, setConvoSidebarOpen] = useState(false)
+  const [selectedSutra, setSelectedSutra] = useState<CitedSutra | null>(null)
+  const [advisor, setAdvisor] = useState<string>('chanakya')
 
-  const logout  = useAuthStore((s) => s.logout)
-  const user    = useAuthStore((s) => s.user)
+  const location = useLocation()
   const navigate = useNavigate()
 
-  const handleLogout = () => {
-    logout()
-    navigate('/login')
-  }
+  // Read prefilled query and convoId from location search params
+  useEffect(() => {
+    const params = new URLSearchParams(location.search)
+    const query = params.get('query')
+    if (query) {
+      setPrefillQuery(query)
+      // Clean up search params after consuming
+      navigate(location.pathname, { replace: true })
+    }
 
-  const avatarLetter = user?.email?.charAt(0).toUpperCase() ?? '?'
-  const isFree = user?.plan === 'free'
-  const planLabel = user?.plan
-    ? user.plan.charAt(0).toUpperCase() + user.plan.slice(1)
-    : 'Free'
+    const convoId = params.get('convoId')
+    if (convoId) {
+      setActiveConvoId(Number(convoId))
+      navigate(location.pathname, { replace: true })
+    }
+  }, [location, navigate])
+
+  // Fetch conversation advisor persona
+  useEffect(() => {
+    if (!activeConvoId) {
+      setAdvisor('chanakya')
+      return
+    }
+    apiClient.get<{ id: number; advisor?: string }>(`/conversations/${activeConvoId}`)
+      .then((r: any) => {
+        if (r.data?.advisor) {
+          setAdvisor(r.data.advisor)
+        }
+      })
+      .catch(() => {})
+  }, [activeConvoId])
 
   return (
-    <div className="flex h-screen bg-wisdom-950 font-body">
-      {/* ── Mobile backdrop overlay ─────────────────────────────── */}
-      {sidebarOpen && (
+    <div className="flex h-[calc(100vh-3.5rem)] overflow-hidden bg-wisdom-950 font-body relative z-20">
+      {/* ── Mobile Backdrop for Conversation Sidebar ── */}
+      {convoSidebarOpen && (
         <div
-          className="fixed inset-0 bg-black/50 z-40 md:hidden animate-fade-in"
-          onClick={() => setSidebarOpen(false)}
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-30 md:hidden animate-fade-in"
+          onClick={() => setConvoSidebarOpen(false)}
         />
       )}
 
-      {/* ── Sidebar ─────────────────────────────────────────────── */}
+      {/* ── Left Side: Conversation Sidebar ── */}
       <div
         className={`
-          fixed inset-y-0 left-0 z-50 w-72
-          transform transition-transform duration-300 ease-in-out
-          md:relative md:translate-x-0 md:z-auto
-          ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
+          fixed inset-y-14 left-0 z-40 w-64 border-r border-wisdom-700/40 bg-wisdom-900/90
+          transform transition-transform duration-300 ease-in-out shrink-0
+          md:relative md:inset-auto md:translate-x-0 md:z-auto md:bg-transparent
+          ${convoSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
         `}
       >
         <ConversationSidebar
@@ -53,107 +74,82 @@ export function ChatPage() {
           refreshTrigger={activeConvoId}
           onSelect={(id) => {
             setActiveConvoId(id)
-            setSidebarOpen(false)
+            setConvoSidebarOpen(false)
           }}
           onNewChat={() => {
             setActiveConvoId(undefined)
-            setSidebarOpen(false)
+            setConvoSidebarOpen(false)
           }}
-          onClose={() => setSidebarOpen(false)}
+          onClose={() => setConvoSidebarOpen(false)}
         />
       </div>
 
-      {/* ── Main content area ───────────────────────────────────── */}
-      <div className="flex-1 flex flex-col overflow-hidden">
-        {/* ── Top bar ───────────────────────────────────────────── */}
-        <header className="glass border-b border-wisdom-800/60 px-3 py-2 sm:px-5 sm:py-2.5 flex items-center justify-between gap-3 animate-fade-in">
-          {/* Left: hamburger + avatar + email */}
-          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
-            {/* Mobile hamburger */}
+      {/* ── Center / Right Side: Chat Window ── */}
+      <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
+        {/* Chat header area */}
+        <div className="h-13 bg-wisdom-900/40 border-b border-wisdom-700/40 flex items-center justify-between px-4 sm:px-6 shrink-0 z-20 select-none">
+          <div className="flex items-center gap-3 min-w-0">
+            {/* Mobile convo menu button */}
             <button
-              onClick={() => setSidebarOpen(true)}
+              onClick={() => setConvoSidebarOpen(true)}
               className="md:hidden p-1.5 rounded-lg text-wisdom-400 hover:text-saffron-400 hover:bg-wisdom-800/60 transition-colors"
-              aria-label="Open sidebar"
             >
-              <Menu className="w-5 h-5" />
+              <Menu className="w-4.5 h-4.5" />
             </button>
-
-            {/* Avatar circle */}
-            <div className="flex-shrink-0 w-8 h-8 rounded-full bg-saffron-600 flex items-center justify-center shadow-glow">
-              <span className="text-sm font-semibold text-wisdom-950 font-display leading-none">
-                {avatarLetter}
-              </span>
-            </div>
-
-            {/* Email */}
-            <span className="text-wisdom-400 text-xs sm:text-sm truncate max-w-[160px] sm:max-w-xs">
-              {user?.email}
-            </span>
+            <h3 className="text-xs font-semibold text-wisdom-200 truncate">
+              {activeConvoId ? 'Active Strategist Session' : 'New Strategic Query'}
+            </h3>
           </div>
 
-          {/* Right: plan badge, settings, upgrade, logout */}
-          <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
-            {/* Plan badge */}
-            <span
-              className={`hidden sm:inline-flex text-[11px] font-medium px-2.5 py-0.5 rounded-full tracking-wide ${
-                isFree
-                  ? 'bg-wisdom-800 text-wisdom-400 border border-wisdom-700'
-                  : 'badge-saffron'
-              }`}
-            >
-              {planLabel}
-            </span>
-
-            {/* Settings */}
-            <button
-              onClick={() => navigate('/settings')}
-              className="p-1.5 rounded-lg text-wisdom-500 hover:text-saffron-400 hover:bg-wisdom-800/60 transition-colors"
-              aria-label="Settings"
-            >
-              <Settings className="w-4 h-4" />
-            </button>
-
-            {/* Upgrade (free users only) */}
-            {isFree && (
-              <button
-                onClick={() => setShowUpgrade(true)}
-                className="btn-primary !py-1.5 !px-3 !text-xs !rounded-lg inline-flex items-center gap-1.5 group"
+          <div className="flex items-center gap-2 shrink-0">
+            {/* Advisor badge selector */}
+            {!activeConvoId ? (
+              <select
+                value={advisor}
+                onChange={(e) => setAdvisor(e.target.value)}
+                className="bg-wisdom-900 border border-wisdom-700/40 text-saffron-400 text-[10px] uppercase font-bold rounded-lg px-2 py-1 focus:outline-none focus:ring-1 focus:ring-saffron-500 cursor-pointer"
               >
-                <Sparkles className="w-3.5 h-3.5 group-hover:animate-pulse-glow transition-transform" />
-                <span className="hidden sm:inline">Upgrade</span>
-              </button>
+                <option value="chanakya">Chanakya Neeti</option>
+                <option value="gita">Bhagavad Gita</option>
+                <option value="stoic">Stoicism</option>
+                <option value="sun_tzu">Art of War</option>
+              </select>
+            ) : (
+              <span className="inline-flex text-[9px] font-bold px-2 py-0.5 rounded bg-saffron-500/10 border border-saffron-500/25 text-saffron-400 uppercase tracking-widest">
+                {advisor === 'chanakya' ? 'Chanakya' : advisor === 'gita' ? 'Gita' : advisor === 'stoic' ? 'Stoic' : 'Art of War'}
+              </span>
             )}
 
-            {/* Logout */}
+            {/* New Chat Button */}
             <button
-              onClick={handleLogout}
-              className="btn-ghost !py-1.5 !px-2.5 !text-xs !rounded-lg inline-flex items-center gap-1.5 text-wisdom-500 hover:text-red-400"
-              aria-label="Logout"
+              onClick={() => setActiveConvoId(undefined)}
+              className="flex items-center gap-1.5 px-3 py-1 bg-saffron-500/10 border border-saffron-500/20 hover:border-saffron-500/35 text-saffron-400 text-[10px] font-bold uppercase tracking-wider rounded-lg transition-colors"
             >
-              <LogOut className="w-4 h-4" />
-              <span className="hidden sm:inline">Logout</span>
+              <Plus className="w-3.5 h-3.5" />
+              New Chat
             </button>
           </div>
-        </header>
+        </div>
 
-        {/* ── Daily Sutra ───────────────────────────────────────── */}
-        <DailySutraWidget onAsk={(q) => setPrefillQuery(q)} />
-
-        {/* ── Chat Window ───────────────────────────────────────── */}
-        <ChatWindow
-          conversationId={activeConvoId}
-          onConversationCreated={(id) => setActiveConvoId(id)}
-          prefillQuery={prefillQuery}
-          onPrefillConsumed={() => setPrefillQuery('')}
-          cagMode={cagMode}
-          onToggleCag={() => setCagMode((v) => !v)}
-        />
+        {/* Dynamic Chat Window */}
+        <div className="flex-1 min-w-0 min-h-0 relative">
+          <ChatWindow
+            conversationId={activeConvoId}
+            onConversationCreated={(id) => setActiveConvoId(id)}
+            prefillQuery={prefillQuery}
+            onPrefillConsumed={() => setPrefillQuery('')}
+            cagMode={cagMode}
+            onToggleCag={() => setCagMode((v) => !v)}
+            onSelectSutra={setSelectedSutra}
+            advisor={advisor}
+          />
+        </div>
       </div>
 
-      {/* ── Subscription modal ──────────────────────────────────── */}
-      <SubscriptionModal
-        open={showUpgrade}
-        onClose={() => setShowUpgrade(false)}
+      {/* ── Sutra details drawer ── */}
+      <SutraDetailDrawer
+        sutra={selectedSutra}
+        onClose={() => setSelectedSutra(null)}
       />
     </div>
   )

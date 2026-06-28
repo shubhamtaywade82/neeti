@@ -13,16 +13,20 @@ module Neeti
     # @param stream_proc  [Proc, nil] receives token strings for SSE
     # @param mode         [Symbol] :retrieval (default) or :cag (full corpus)
     # @return [Hash] { advice:, cited_sutra_ids:, reflection_score: }
-    def advise(query, user:, conversation:, stream_proc: nil, mode: :retrieval)
-      sutras, context_text = if mode == :cag
-        [CorpusCache.all_sutras, CorpusCache.corpus_text]
+    def advise(query, user:, conversation:, stream_proc: nil, mode: :retrieval, advisor: :chanakya)
+      sutras, context_text = if advisor.to_sym == :chanakya
+        if mode == :cag
+          [CorpusCache.all_sutras, CorpusCache.corpus_text]
+        else
+          retrieved = @retriever.retrieve(query)
+          [retrieved, nil]
+        end
       else
-        retrieved = @retriever.retrieve(query)
-        [retrieved, nil]
+        [[], nil]
       end
 
       insights = MemoryStore.retrieve_insights(user)
-      messages = build_messages(query, sutras, insights, conversation, corpus_text: context_text)
+      messages = build_messages(query, sutras, insights, conversation, corpus_text: context_text, advisor: advisor)
 
       draft = @provider.chat(messages: messages, stream: stream_proc || false)
 
@@ -36,7 +40,7 @@ module Neeti
 
     private
 
-    def build_messages(query, sutras, insights, conversation, corpus_text: nil)
+    def build_messages(query, sutras, insights, conversation, corpus_text: nil, advisor: :chanakya)
       history = conversation.messages.order(:created_at).last(6).map do |m|
         { role: m.role, content: m.content }
       end
@@ -49,7 +53,7 @@ module Neeti
       end
 
       [
-        { role: "system", content: Prompts::CHANAKYA_SYSTEM },
+        { role: "system", content: Prompts.system_prompt_for(advisor) },
         *history,
         { role: "user",   content: user_content }
       ]

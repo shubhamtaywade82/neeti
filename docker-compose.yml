@@ -1,6 +1,6 @@
 services:
   db:
-    image: postgres:16-alpine
+    image: postgres:17-alpine
     environment:
       POSTGRES_USER: neeti
       POSTGRES_PASSWORD: neeti_dev
@@ -8,7 +8,7 @@ services:
     volumes:
       - pg_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U neeti"]
+      test: ["CMD-SHELL", "pg_isready -U neeti -d neeti_development"]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -17,7 +17,7 @@ services:
     build: .
     command: bundle exec rails server -b 0.0.0.0 -p 3000
     environment:
-      DATABASE_URL: postgresql://neeti:***@db:5432/neeti_development
+      DATABASE_URL: postgresql://neeti:neeti_dev@db:5432/neeti_development
       OLLAMA_URL: http://host.docker.internal:11434
       OLLAMA_MODEL: llama3.1:8b
       RAILS_ENV: development
@@ -44,9 +44,9 @@ services:
 
   worker:
     build: .
-    command: bundle exec rails solid_queue:work
+    command: bundle exec rails solid_queue:start
     environment:
-      DATABASE_URL: postgresql://neeti:***@db:5432/neeti_development
+      DATABASE_URL: postgresql://neeti:neeti_dev@db:5432/neeti_development
       RAILS_ENV: development
     volumes:
       - .:/rails

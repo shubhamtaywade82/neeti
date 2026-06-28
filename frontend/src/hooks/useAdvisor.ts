@@ -20,7 +20,7 @@ export function useAdvisor() {
   const controllerRef                   = useRef<AbortController | null>(null)
   const token                           = useAuthStore((s) => s.token)
 
-  const ask = useCallback(async (query: string, conversationId?: number, mode?: string): Promise<string> => {
+  const ask = useCallback(async (query: string, conversationId?: number, mode?: string, advisor?: string): Promise<string> => {
     setStreamedText('')
     setResult(null)
     setError(null)
@@ -37,7 +37,12 @@ export function useAdvisor() {
           'Authorization': `Bearer ${token}`,
           'Accept':        'text/event-stream'
         },
-        body:   JSON.stringify({ query, ...(conversationId && { conversation_id: conversationId }), ...(mode && { mode }) }),
+        body:   JSON.stringify({ 
+          query, 
+          ...(conversationId && { conversation_id: conversationId }), 
+          ...(mode && { mode }),
+          ...(advisor && { advisor })
+        }),
         signal: controllerRef.current.signal
       })
 

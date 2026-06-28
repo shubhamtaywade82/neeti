@@ -1,8 +1,14 @@
 import type { ReactNode } from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { useAuthStore } from './stores/authStore'
-import { ChatPage }     from './pages/ChatPage'
-import { LoginPage }    from './pages/LoginPage'
+import { AppShell } from './components/AppShell'
+import { DashboardPage } from './pages/DashboardPage'
+import { ChatPage } from './pages/ChatPage'
+import { PacksPage } from './pages/PacksPage'
+import { GraphPage } from './pages/GraphPage'
+import { SutrasPage } from './pages/SutrasPage'
+import { MemoryPage } from './pages/MemoryPage'
+import { LoginPage } from './pages/LoginPage'
 import { RegisterPage } from './pages/RegisterPage'
 import { SettingsPage } from './pages/SettingsPage'
 
@@ -15,10 +21,30 @@ export default function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/login"    element={<LoginPage />} />
+        {/* Public Routes */}
+        <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
-        <Route path="/settings" element={<RequireAuth><SettingsPage /></RequireAuth>} />
-        <Route path="/"         element={<RequireAuth><ChatPage /></RequireAuth>} />
+
+        {/* Authenticated Workspace wrapped in AppShell */}
+        <Route
+          path="/"
+          element={
+            <RequireAuth>
+              <AppShell />
+            </RequireAuth>
+          }
+        >
+          <Route index element={<DashboardPage />} />
+          <Route path="chat" element={<ChatPage />} />
+          <Route path="packs" element={<PacksPage />} />
+          <Route path="graph" element={<GraphPage />} />
+          <Route path="sutras" element={<SutrasPage />} />
+          <Route path="memory" element={<MemoryPage />} />
+          <Route path="settings" element={<SettingsPage />} />
+        </Route>
+
+        {/* Fallback */}
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>
   )
