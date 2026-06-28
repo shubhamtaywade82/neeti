@@ -8,7 +8,22 @@ export default defineConfig({
     proxy: {
       '/api': {
         target: process.env.VITE_BACKEND_URL || 'http://localhost:3000',
-        changeOrigin: true
+        changeOrigin: true,
+        configure: (proxy, _options) => {
+          proxy.on('proxyReq', (proxyReq, req, _res) => {
+            // Preserve streaming headers for SSE
+            if (req.headers.accept?.includes('text/event-stream')) {
+              proxyReq.setHeader('Accept', 'text/event-stream')
+              proxyReq.setHeader('Cache-Control', 'no-cache')
+            }
+          })
+          proxy.on('proxyRes', (proxyRes, req, _res) => {
+            // Disable buffering for SSE
+            if (req.headers.accept?.includes('text/event-stream')) {
+              proxyRes.headers['x-accel-buffering'] = 'no'
+            }
+          })
+        }
       }
     }
   },
