@@ -58,7 +58,7 @@ export function SettingsPage() {
 
   // LLM routers state
   const [models, setModels] = useState<LLMModel[]>([
-    { id: 'm1', name: 'ollama / llama3.1', provider: 'local', latency: '142ms', status: 'active' },
+    { id: 'm1', name: 'ollama / qwen3.5:4b', provider: 'local', latency: '142ms', status: 'active' },
     { id: 'm2', name: 'OpenAI / gpt-4o', provider: 'cloud', latency: '310ms', status: 'standby' },
     { id: 'm3', name: 'Anthropic / claude-3', provider: 'cloud', latency: '890ms', status: 'standby' },
     { id: 'm4', name: 'Gemini / pro-1.5', provider: 'cloud', latency: '420ms', status: 'off' },

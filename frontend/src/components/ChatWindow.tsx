@@ -266,7 +266,7 @@ export function ChatWindow({ conversationId, onConversationCreated, prefillQuery
               : undefined,
             latency: '1,240ms',
             tokens: 342,
-            model: 'mixtral-8x7b (Ollama)'
+            model: 'qwen3.5:4b (Ollama)'
           }))
         )
       })
@@ -304,7 +304,7 @@ export function ChatWindow({ conversationId, onConversationCreated, prefillQuery
               : undefined,
             latency: '1,842ms',
             tokens: 298,
-            model: 'mixtral-8x7b (Ollama)'
+            model: 'qwen3.5:4b (Ollama)'
           }
         }
         return updated

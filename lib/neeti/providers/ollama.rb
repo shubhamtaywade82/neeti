@@ -5,7 +5,7 @@ require 'ollama/client'
 module Neeti
   module Providers
     class Ollama < Base
-      DEFAULT_MODEL = "llama3.1:8b"
+      DEFAULT_MODEL = "qwen3.5:4b"
 
       def initialize(model: nil)
         @model = model || ENV.fetch('OLLAMA_MODEL', DEFAULT_MODEL)

@@ -19,7 +19,7 @@ services:
     environment:
       DATABASE_URL: postgresql://neeti:neeti_dev@db:5432/neeti_development
       OLLAMA_URL: http://host.docker.internal:11434
-      OLLAMA_MODEL: llama3.1:8b
+      OLLAMA_MODEL: qwen3.5:4b
       RAILS_ENV: development
       JWT_SECRET_KEY: dev_jwt_secret_change_in_production
     volumes:
@@ -37,6 +37,8 @@ services:
     image: node:20-alpine
     working_dir: /app
     command: sh -c "npm ci && npm run dev -- --host 0.0.0.0 --port 5173"
+    environment:
+      - VITE_BACKEND_URL=http://app:3000
     volumes:
       - ./frontend:/app
     ports:
