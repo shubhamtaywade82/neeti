@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { useAdvisor } from '../hooks/useAdvisor'
+import { useAdvisorStore } from '../stores/advisorStore'
 import { useFeatureFlagsStore } from '../stores/featureFlagsStore'
 import { apiClient } from '../api/client'
 import { MessageBubble } from './MessageBubble'
@@ -38,16 +38,16 @@ interface Props {
 }
 
 const ADVISOR_DETAILS: Record<string, {
-  name: string
-  tagline: string
-  avatarText: string
+  name: string;
+  tagline: string;
+  avatarText: string;
   suggestions: {
-    category: string
-    icon: any
-    color: string
-    borderColor: string
-    queries: string[]
-  }[]
+    category: string;
+    icon: any;
+    color: string;
+    borderColor: string;
+    queries: string[];
+  }[];
 }> = {
   chanakya: {
     name: 'Chanakya Neeti',
@@ -241,7 +241,7 @@ const ADVISOR_DETAILS: Record<string, {
 
 export function ChatWindow({ conversationId, onConversationCreated, prefillQuery, onPrefillConsumed, cagMode = false, onToggleCag = () => {}, onSelectSutra, advisor = 'chanakya' }: Props) {
   const [messages, setMessages]       = useState<Message[]>([])
-  const { streamedText, isStreaming, result, error, ask, cancel } = useAdvisor()
+  const { streamedText, isStreaming, result, error, ask, cancel, activeQuery } = useAdvisorStore()
   const { flags } = useFeatureFlagsStore()
   const bottomRef                     = useRef<HTMLDivElement>(null)
 
@@ -272,6 +272,29 @@ export function ChatWindow({ conversationId, onConversationCreated, prefillQuery
       })
       .catch(() => {})
   }, [conversationId, flags.chatReasoning])
+
+  // Re-fetch messages when streaming completes
+  useEffect(() => {
+    if (!isStreaming && conversationId) {
+      apiClient.get<ApiMessage[]>(`/conversations/${conversationId}/messages`)
+        .then((r) => {
+          setMessages(
+            r.data.map((m) => ({
+              role: m.role,
+              content: m.content,
+              cited_sutras: m.cited_sutras,
+              reasoning: flags.chatReasoning
+                ? ['Intent Analysis: user query parsing', 'Selected persona matching', 'Grounded reasoning filters applied']
+                : undefined,
+              latency: '1,240ms',
+              tokens: 342,
+              model: 'qwen3.5:4b (Ollama)'
+            }))
+          )
+        })
+        .catch(() => {})
+    }
+  }, [isStreaming, conversationId, flags.chatReasoning])
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -326,16 +349,26 @@ export function ChatWindow({ conversationId, onConversationCreated, prefillQuery
       { role: 'user',      content: query },
       { role: 'assistant', content: '', isStreaming: true }
     ])
-    const finalText = await ask(query, conversationId, cagMode ? 'cag' : 'retrieval', advisor)
-    setMessages((prev) => {
-      const updated = [...prev]
-      updated[updated.length - 1] = {
-        role:        'assistant',
-        content:     finalText,
-        isStreaming: false
-      }
-      return updated
-    })
+    await ask(query, conversationId, cagMode ? 'cag' : 'retrieval', advisor)
+  }
+
+  // Compute display messages list (merging history with active background stream)
+  const displayMessages = [...messages]
+  if (isStreaming && activeQuery) {
+    const lastMsg = messages[messages.length - 1]
+    const hasUserMsg = lastMsg && lastMsg.role === 'user' && lastMsg.content === activeQuery
+    const hasAssistantMsg = lastMsg && lastMsg.role === 'assistant' && lastMsg.isStreaming
+    
+    if (!hasUserMsg && !hasAssistantMsg) {
+      displayMessages.push(
+        { role: 'user', content: activeQuery },
+        { role: 'assistant', content: streamedText, isStreaming: true }
+      )
+    } else if (hasUserMsg && !hasAssistantMsg) {
+      displayMessages.push(
+        { role: 'assistant', content: streamedText, isStreaming: true }
+      )
+    }
   }
 
   return (
@@ -392,7 +425,7 @@ export function ChatWindow({ conversationId, onConversationCreated, prefillQuery
         )}
 
         <div className="max-w-3xl mx-auto space-y-6">
-          {messages.map((msg, i) => (
+          {displayMessages.map((msg, i) => (
             <div key={i} className="flex flex-col">
               <MessageBubble
                 role={msg.role}

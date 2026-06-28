@@ -22,9 +22,14 @@ module Api
         advisor_name ||= 'chanakya'
 
         conversation = load_or_create_conversation(advisor_name)
+        # 1. Save user message immediately so it's not lost
+        user_msg = conversation.messages.create!(role: 'user', content: params[:query])
+
         agent        = Neeti::Agent.new
+        accumulated_advice = +""
 
         stream_proc = ->(token) {
+          accumulated_advice << token
           sse.write({ type: 'token', content: token }.to_json)
         }
 
@@ -39,7 +44,7 @@ module Api
           advisor:      advisor
         )
 
-        conversation.messages.create!(role: 'user',    content: params[:query])
+        # 2. Save full assistant message on successful completion
         conversation.messages.create!(
           role:            'assistant',
           content:         result[:advice],
@@ -76,7 +81,14 @@ module Api
         }.to_json)
 
       rescue ActionController::Live::ClientDisconnected
-        # normal: client disconnected mid-stream
+        # 3. Client disconnected mid-stream (e.g. navigated away). Save what was generated.
+        if accumulated_advice.strip.present?
+          conversation.messages.create!(
+            role:        'assistant',
+            content:     accumulated_advice,
+            tokens_used: accumulated_advice.split.length
+          )
+        end
       rescue => e
         sse.write({ type: 'error', message: 'Advisor temporarily unavailable.' }.to_json)
         Rails.logger.error("Advisor error: #{e.class}: #{e.message}")
