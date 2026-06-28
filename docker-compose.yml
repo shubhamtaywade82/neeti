@@ -12,6 +12,10 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+    deploy:
+      resources:
+        limits:
+          memory: 512M
 
   app:
     build: .
@@ -33,6 +37,10 @@ services:
         condition: service_healthy
     extra_hosts:
       - "host.docker.internal:host-gateway"
+    deploy:
+      resources:
+        limits:
+          memory: 2G
     develop:
       watch:
         - action: sync
@@ -53,6 +61,10 @@ services:
       - ./frontend:/app
     ports:
       - "5174:5173"
+    deploy:
+      resources:
+        limits:
+          memory: 1G
     develop:
       watch:
         - action: sync
@@ -73,6 +85,10 @@ services:
     depends_on:
       db:
         condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          memory: 1G
 
 volumes:
   pg_data:
