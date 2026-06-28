@@ -12,6 +12,8 @@ import { LoginPage } from './pages/LoginPage'
 import { RegisterPage } from './pages/RegisterPage'
 import { SettingsPage } from './pages/SettingsPage'
 
+import { AdminPage } from './pages/AdminPage'
+
 function RequireAuth({ children }: { children: ReactNode }) {
   const token = useAuthStore((s) => s.token)
   return token ? <>{children}</> : <Navigate to="/login" replace />
@@ -41,6 +43,7 @@ export default function App() {
           <Route path="sutras" element={<SutrasPage />} />
           <Route path="memory" element={<MemoryPage />} />
           <Route path="settings" element={<SettingsPage />} />
+          <Route path="admin" element={<AdminPage />} />
         </Route>
 
         {/* Fallback */}

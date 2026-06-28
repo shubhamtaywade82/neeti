@@ -5,6 +5,7 @@ interface User {
   id: number
   email: string
   plan: string
+  role: string
   daily_query_count: number
 }
 

@@ -37,6 +37,7 @@ module Api
           id:                u.id,
           email:             u.email,
           plan:              u.plan,
+          role:              u.role,
           daily_query_count: u.daily_query_count,
           daily_reset_at:    u.daily_reset_at
         }

@@ -23,7 +23,7 @@ export function RegisterPage() {
     }
     setIsLoading(true)
     try {
-      const { data } = await apiClient.post<{ token: string; user: { id: number; email: string; plan: string; daily_query_count: number } }>('/auth/register', {
+      const { data } = await apiClient.post<{ token: string; user: any }>('/auth/register', {
         email, password, password_confirmation: confirm
       })
       setAuth(data.token, data.user)

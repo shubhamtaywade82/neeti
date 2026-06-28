@@ -17,7 +17,7 @@ export function LoginPage() {
     setError('')
     setIsLoading(true)
     try {
-      const { data } = await apiClient.post<{ token: string; user: { id: number; email: string; plan: string; daily_query_count: number } }>('/auth/login', { email, password })
+      const { data } = await apiClient.post<{ token: string; user: any }>('/auth/login', { email, password })
       setAuth(data.token, data.user)
       navigate('/')
     } catch {

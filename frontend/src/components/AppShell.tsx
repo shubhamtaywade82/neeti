@@ -18,7 +18,8 @@ import {
   Compass,
   X,
   Search,
-  Check
+  Check,
+  Shield
 } from 'lucide-react'
 
 // Mock description for the active packs orb
@@ -89,6 +90,10 @@ export function AppShell() {
     { id: 'sutras', path: '/sutras', label: 'Sutra Browser', icon: BookOpen, enabled: flags.sutraBrowserView },
     { id: 'memory', path: '/memory', label: 'Memory & Insights', icon: Brain, enabled: flags.memoryInsightsView },
   ]
+
+  if (user?.role === 'admin') {
+    navItems.push({ id: 'admin', path: '/admin', label: 'System Console', icon: Shield, enabled: true })
+  }
 
   const visibleNavs = navItems.filter((item) => item.enabled)
   const avatarLetter = user?.email?.charAt(0).toUpperCase() ?? '?'
