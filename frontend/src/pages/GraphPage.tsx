@@ -205,7 +205,8 @@ export function GraphPage() {
                   {node.title}
                 </div>
               </div>
-            ))}
+            )
+          })}
 
           {filteredNodes.length === 0 && (
             <div className="text-center py-10 text-wisdom-500 italic text-xs">

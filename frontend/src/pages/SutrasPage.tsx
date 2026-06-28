@@ -217,7 +217,8 @@ export function SutrasPage() {
                   ))}
                 </div>
               </div>
-            ))}
+            )
+          })}
 
           {filteredSutras.length === 0 && (
             <div className="glass-card border border-wisdom-700/40 rounded-xl p-12 text-center text-wisdom-500 select-none">

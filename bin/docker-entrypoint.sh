@@ -31,6 +31,7 @@ exec 9>/tmp/migrate.lock
 flock -x 9
 bundle exec rails solid_queue:install 2>/dev/null || true
 bundle exec rails db:migrate
+bundle exec rails runner "load 'db/queue_schema.rb'" 2>/dev/null || true
 
 echo "Removing stale server pid if present..."
 rm -f tmp/pids/server.pid
