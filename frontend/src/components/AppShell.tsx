@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Link, useLocation, useNavigate, Outlet } from 'react-router-dom'
+import { apiClient } from '../api/client'
 import { useAuthStore } from '../stores/authStore'
 import { useFeatureFlagsStore } from '../stores/featureFlagsStore'
 import {
@@ -42,16 +43,21 @@ export function AppShell() {
   const logout = useAuthStore((s) => s.logout)
   const { flags } = useFeatureFlagsStore()
 
-  // Load installed packs from localStorage if available
+  // Load installed packs from backend API
   useEffect(() => {
-    const stored = localStorage.getItem('neeti-installed-packs')
-    if (stored) {
-      try {
-        setInstalledPacks(JSON.parse(stored))
-      } catch (e) {}
-    } else {
-      localStorage.setItem('neeti-installed-packs', JSON.stringify(['chanakya', 'gita']))
-    }
+    apiClient.get<{ packs: any[]; installed: string[] }>('/packs')
+      .then((r) => {
+        setInstalledPacks(r.data.installed || [])
+        localStorage.setItem('neeti-installed-packs', JSON.stringify(r.data.installed || []))
+      })
+      .catch(() => {
+        const stored = localStorage.getItem('neeti-installed-packs')
+        if (stored) {
+          try {
+            setInstalledPacks(JSON.parse(stored))
+          } catch (e) {}
+        }
+      })
   }, [location])
 
   // Sync state if packs view is updated

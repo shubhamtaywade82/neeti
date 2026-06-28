@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { apiClient } from '../api/client'
 import {
   Brain,
   Target,
@@ -7,13 +8,12 @@ import {
   AlertTriangle,
   User,
   Shield,
-  Trash2,
-  Lock
+  Trash2
 } from 'lucide-react'
 
 interface Insight {
   id: number
-  type: 'goal' | 'preference' | 'pattern' | 'challenge' | 'value'
+  type: string
   icon: string
   label: string
   source: string
@@ -22,14 +22,7 @@ interface Insight {
   date: string
 }
 
-const INITIAL_INSIGHTS: Insight[] = [
-  { id: 1, type: 'goal', icon: '🎯', label: 'Recurring interest in leadership under uncertainty', source: 'Derived from 8 conversations', confidence: 0.91, explicit: false, date: 'Jun 24, 2026' },
-  { id: 2, type: 'preference', icon: '⚖️', label: 'Prefers principle-based advice over tactical shortcuts', source: 'Explicit · stated 3 sessions ago', confidence: 1.00, explicit: true, date: 'Jun 25, 2026' },
-  { id: 3, type: 'pattern', icon: '🔍', label: 'Building a decision framework for strategic risk', source: 'Inferred from recent queries', confidence: 0.74, explicit: false, date: 'Jun 27, 2026' },
-  { id: 4, type: 'goal', icon: '🏗️', label: 'Actively building a knowledge system for decision-making', source: 'Explicit · current session', confidence: 1.00, explicit: true, date: 'Jun 28, 2026' }
-]
-
-const TYPE_CONFIG = {
+const TYPE_CONFIG: Record<string, { color: string; label: string; icon: any }> = {
   goal: { color: 'text-emerald-400 border-l-emerald-500 bg-emerald-500/10', label: 'Goals', icon: Target },
   preference: { color: 'text-rose-400 border-l-rose-500 bg-rose-500/10', label: 'Preferences', icon: Heart },
   pattern: { color: 'text-sky-400 border-l-sky-500 bg-sky-500/10', label: 'Patterns', icon: LineChart },
@@ -38,9 +31,9 @@ const TYPE_CONFIG = {
 }
 
 export function MemoryPage() {
-  const [insights, setInsights] = useState<Insight[]>(INITIAL_INSIGHTS)
+  const [insights, setInsights] = useState<Insight[]>([])
 
-  // Sync privacy controls to localStorage
+  // Privacy controls
   const [autoExtract, setAutoExtract] = useState(
     localStorage.getItem('neeti-privacy-autoextract') !== 'false'
   )
@@ -51,18 +44,33 @@ export function MemoryPage() {
     localStorage.getItem('neeti-privacy-sharedata') === 'true'
   )
 
+  useEffect(() => {
+    apiClient.get<Insight[]>('/insights')
+      .then((r) => setInsights(r.data || []))
+      .catch(() => {})
+  }, [])
+
   const handleToggle = (key: string, val: boolean, setter: (v: boolean) => void) => {
     setter(val)
     localStorage.setItem(key, String(val))
   }
 
-  const deleteInsight = (id: number) => {
-    setInsights(insights.filter((x) => x.id !== id))
+  const deleteInsight = async (id: number) => {
+    try {
+      await apiClient.delete(`/insights/${id}`)
+      setInsights(insights.filter((x) => x.id !== id))
+    } catch (e) {}
   }
 
-  const clearMemory = () => {
+  const clearMemory = async () => {
     if (window.confirm('Are you sure you want to delete all stored profile memory? This cannot be undone.')) {
-      setInsights([])
+      try {
+        // Clear sequentially
+        for (const ins of insights) {
+          await apiClient.delete(`/insights/${ins.id}`)
+        }
+        setInsights([])
+      } catch (e) {}
     }
   }
 
@@ -123,7 +131,7 @@ export function MemoryPage() {
 
           <div className="space-y-3">
             {insights.map((ins) => {
-              const config = TYPE_CONFIG[ins.type]
+              const config = TYPE_CONFIG[ins.type] || TYPE_CONFIG.goal
               const typeColor = ins.type === 'goal' ? 'bg-emerald-500/10 text-emerald-400' :
                                 ins.type === 'preference' ? 'bg-rose-500/10 text-rose-400' :
                                 ins.type === 'pattern' ? 'bg-sky-500/10 text-sky-400' :

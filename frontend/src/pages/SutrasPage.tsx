@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useLocation } from 'react-router-dom'
+import { apiClient } from '../api/client'
 import {
   Search,
   BookOpen,
@@ -22,25 +23,17 @@ interface Sutra {
   concepts: string[]
 }
 
-const ALL_SUTRAS: Sutra[] = [
-  { id: 1, pack: 'chanakya', chapter: 1, sutra: 1, devanagari: 'सुखस्य मूलं धर्मः। धर्मस्य मूलमर्थः।', translation: 'The root of happiness is righteousness (dharma). The root of righteousness is wealth/resourcefulness.', themes: ['Leadership', 'Foundation', 'Strategy'], concepts: ['Happiness', 'Dharma', 'Wealth'] },
-  { id: 2, pack: 'chanakya', chapter: 3, sutra: 7, devanagari: 'दुर्जनः परिहर्तव्यः विद्यालंकृतोऽपि सन्।', translation: 'A wicked person should be avoided even if adorned with learning and virtue. A serpent with a jewel is still venomous.', themes: ['Ethics', 'Wisdom'], concepts: ['Discernment', 'Character'] },
-  { id: 3, pack: 'chanakya', chapter: 7, sutra: 4, devanagari: 'मन्त्रिणां परिषत्कार्यम्…', translation: 'The work of the council of ministers must be conducted in utmost secrecy. Cabinet secrecy is the key to state safety.', themes: ['Leadership', 'Strategy'], concepts: ['Counsel', 'Secrecy'] },
-  { id: 4, pack: 'chanakya', chapter: 11, sutra: 2, devanagari: 'यस्य मूलं दृढं तस्य शाखा विस्तृता भवति।', translation: 'He whose foundation is firm — his branches spread wide in all directions.', themes: ['Leadership', 'Foundation'], concepts: ['Stability', 'Growth'] },
-  { id: 5, pack: 'chanakya', chapter: 5, sutra: 11, devanagari: 'सत्यं ब्रूयात् प्रियं ब्रूयात्…', translation: 'Speak truth; speak pleasantly. Do not speak unpleasant truths, nor pleasant falsehoods.', themes: ['Ethics', 'Communication'], concepts: ['Truth', 'Diplomacy'] },
-  { id: 6, pack: 'chanakya', chapter: 2, sutra: 18, devanagari: 'अनालोच्य व्ययं कर्ता…', translation: 'One who spends without deliberation and clear objectives invites sudden ruin upon himself.', themes: ['Strategy', 'Foundation'], concepts: ['Resource Management', 'Discipline'] },
-  { id: 7, pack: 'chanakya', chapter: 8, sutra: 3, devanagari: 'विद्या मित्रं प्रवासेषु।', translation: 'Knowledge is a friend in foreign lands; a wife is a companion at home.', themes: ['Wisdom', 'Learning'], concepts: ['Knowledge', 'Self-reliance'] },
-  { id: 8, pack: 'gita', chapter: 2, sutra: 47, devanagari: 'कर्मण्येवाधिकारस्ते मा फलेषु कदाचन।', translation: 'You have a right to perform your duty, but never to the fruits thereof. Do not let the reward be your motive.', themes: ['Dharma', 'Action'], concepts: ['Detachment', 'Karma'] },
-  { id: 9, pack: 'gita', chapter: 3, sutra: 19, devanagari: 'तस्मादसक्तः सततं कार्यं कर्म समाचर।', translation: 'Therefore, without attachment, always perform your prescribed duties.', themes: ['Dharma', 'Duty'], concepts: ['Action', 'Detachment'] },
-  { id: 10, pack: 'gita', chapter: 6, sutra: 5, devanagari: 'उद्धरेदात्मनात्मानं नात्मानमवसादयेत्।', translation: 'A person must elevate themselves by their own mind, not degrade themselves. The mind is both a friend and an enemy.', themes: ['Self-mastery', 'Leadership'], concepts: ['Self-reliance', 'Upliftment'] }
-]
-
 const PACKS_DETAILS: Record<string, { emoji: string; name: string; color: string; bgColor: string; borderColor: string }> = {
   chanakya: { emoji: '🪔', name: 'Chanakya Neeti', color: '#E8A020', bgColor: 'rgba(232,160,32,0.08)', borderColor: 'rgba(232,160,32,0.35)' },
-  gita: { emoji: '🌺', name: 'Bhagavad Gita', color: '#5C8A6A', bgColor: 'rgba(92,138,106,0.08)', borderColor: 'rgba(92,138,106,0.35)' }
+  gita: { emoji: '🌺', name: 'Bhagavad Gita', color: '#5C8A6A', bgColor: 'rgba(92,138,106,0.08)', borderColor: 'rgba(92,138,106,0.35)' },
+  arthashastra: { emoji: '⚖️', name: 'Arthashastra', color: '#9B8AE0', bgColor: 'rgba(155,138,224,0.08)', borderColor: 'rgba(155,138,224,0.35)' },
+  stoic: { emoji: '🏛️', name: 'Stoic Meditations', color: '#94A3B8', bgColor: 'rgba(148,163,184,0.08)', borderColor: 'rgba(148,163,184,0.35)' },
+  sunzi: { emoji: '🎴', name: 'The Art of War', color: '#F87171', bgColor: 'rgba(248,113,113,0.08)', borderColor: 'rgba(248,113,113,0.35)' },
+  atomic: { emoji: '⚡', name: 'Atomic Habits', color: '#60A5FA', bgColor: 'rgba(96,165,250,0.08)', borderColor: 'rgba(96,165,250,0.35)' },
 }
 
 export function SutrasPage() {
+  const [sutras, setSutras] = useState<Sutra[]>([])
   const [selectedId, setSelectedId] = useState<number | null>(null)
   const [searchVal, setSearchVal] = useState('')
   const [filterPack, setFilterPack] = useState<string>('all')
@@ -49,40 +42,42 @@ export function SutrasPage() {
 
   const location = useLocation()
 
-  // Load search query from URL state if navigated from top bar or dashboard
+  // Load active packs
   useEffect(() => {
-    const params = new URLSearchParams(location.search)
-    const q = params.get('search')
-    if (q) setSearchVal(q)
-
     const stored = localStorage.getItem('neeti-installed-packs')
     if (stored) {
       try {
         setInstalledPacks(JSON.parse(stored))
       } catch (e) {}
     }
-  }, [location])
+  }, [])
 
-  // Get active themes from installed packs
-  const activeSutras = ALL_SUTRAS.filter((s) => installedPacks.includes(s.pack))
-  const allThemes = Array.from(new Set(activeSutras.flatMap((s) => s.themes)))
+  // Fetch sutras from backend API when search/filters change
+  useEffect(() => {
+    const params: Record<string, string> = {}
+    if (searchVal.trim()) params.search = searchVal.trim()
+    if (filterTheme !== 'all') params.theme = filterTheme
 
-  // Filtering logic
-  const filteredSutras = activeSutras.filter((sutra) => {
+    apiClient.get<Sutra[]>('/sutras', { params })
+      .then((r) => {
+        setSutras(r.data || [])
+      })
+      .catch(() => {})
+  }, [searchVal, filterTheme])
+
+  // Get all unique themes
+  const allThemes = Array.from(new Set(sutras.flatMap((s) => s.themes)))
+
+  // Client-side pack filter
+  const filteredSutras = sutras.filter((sutra) => {
+    // 1. Must be from installed pack
+    if (!installedPacks.includes(sutra.pack)) return false
+    // 2. Tab pack filter
     if (filterPack !== 'all' && sutra.pack !== filterPack) return false
-    if (filterTheme !== 'all' && !sutra.themes.includes(filterTheme)) return false
-
-    const query = searchVal.toLowerCase()
-    const matchesSearch =
-      !query ||
-      sutra.translation.toLowerCase().includes(query) ||
-      sutra.devanagari.toLowerCase().includes(query) ||
-      sutra.concepts.some((c) => c.toLowerCase().includes(query))
-
-    return matchesSearch
+    return true
   })
 
-  const selectedSutra = ALL_SUTRAS.find((s) => s.id === selectedId)
+  const selectedSutra = sutras.find((s) => s.id === selectedId)
   const selectedPack = selectedSutra ? PACKS_DETAILS[selectedSutra.pack] : null
 
   return (
@@ -163,7 +158,7 @@ export function SutrasPage() {
             Sutras ({filteredSutras.length})
           </div>
           {filteredSutras.map((sutra) => {
-            const packDetails = PACKS_DETAILS[sutra.pack]
+            const packDetails = PACKS_DETAILS[sutra.pack] || PACKS_DETAILS.chanakya
             const isSelected = selectedId === sutra.id
             return (
               <div

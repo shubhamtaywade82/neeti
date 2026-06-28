@@ -1,14 +1,12 @@
 import { useState, useEffect } from 'react'
 import { useOutletContext } from 'react-router-dom'
+import { apiClient } from '../api/client'
 import {
   Library,
   Search,
   Star,
   Check,
   Plus,
-  Shield,
-  HelpCircle,
-  Download,
   Trash2
 } from 'lucide-react'
 
@@ -33,163 +31,40 @@ interface Pack {
   premium: boolean
 }
 
-const ALL_PACKS: Pack[] = [
-  {
-    id: 'chanakya',
-    name: 'Chanakya Neeti',
-    emoji: '🪔',
-    author: 'Kautilya',
-    version: '2.1',
-    tier: 'Free',
-    rating: 4.9,
-    reviews: 1240,
-    nodes: 432,
-    edges: 1280,
-    themes: 28,
-    color: '#E8A020',
-    borderColor: 'rgba(232,160,32,0.35)',
-    bgColor: 'rgba(232,160,32,0.08)',
-    desc: '432 structured sutras on statecraft, ethics, leadership, and human nature — with themes, concepts, and relational edges.',
-    tags: ['Leadership', 'Ethics', 'Strategy', 'Philosophy'],
-    official: true,
-    premium: false
-  },
-  {
-    id: 'gita',
-    name: 'Bhagavad Gita',
-    emoji: '🌺',
-    author: 'Vyasa',
-    version: '1.4',
-    tier: 'Free',
-    rating: 4.8,
-    reviews: 987,
-    nodes: 700,
-    edges: 2100,
-    themes: 34,
-    color: '#5C8A6A',
-    borderColor: 'rgba(92,138,106,0.35)',
-    bgColor: 'rgba(92,138,106,0.08)',
-    desc: '700 verses from 18 chapters, mapped to dharma, karma, detachment, and cosmic order with multi-tradition commentary.',
-    tags: ['Dharma', 'Yoga', 'Metaphysics', 'Duty'],
-    official: true,
-    premium: false
-  },
-  {
-    id: 'arthashastra',
-    name: 'Arthashastra',
-    emoji: '⚖️',
-    author: 'Kautilya',
-    version: '1.0',
-    tier: 'Strategist',
-    rating: 4.6,
-    reviews: 423,
-    nodes: 6000,
-    edges: 12000,
-    themes: 62,
-    color: '#9B8AE0',
-    borderColor: 'rgba(155,138,224,0.35)',
-    bgColor: 'rgba(155,138,224,0.08)',
-    desc: "Kautilya's complete treatise on statecraft, economic policy, and military strategy — 15 books, 6,000 sutras on governance.",
-    tags: ['Statecraft', 'Economics', 'Military', 'Governance'],
-    official: true,
-    premium: true
-  },
-  {
-    id: 'stoic',
-    name: 'Stoic Meditations',
-    emoji: '🏛️',
-    author: 'Marcus Aurelius',
-    version: '1.0',
-    tier: 'Free',
-    rating: 4.9,
-    reviews: 1560,
-    nodes: 310,
-    edges: 890,
-    themes: 22,
-    color: '#94A3B8',
-    borderColor: 'rgba(148,163,184,0.35)',
-    bgColor: 'rgba(148,163,184,0.08)',
-    desc: "Marcus Aurelius's private reflections on virtue, reason, and the good life — structured as concepts and principles.",
-    tags: ['Stoicism', 'Virtue', 'Resilience', 'Philosophy'],
-    official: false,
-    premium: false
-  },
-  {
-    id: 'sunzi',
-    name: 'The Art of War',
-    emoji: '🎴',
-    author: 'Sun Tzu',
-    version: '1.1',
-    tier: 'Free',
-    rating: 4.7,
-    reviews: 1890,
-    nodes: 260,
-    edges: 720,
-    themes: 18,
-    color: '#F87171',
-    borderColor: 'rgba(248,113,113,0.35)',
-    bgColor: 'rgba(248,113,113,0.08)',
-    desc: "Sun Tzu's 13 chapters on military strategy, competitive intelligence, and the psychology of conflict.",
-    tags: ['Strategy', 'Conflict', 'Intelligence', 'Competition'],
-    official: true,
-    premium: false
-  },
-  {
-    id: 'atomic',
-    name: 'Atomic Habits',
-    emoji: '⚡',
-    author: 'James Clear',
-    version: '1.2',
-    tier: 'Seeker',
-    rating: 4.7,
-    reviews: 2100,
-    nodes: 180,
-    edges: 540,
-    themes: 14,
-    color: '#60A5FA',
-    borderColor: 'rgba(96,165,250,0.35)',
-    bgColor: 'rgba(96,165,250,0.08)',
-    desc: 'Frameworks, habit loops, identity-based change models, and behavior design principles from the bestselling book.',
-    tags: ['Habits', 'Productivity', 'Behavior', 'Systems'],
-    official: true,
-    premium: true
-  }
-]
-
 export function PacksPage() {
+  const [packs, setPacks] = useState<Pack[]>([])
   const [installedPacks, setInstalledPacks] = useState<string[]>([])
   const [searchQuery, setSearchQuery] = useState('')
   const [activeTab, setActiveTab] = useState<'all' | 'installed' | 'official' | 'premium'>('all')
   const { triggerPackSync } = useOutletContext<{ triggerPackSync?: () => void }>()
 
-  // Load installed packs
+  // Load packs from backend API
   useEffect(() => {
-    const stored = localStorage.getItem('neeti-installed-packs')
-    if (stored) {
-      try {
-        setInstalledPacks(JSON.parse(stored))
-      } catch (e) {}
-    } else {
-      setInstalledPacks(['chanakya', 'gita'])
-    }
+    apiClient.get<{ packs: Pack[]; installed: string[] }>('/packs')
+      .then((r) => {
+        setPacks(r.data.packs || [])
+        setInstalledPacks(r.data.installed || [])
+        localStorage.setItem('neeti-installed-packs', JSON.stringify(r.data.installed || []))
+      })
+      .catch(() => {})
   }, [])
 
-  const handleInstallToggle = (id: string) => {
-    let updated = [...installedPacks]
-    if (installedPacks.includes(id)) {
-      updated = updated.filter((x) => x !== id)
-    } else {
-      updated.push(id)
-    }
-    setInstalledPacks(updated)
-    localStorage.setItem('neeti-installed-packs', JSON.stringify(updated))
-    // Trigger window storage event or invoke context sync callback
-    window.dispatchEvent(new Event('storage'))
-    if (triggerPackSync) triggerPackSync()
+  const handleInstallToggle = async (id: string) => {
+    const isInstalled = installedPacks.includes(id)
+    const endpoint = isInstalled ? '/packs/uninstall' : '/packs/install'
+    try {
+      const { data } = await apiClient.post<{ success: boolean; installed: string[] }>(endpoint, { pack_id: id })
+      if (data.success) {
+        setInstalledPacks(data.installed)
+        localStorage.setItem('neeti-installed-packs', JSON.stringify(data.installed))
+        window.dispatchEvent(new Event('storage'))
+        if (triggerPackSync) triggerPackSync()
+      }
+    } catch (e) {}
   }
 
   // Filter packs
-  const filteredPacks = ALL_PACKS.filter((pack) => {
+  const filteredPacks = packs.filter((pack) => {
     const isInstalled = installedPacks.includes(pack.id)
     const matchesSearch =
       pack.name.toLowerCase().includes(searchQuery.toLowerCase()) ||

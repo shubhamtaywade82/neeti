@@ -17,6 +17,20 @@ Rails.application.routes.draw do
       # Daily Sutra
       get '/daily_sutra', to: 'daily_sutra#show'
 
+      # Packs management
+      get  '/packs',            to: 'packs#index'
+      post '/packs/install',    to: 'packs#install'
+      post '/packs/uninstall',  to: 'packs#uninstall'
+
+      # Sutras explorer
+      get '/sutras', to: 'sutras#index'
+
+      # Graph explorer
+      get '/graph', to: 'graph#index'
+
+      # Memory Insights
+      resources :insights, only: [:index, :destroy]
+
       # Users / account management
       get    '/users/me',    to: 'users#show'
       patch  '/users/me',    to: 'users#update'

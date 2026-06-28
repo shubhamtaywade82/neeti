@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { apiClient } from '../api/client'
 import {
   Network,
   Search,
@@ -8,128 +9,67 @@ import {
   Tag,
   Book,
   Activity,
-  ArrowLeft
+  ChevronRight
 } from 'lucide-react'
 
 interface GraphNode {
   id: string
-  pack: string
-  type: 'sutra' | 'verse' | 'concept' | 'theme'
-  title: string
-  content: string
-  original?: string
-  source: string
-  confidence: number
-  themes: string[]
-  concepts: string[]
+  name: string
+  category: string
+  sutras: {
+    id: number
+    canonical_id: string
+    translation_en: string
+    chapter: number
+  }[]
 }
 
 interface GraphEdge {
   source: string
   target: string
-  type: 'supports' | 'contradicts' | 'relates'
+  type: string
   strength: number
 }
 
-const GRAPH_NODES: GraphNode[] = [
-  {
-    id: 'n1',
-    pack: 'Chanakya Neeti',
-    type: 'sutra',
-    title: 'Sutra 1.1: The Root of Prosperity',
-    content: 'The root of prosperity is discipline. True governance and leadership stem from self-control and sensory control.',
-    original: 'सुखस्य मूलं धर्मः। धर्मस्य मूलमर्थः। अर्थस्य मूलं राज्यम्।',
-    source: 'Ch. 1, Sutra 1',
-    confidence: 0.98,
-    themes: ['Leadership', 'Foundation', 'Strategy'],
-    concepts: ['Self-control', 'Discipline']
-  },
-  {
-    id: 'n2',
-    pack: 'Bhagavad Gita',
-    type: 'verse',
-    title: 'Gita 2.47: Perform Duty Detached',
-    content: 'You have a right to perform your duty, but never to the fruits thereof. Do not let the reward be your motive.',
-    original: 'कर्मण्येवाधिकारस्ते मा फलेषु कदाचन। मा कर्मफलहेतुर्भूर्मा ते सङ्गोऽस्त्वकर्मणि॥',
-    source: 'Ch. 2, Verse 47',
-    confidence: 0.99,
-    themes: ['Dharma', 'Action', 'Ethics'],
-    concepts: ['Detachment', 'Duty', 'Karma']
-  },
-  {
-    id: 'n3',
-    pack: 'Chanakya Neeti',
-    type: 'sutra',
-    title: 'Sutra 3.7: Character over Learning',
-    content: 'A wicked person should be avoided even if adorned with wisdom. A serpent adorned with a jewel is still venomous.',
-    original: 'दुर्जनः परिहर्तव्यः विद्यालंकृतोऽपि सन्।',
-    source: 'Ch. 3, Sutra 7',
-    confidence: 0.95,
-    themes: ['Ethics', 'Wisdom', 'Strategy'],
-    concepts: ['Character', 'Discernment']
-  },
-  {
-    id: 'n4',
-    pack: 'Bhagavad Gita',
-    type: 'verse',
-    title: 'Gita 6.5: Lift Self by Self',
-    content: 'A person must elevate themselves by their own mind, not degrade themselves. The mind is both a friend and an enemy.',
-    original: 'उद्धरेदात्मनात्मानं नात्मानमवसादयेत्। आत्मैव ह्यात्मनो बन्धुरात्मैव रिपुरात्मनः॥',
-    source: 'Ch. 6, Verse 5',
-    confidence: 0.92,
-    themes: ['Leadership', 'Wisdom'],
-    concepts: ['Self-reliance', 'Self-mastery']
-  },
-  {
-    id: 'n5',
-    pack: 'Chanakya Neeti',
-    type: 'sutra',
-    title: 'Sutra 2.18: Deliberate Spending',
-    content: 'One who spends without deliberation and clear objectives invites sudden ruin upon himself.',
-    original: 'अनालोच्य व्ययं कर्ता अनाधः पथिकः समा।',
-    source: 'Ch. 2, Sutra 18',
-    confidence: 0.89,
-    themes: ['Strategy', 'Foundation'],
-    concepts: ['Resource Management', 'Discipline']
-  }
-]
-
-const GRAPH_EDGES: GraphEdge[] = [
-  { source: 'n1', target: 'n5', type: 'supports', strength: 0.85 }, // Prosperity root -> Deliberate spending
-  { source: 'n1', target: 'n4', type: 'relates', strength: 0.72 },   // Prosperity root -> Self-reliance
-  { source: 'n2', target: 'n4', type: 'supports', strength: 0.91 },  // Action without fruits -> Self-mastery
-  { source: 'n2', target: 'n3', type: 'relates', strength: 0.65 },   // Action without fruits -> Character
-  { source: 'n3', target: 'n4', type: 'supports', strength: 0.78 }   // Avoid wicked -> Self-mastery
-]
-
 export function GraphPage() {
+  const [nodes, setNodes] = useState<GraphNode[]>([])
+  const [edges, setEdges] = useState<GraphEdge[]>([])
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null)
   const [searchVal, setSearchVal] = useState('')
   const [selectedTheme, setSelectedTheme] = useState<string | null>(null)
 
-  // Get all unique themes
-  const allThemes = Array.from(new Set(GRAPH_NODES.flatMap((n) => n.themes)))
+  useEffect(() => {
+    apiClient.get<{ nodes: GraphNode[]; edges: GraphEdge[] }>('/graph')
+      .then((r) => {
+        setNodes(r.data.nodes || [])
+        setEdges(r.data.edges || [])
+      })
+      .catch(() => {})
+  }, [])
+
+  // Get all unique themes (represented by categories or unique node names)
+  const allThemes = Array.from(new Set(nodes.map((n) => n.name)))
 
   // Filter nodes
-  const filteredNodes = GRAPH_NODES.filter((node) => {
+  const filteredNodes = nodes.filter((node) => {
     const matchesSearch =
-      node.title.toLowerCase().includes(searchVal.toLowerCase()) ||
-      node.content.toLowerCase().includes(searchVal.toLowerCase())
-    const matchesTheme = !selectedTheme || node.themes.includes(selectedTheme)
+      node.name.toLowerCase().includes(searchVal.toLowerCase()) ||
+      node.category.toLowerCase().includes(searchVal.toLowerCase())
+    const matchesTheme = !selectedTheme || node.name === selectedTheme
     return matchesSearch && matchesTheme
   })
 
-  const selectedNode = GRAPH_NODES.find((n) => n.id === selectedNodeId)
+  const selectedNode = nodes.find((n) => n.id === selectedNodeId)
 
   // Get related edges
   const relatedEdges = selectedNodeId
-    ? GRAPH_EDGES.filter((e) => e.source === selectedNodeId || e.target === selectedNodeId)
+    ? edges.filter((e) => e.source === selectedNodeId || e.target === selectedNodeId)
     : []
 
   const relatedNodes = relatedEdges
     .map((edge) => {
       const otherId = edge.source === selectedNodeId ? edge.target : edge.source
-      const node = GRAPH_NODES.find((n) => n.id === otherId)
+      const node = nodes.find((n) => n.id === otherId)
       return node ? { edge, node } : null
     })
     .filter(Boolean) as { edge: GraphEdge; node: GraphNode }[]
@@ -198,11 +138,11 @@ export function GraphPage() {
                 }`}
               >
                 <div className="flex items-center justify-between text-[9px] font-semibold uppercase tracking-wider text-wisdom-500">
-                  <span className="text-saffron-400">{node.type}</span>
-                  <span>{node.pack}</span>
+                  <span className="text-saffron-400">{node.category}</span>
+                  <span>Pack Reference</span>
                 </div>
-                <div className="text-xs font-semibold leading-relaxed truncate">
-                  {node.title}
+                <div className="text-xs font-semibold leading-relaxed truncate capitalize">
+                  {node.name}
                 </div>
               </div>
             )
@@ -226,23 +166,20 @@ export function GraphPage() {
                 Graph Explorer
               </span>
               <span>/</span>
-              <span className="text-saffron-400">{selectedNode.pack}</span>
+              <span className="text-saffron-400 capitalize">{selectedNode.category}</span>
             </div>
 
             {/* Title / Badges */}
             <div className="space-y-3">
-              <h1 className="text-2xl font-bold font-display text-wisdom-100">
-                {selectedNode.title}
+              <h1 className="text-2xl font-bold font-display text-wisdom-100 capitalize">
+                {selectedNode.name}
               </h1>
               <div className="flex flex-wrap gap-2 text-xs select-none">
                 <span className="px-2.5 py-0.5 rounded bg-saffron-500/10 border border-saffron-500/20 text-saffron-400 uppercase tracking-wider text-[10px] font-bold">
-                  {selectedNode.type}
+                  {selectedNode.category}
                 </span>
                 <span className="px-2.5 py-0.5 rounded bg-wisdom-800 border border-wisdom-700/40 text-wisdom-400 text-[10px] font-semibold">
-                  Source: {selectedNode.source}
-                </span>
-                <span className="px-2.5 py-0.5 rounded bg-wisdom-800 border border-wisdom-700/40 text-wisdom-400 text-[10px] font-semibold">
-                  Confidence: {Math.round(selectedNode.confidence * 100)}%
+                  Source: Knowledge Corpus DB
                 </span>
               </div>
             </div>
@@ -251,25 +188,28 @@ export function GraphPage() {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               {/* Content box */}
               <div className="lg:col-span-2 space-y-6">
-                {/* content text */}
+                {/* Referencing sutras list */}
                 <div className="glass-card border border-wisdom-700/40 p-6 rounded-2xl space-y-4">
                   <h3 className="text-sm font-bold text-wisdom-200 font-display flex items-center gap-2 border-b border-wisdom-700/20 pb-3">
                     <BookOpen className="w-4 h-4 text-saffron-500" />
-                    Content translation
+                    Referencing Sutras
                   </h3>
-                  <p className="text-sm text-wisdom-300 leading-relaxed font-body">
-                    {selectedNode.content}
-                  </p>
-                  {selectedNode.original && (
-                    <div className="p-4 bg-wisdom-900/60 border border-wisdom-700/40 rounded-xl space-y-2 mt-4">
-                      <div className="text-[10px] font-bold text-wisdom-500 uppercase tracking-widest select-none">
-                        Original script (Sanskrit)
+                  <div className="space-y-4">
+                    {selectedNode.sutras.map((s) => (
+                      <div key={s.id} className="p-4 bg-wisdom-900/60 border border-wisdom-700/40 rounded-xl space-y-2">
+                        <div className="flex justify-between items-center text-[10px] font-bold text-wisdom-500 uppercase tracking-widest select-none">
+                          <span>Sutra {s.canonical_id}</span>
+                          <span>Ch.{s.chapter}</span>
+                        </div>
+                        <p className="text-xs text-wisdom-300 leading-relaxed font-body">
+                          "{s.translation_en}"
+                        </p>
                       </div>
-                      <p className="text-base text-saffron-300/80 font-display font-medium leading-relaxed italic">
-                        {selectedNode.original}
-                      </p>
-                    </div>
-                  )}
+                    ))}
+                    {selectedNode.sutras.length === 0 && (
+                      <p className="text-xs text-wisdom-500 italic">No direct referencing sutras found.</p>
+                    )}
+                  </div>
                 </div>
 
                 {/* Connections list */}
@@ -303,10 +243,10 @@ export function GraphPage() {
                             </span>
                           </div>
                           <div>
-                            <h4 className="text-xs font-bold text-wisdom-200 group-hover:text-saffron-300 transition-colors">
-                              {node.title}
+                            <h4 className="text-xs font-bold text-wisdom-200 group-hover:text-saffron-300 transition-colors capitalize">
+                              {node.name}
                             </h4>
-                            <span className="text-[10px] text-wisdom-500">{node.pack}</span>
+                            <span className="text-[10px] text-wisdom-500 uppercase">{node.category}</span>
                           </div>
                         </div>
                         <ChevronRight className="w-4 h-4 text-wisdom-500 group-hover:text-saffron-400 transition-colors" />
@@ -321,40 +261,15 @@ export function GraphPage() {
 
               {/* Sidebar meta details */}
               <div className="space-y-6 select-none">
-                {/* Themes */}
+                {/* Category details */}
                 <div className="glass-card border border-wisdom-700/40 p-5 rounded-2xl space-y-3">
                   <h4 className="text-xs font-bold text-wisdom-400 uppercase tracking-widest flex items-center gap-1.5">
                     <Tag className="w-3.5 h-3.5 text-saffron-500" />
-                    Themes
+                    Classification
                   </h4>
-                  <div className="flex flex-wrap gap-1.5">
-                    {selectedNode.themes.map((theme) => (
-                      <span
-                        key={theme}
-                        className="px-2.5 py-1 rounded bg-wisdom-900 border border-wisdom-700/40 text-wisdom-300 text-[10px] font-semibold"
-                      >
-                        {theme}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Concepts */}
-                <div className="glass-card border border-wisdom-700/40 p-5 rounded-2xl space-y-3">
-                  <h4 className="text-xs font-bold text-wisdom-400 uppercase tracking-widest flex items-center gap-1.5">
-                    <Eye className="w-3.5 h-3.5 text-saffron-500" />
-                    Concepts
-                  </h4>
-                  <div className="flex flex-wrap gap-1.5">
-                    {selectedNode.concepts.map((concept) => (
-                      <span
-                        key={concept}
-                        className="px-2.5 py-1 rounded bg-saffron-500/5 border border-saffron-500/20 text-saffron-400 text-[10px] font-semibold"
-                      >
-                        {concept}
-                      </span>
-                    ))}
-                  </div>
+                  <span className="inline-block px-2.5 py-1 rounded bg-wisdom-900 border border-wisdom-700/40 text-wisdom-300 text-[10px] font-semibold uppercase">
+                    {selectedNode.category}
+                  </span>
                 </div>
 
                 {/* Provenance */}
@@ -365,16 +280,12 @@ export function GraphPage() {
                   </h4>
                   <div className="space-y-2.5 text-xs text-wisdom-400">
                     <div className="flex justify-between border-b border-wisdom-700/10 pb-2">
-                      <span className="text-wisdom-500">Book</span>
-                      <span className="text-wisdom-200">{selectedNode.pack}</span>
-                    </div>
-                    <div className="flex justify-between border-b border-wisdom-700/10 pb-2">
-                      <span className="text-wisdom-500">Reference</span>
-                      <span className="text-wisdom-200">{selectedNode.source}</span>
+                      <span className="text-wisdom-500">Source</span>
+                      <span className="text-wisdom-200">Knowledge Graph DB</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-wisdom-500">Confidence</span>
-                      <span className="text-wisdom-200">{Math.round(selectedNode.confidence * 100)}%</span>
+                      <span className="text-wisdom-500">Connections</span>
+                      <span className="text-wisdom-200">{relatedNodes.length} mapped</span>
                     </div>
                   </div>
                 </div>

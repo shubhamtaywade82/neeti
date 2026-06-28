@@ -73,4 +73,8 @@ Rails.application.configure do
 
   # Disable schema dump to bypass client-server pg_dump version mismatch in development docker env
   config.active_record.dump_schema_after_migration = false
+
+  # Allow requests from the docker container hostname
+  config.hosts << "app"
+  config.hosts << "app:3000"
 end

@@ -19,7 +19,6 @@ interface Conversation {
   advisor?: string
 }
 
-// Mock desc for descriptions and colors
 const ACTIVE_PACKS_METADATA: Record<string, { emoji: string; name: string; desc: string; nodeCount: number; edgeCount: number; color: string }> = {
   chanakya: { emoji: '🪔', name: 'Chanakya Neeti', desc: 'Ancient Indian treatise on statecraft, economics, and political strategy. Leadership and governance wisdom.', nodeCount: 432, edgeCount: 1280, color: 'border-saffron-500' },
   gita: { emoji: '🌺', name: 'Bhagavad Gita', desc: 'Dialogue between Prince Arjuna and Lord Krishna on duty, self-mastery, detachment, and righteousness.', nodeCount: 700, edgeCount: 2100, color: 'border-emerald-500' },
@@ -32,19 +31,43 @@ const ACTIVE_PACKS_METADATA: Record<string, { emoji: string; name: string; desc:
 export function DashboardPage() {
   const [conversations, setConversations] = useState<Conversation[]>([])
   const [installedPacks, setInstalledPacks] = useState<string[]>(['chanakya', 'gita'])
+  const [insightsCount, setInsightsCount] = useState<number>(4)
+  const [latestInsight, setLatestInsight] = useState<string>('Building a sustainable trading system with strict risk management parameters.')
   const navigate = useNavigate()
 
   useEffect(() => {
+    // 1. Fetch recent conversations
     apiClient.get<Conversation[]>('/conversations')
       .then((r) => setConversations(r.data))
       .catch(() => {})
 
-    const stored = localStorage.getItem('neeti-installed-packs')
-    if (stored) {
-      try {
-        setInstalledPacks(JSON.parse(stored))
-      } catch (e) {}
-    }
+    // 2. Fetch packs to check active count
+    apiClient.get<{ packs: any[]; installed: string[] }>('/packs')
+      .then((r) => {
+        const active = r.data.installed || []
+        setInstalledPacks(active)
+        localStorage.setItem('neeti-installed-packs', JSON.stringify(active))
+      })
+      .catch(() => {
+        // Fallback to local storage if API is slow
+        const stored = localStorage.getItem('neeti-installed-packs')
+        if (stored) {
+          try {
+            setInstalledPacks(JSON.parse(stored))
+          } catch (e) {}
+        }
+      })
+
+    // 3. Fetch insights to check memory
+    apiClient.get<any[]>('/insights')
+      .then((r) => {
+        setInsightsCount(r.data.length)
+        if (r.data.length > 0) {
+          // Display the first one as latest
+          setLatestInsight(r.data[0].label)
+        }
+      })
+      .catch(() => {})
   }, [])
 
   const startChatPrompt = (query: string) => {
@@ -55,8 +78,7 @@ export function DashboardPage() {
     navigate(`/chat?convoId=${id}`)
   }
 
-  // Get active packs details
-  const activePacks = installedPacks.map((id) => ({ id, ...ACTIVE_PACKS_METADATA[id] })).filter(Boolean)
+  const activePacks = installedPacks.map((id) => ({ id, ...ACTIVE_PACKS_METADATA[id] })).filter(x => x.name !== undefined)
 
   const quickPrompts = [
     'How do I handle a difficult team member?',
@@ -110,7 +132,7 @@ export function DashboardPage() {
         {[
           { label: 'Conversations', value: conversations.length, sub: 'All threads', icon: MessageSquare, color: 'text-saffron-400 bg-saffron-500/10 border-saffron-500/10' },
           { label: 'Knowledge Packs', value: `${installedPacks.length}/6`, sub: 'Installed ratio', icon: Library, color: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/10' },
-          { label: 'Insights Learned', value: '19', sub: 'Extracted about you', icon: Brain, color: 'text-indigo-400 bg-indigo-500/10 border-indigo-500/10' },
+          { label: 'Insights Learned', value: insightsCount, sub: 'Extracted about you', icon: Brain, color: 'text-indigo-400 bg-indigo-500/10 border-indigo-500/10' },
           { label: 'Graph Connections', value: '3.9K', sub: 'Cross-references', icon: Network, color: 'text-sky-400 bg-sky-500/10 border-sky-500/10' },
         ].map((stat, idx) => {
           const Icon = stat.icon
@@ -238,7 +260,7 @@ export function DashboardPage() {
                 🎯 Goal
               </span>
               <p className="text-xs text-wisdom-300 leading-relaxed">
-                Building a sustainable trading system with strict risk management parameters.
+                {latestInsight}
               </p>
             </div>
           </div>

@@ -22,6 +22,7 @@ services:
       OLLAMA_MODEL: qwen3.5:4b
       RAILS_ENV: development
       JWT_SECRET_KEY: dev_jwt_secret_change_in_production
+      CORS_ORIGINS: http://localhost:5174,http://localhost:5173
     volumes:
       - .:/rails
       - bundle_cache:/usr/local/bundle
@@ -32,6 +33,15 @@ services:
         condition: service_healthy
     extra_hosts:
       - "host.docker.internal:host-gateway"
+    develop:
+      watch:
+        - action: sync
+          path: .
+          target: /rails
+          ignore:
+            - log/
+            - tmp/
+            - frontend/
 
   frontend:
     image: node:20-alpine
@@ -43,6 +53,13 @@ services:
       - ./frontend:/app
     ports:
       - "5174:5173"
+    develop:
+      watch:
+        - action: sync
+          path: ./frontend
+          target: /app
+          ignore:
+            - node_modules/
 
   worker:
     build: .
