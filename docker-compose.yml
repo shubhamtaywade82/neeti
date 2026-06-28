@@ -22,7 +22,7 @@ services:
     command: bundle exec rails server -b 0.0.0.0 -p 3000
     environment:
       DATABASE_URL: postgresql://neeti:neeti_dev@db:5432/neeti_development
-      OLLAMA_URL: http://host.docker.internal:11434
+      OLLAMA_URL: http://192.168.0.4:11434
       OLLAMA_MODEL: qwen3.5:4b
       RAILS_ENV: development
       JWT_SECRET_KEY: dev_jwt_secret_change_in_production
@@ -37,6 +37,7 @@ services:
         condition: service_healthy
     extra_hosts:
       - "host.docker.internal:host-gateway"
+    # network_mode: "host"  # causes port conflicts with other services
     deploy:
       resources:
         limits:
@@ -78,6 +79,8 @@ services:
     command: bundle exec rails solid_queue:start
     environment:
       DATABASE_URL: postgresql://neeti:neeti_dev@db:5432/neeti_development
+      OLLAMA_URL: http://192.168.0.4:11434
+      OLLAMA_MODEL: qwen3.5:4b
       RAILS_ENV: development
     volumes:
       - .:/rails

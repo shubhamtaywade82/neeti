@@ -128,10 +128,10 @@ module Neeti
     # @param query [String]
     # @return [Array<Sutra>]
     def retrieve(query)
-      results = layer1_metadata(query)
+      results = layer2_fts(query)
       return finalize(results) if sufficient?(results)
 
-      results = (results + layer2_fts(query)).uniq
+      results = (results + layer1_metadata(query)).uniq
       return finalize(results) if sufficient?(results)
 
       results = (results + layer3_llm(query)).uniq

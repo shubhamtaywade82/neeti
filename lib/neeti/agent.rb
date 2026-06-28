@@ -41,7 +41,7 @@ module Neeti
     private
 
     def build_messages(query, sutras, insights, conversation, corpus_text: nil, advisor: :chanakya)
-      history = conversation.messages.order(:created_at).last(6).map do |m|
+      history = conversation.messages.order(created_at: :desc).limit(6).reverse.map do |m|
         { role: m.role, content: m.content }
       end
 
@@ -62,7 +62,7 @@ module Neeti
     # Reflect only when retrieval is weak or draft is suspiciously short.
     # Skipping saves ~50% token cost on confident queries.
     def needs_reflection?(sutras, draft)
-      sutras.size < 2 || draft.split.length < 40
+      sutras.size < 2 && draft.split.length < 40
     end
 
     def skip_reflection
