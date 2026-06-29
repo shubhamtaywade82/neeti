@@ -23,7 +23,7 @@ services:
     environment:
       DATABASE_URL: postgresql://neeti:neeti_dev@db:5432/neeti_development
       OLLAMA_URL: http://192.168.0.4:11434
-      OLLAMA_MODEL: qwen3.5:4b
+      OLLAMA_MODEL: qwen2.5:0.5b
       RAILS_ENV: development
       JWT_SECRET_KEY: dev_jwt_secret_change_in_production
       CORS_ORIGINS: http://localhost:5174,http://localhost:5173
@@ -80,7 +80,7 @@ services:
     environment:
       DATABASE_URL: postgresql://neeti:neeti_dev@db:5432/neeti_development
       OLLAMA_URL: http://192.168.0.4:11434
-      OLLAMA_MODEL: qwen3.5:4b
+      OLLAMA_MODEL: qwen2.5:0.5b
       RAILS_ENV: development
     volumes:
       - .:/rails
