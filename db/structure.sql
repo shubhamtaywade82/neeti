@@ -1057,7 +1057,9 @@ CREATE TABLE public.users (
     created_at timestamp(6) without time zone NOT NULL,
     updated_at timestamp(6) without time zone NOT NULL,
     role character varying DEFAULT 'user'::character varying NOT NULL,
-    installed_packs text[] DEFAULT '{chanakya,gita}'::text[]
+    installed_packs text[] DEFAULT '{chanakya,gita}'::text[],
+    reset_token character varying,
+    reset_sent_at timestamp(6) without time zone
 );
 
 
@@ -2078,6 +2080,13 @@ CREATE UNIQUE INDEX index_users_on_email ON public.users USING btree (email);
 
 
 --
+-- Name: index_users_on_reset_token; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_users_on_reset_token ON public.users USING btree (reset_token);
+
+
+--
 -- Name: index_users_on_role; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -2313,6 +2322,7 @@ ALTER TABLE ONLY public.sutra_vices
 SET search_path TO "$user", public;
 
 INSERT INTO "schema_migrations" (version) VALUES
+('20260712083609'),
 ('20260712000005'),
 ('20260712000004'),
 ('20260712000003'),

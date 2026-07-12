@@ -2,9 +2,11 @@ Rails.application.routes.draw do
   namespace :api do
     namespace :v1 do
       # Auth
-      post '/auth/register', to: 'auth#register'
-      post '/auth/login',    to: 'auth#login'
-      get  '/auth/me',       to: 'auth#me'
+      post '/auth/register',         to: 'auth#register'
+      post '/auth/login',            to: 'auth#login'
+      get  '/auth/me',               to: 'auth#me'
+      post '/auth/forgot_password',  to: 'auth#forgot_password'
+      post '/auth/reset_password',   to: 'auth#reset_password'
 
       # Advisor (SSE streaming) — implemented in Task 7
       post '/advice', to: 'advisor#create'

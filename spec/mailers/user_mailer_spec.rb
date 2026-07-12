@@ -2,17 +2,17 @@ require "rails_helper"
 
 RSpec.describe UserMailer, type: :mailer do
   describe "reset_password" do
-    let(:mail) { UserMailer.reset_password }
+    let(:user) { User.create!(email: 'test@example.com', password: 'password123', password_confirmation: 'password123') }
+    let(:mail) { UserMailer.reset_password(user) }
 
     it "renders the headers" do
-      expect(mail.subject).to eq("Reset password")
-      expect(mail.to).to eq(["to@example.org"])
-      expect(mail.from).to eq(["from@example.com"])
+      expect(mail.subject).to eq("Reset your KOS password")
+      expect(mail.to).to eq([user.email])
     end
 
     it "renders the body" do
-      expect(mail.body.encoded).to match("Hi")
+      expect(mail.body.encoded).to match("Reset your KOS password")
+      expect(mail.body.encoded).to match("reset-password?token=")
     end
   end
-
 end
