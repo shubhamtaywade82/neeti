@@ -21,7 +21,14 @@ module Api
         file = params[:file]
         return render json: { error: 'No file provided' }, status: :bad_request unless file
 
-        ext = File.extname(file.original_filename).downcase.delete('.')
+        if file.size > 20.megabytes
+          return render json: { error: 'File too large (max 20MB)' }, status: :unprocessable_entity
+        end
+
+        original_name = file.original_filename.presence
+        return render json: { error: 'File has no name' }, status: :bad_request unless original_name
+
+        ext = File.extname(original_name).downcase.delete('.')
         return render json: { error: "Unsupported file type: .#{ext}" }, status: :unprocessable_entity unless %w[pdf md txt docx].include?(ext)
 
         allowed_mimes = {
@@ -69,7 +76,8 @@ module Api
       def store_file(file)
         dir = Rails.root.join('storage', 'uploads', Time.now.strftime('%Y/%m/%d'))
         FileUtils.mkdir_p(dir)
-        path = dir.join("#{SecureRandom.hex(8)}_#{file.original_filename}")
+        safe_name = "#{SecureRandom.hex(8)}_#{File.basename(file.original_filename)}"
+        path = dir.join(safe_name)
         File.open(path, 'wb') { |f| f.write(file.read) }
         path.to_s
       end

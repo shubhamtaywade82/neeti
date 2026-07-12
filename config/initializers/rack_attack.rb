@@ -20,4 +20,4 @@ class Rack::Attack
   end
 end
 
-Rack::Attack.enabled = ENV.fetch('RACK_ATTACK_ENABLED', 'false') == 'true'
+Rack::Attack.enabled = ENV.fetch('RACK_ATTACK_ENABLED', 'true') == 'true'

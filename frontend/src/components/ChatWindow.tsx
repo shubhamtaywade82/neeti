@@ -8,7 +8,10 @@ import type { CitedSutra } from './SourceCitation'
 import { QueryInput } from './QueryInput'
 import { Landmark, Shield, Coins, Compass } from 'lucide-react'
 
+let messageCounter = 0
+
 interface Message {
+  id:          string
   role:        'user' | 'assistant'
   content:     string
   isStreaming?: boolean
@@ -257,6 +260,7 @@ export function ChatWindow({ conversationId, onConversationCreated, prefillQuery
       .then((r) => {
         setMessages(
           r.data.map((m) => ({
+            id: `msg-${m.id}`,
             role: m.role,
             content: m.content,
             cited_sutras: m.cited_sutras,
@@ -278,6 +282,7 @@ export function ChatWindow({ conversationId, onConversationCreated, prefillQuery
         .then((r) => {
           setMessages(
             r.data.map((m) => ({
+              id: `msg-${m.id}`,
               role: m.role,
               content: m.content,
               cited_sutras: m.cited_sutras,

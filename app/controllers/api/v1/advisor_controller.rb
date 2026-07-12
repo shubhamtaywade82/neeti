@@ -8,6 +8,14 @@ module Api
       before_action :check_quota!
 
       def create
+        unless params[:query].to_s.strip.present?
+          response.headers['Content-Type'] = 'text/event-stream'
+          sse = SSE.new(response.stream, retry: 300)
+          sse.write({ type: 'error', message: 'Query cannot be empty.' }.to_json)
+          sse.close
+          return
+        end
+
         response.headers['Content-Type']      = 'text/event-stream'
         response.headers['Cache-Control']     = 'no-cache'
         response.headers['X-Accel-Buffering'] = 'no'

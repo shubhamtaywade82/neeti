@@ -96,6 +96,8 @@ export const useAdvisorStore = create<AdvisorState>((set, get) => ({
 
       if (res.status === 401) {
         set({ error: 'Session expired. Please log in again.', isStreaming: false, controller: null })
+        useAuthStore.getState().logout()
+        window.location.href = '/login'
         return accumulated
       }
 

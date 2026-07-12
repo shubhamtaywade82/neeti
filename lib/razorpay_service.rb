@@ -45,7 +45,7 @@ class RazorpayService
 
   def verify_webhook_signature(body, signature)
     Razorpay::Utility.verify_webhook_signature(
-      body, signature, ENV.fetch('RAZORPAY_WEBHOOK_SECRET', 'test_secret')
+      body, signature, ENV.fetch('RAZORPAY_WEBHOOK_SECRET')
     )
   rescue => e
     Rails.logger.warn("Razorpay signature verification failed: #{e.message}")

@@ -22,6 +22,8 @@ import { AdminPage } from './pages/AdminPage'
 
 function RequireAuth({ children }: { children: ReactNode }) {
   const token = useAuthStore((s) => s.token)
+  const hydrated = useAuthStore((s) => s.hydrated)
+  if (!hydrated) return null
   return token ? <>{children}</> : <Navigate to="/login" replace />
 }
 

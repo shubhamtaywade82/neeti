@@ -13,7 +13,8 @@ services:
     buildCommand: |
       bundle install
       bundle exec rails db:migrate
-      bundle exec rails db:seed
+      # Seeds are idempotent: only run if SEED_DB is set (first deploy or fresh database)
+      - if [ "$SEED_DB" = "true" ]; then bundle exec rails db:seed; fi
     startCommand: bundle exec puma -C config/puma.rb
     envVars:
       - key: DATABASE_URL

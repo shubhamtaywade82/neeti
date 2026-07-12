@@ -6,17 +6,17 @@ module Api
       def register
         user = User.new(user_params)
         if user.save
-          render json: { token: JwtService.encode(user_id: user.id), user: user_json(user) },
+          render json: { token: JwtService.encode(user_id: user.id, token_version: user.token_version), user: user_json(user) },
                  status: :created
         else
-          render json: { errors: user.errors.full_messages }, status: :unprocessable_entity
+          render json: { error: 'Registration failed. Email may already be taken.' }, status: :unprocessable_entity
         end
       end
 
       def login
         user = User.find_by(email: params[:email]&.downcase)
         if user&.authenticate(params[:password])
-          render json: { token: JwtService.encode(user_id: user.id), user: user_json(user) }
+          render json: { token: JwtService.encode(user_id: user.id, token_version: user.token_version), user: user_json(user) }
         else
           render json: { error: 'Invalid credentials' }, status: :unauthorized
         end

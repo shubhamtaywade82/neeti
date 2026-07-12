@@ -5,16 +5,17 @@ module Api::V1
     end
 
     def update
-      if params[:current_password].present?
+      if params[:password].present? || params[:email].present?
         unless current_user.authenticate(params[:current_password])
-          return render json: { error: 'Current password is incorrect' }, status: :unprocessable_entity
+          return render json: { error: 'Current password is required to change email or password.' }, status: :unprocessable_entity
         end
       end
 
       if current_user.update(update_params)
+        current_user.increment!(:token_version) if params[:password].present?
         render json: user_json(current_user)
       else
-        render json: { errors: current_user.errors.full_messages }, status: :unprocessable_entity
+        render json: { error: current_user.errors.full_messages.first }, status: :unprocessable_entity
       end
     end
 
