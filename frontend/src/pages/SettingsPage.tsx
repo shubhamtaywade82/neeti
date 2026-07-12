@@ -14,11 +14,8 @@ import {
   Lock,
   Trash2,
   Shield,
-  Layers,
-  Clock,
   Compass,
-  CreditCard,
-  Gem
+  CreditCard
 } from 'lucide-react'
 
 interface UsageStats {
@@ -187,7 +184,6 @@ export function SettingsPage() {
     { key: 'chatCitationsToggle', label: 'Citation Excerpts Toggle', desc: 'Show the expandable grounded citations excerpts card panel beneath responses.' },
   ]
 
-  const isFree = usage?.plan === 'free'
   const isUnlimited = usage?.plan_limit === 'unlimited'
   const usagePercent =
     usage && !isUnlimited && typeof usage.plan_limit === 'number'

@@ -1,13 +1,10 @@
 import { useState, useEffect } from 'react'
-import { useLocation } from 'react-router-dom'
+// 
 import { apiClient } from '../api/client'
 import {
   Search,
-  BookOpen,
   Filter,
-  ChevronRight,
   BookMarked,
-  Tag,
   BookOpenCheck,
   X
 } from 'lucide-react'
@@ -39,8 +36,6 @@ export function SutrasPage() {
   const [filterPack, setFilterPack] = useState<string>('all')
   const [filterTheme, setFilterTheme] = useState<string>('all')
   const [installedPacks, setInstalledPacks] = useState<string[]>(['chanakya', 'gita'])
-
-  const location = useLocation()
 
   // Load active packs
   useEffect(() => {

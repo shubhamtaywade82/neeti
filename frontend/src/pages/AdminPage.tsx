@@ -9,12 +9,8 @@ import {
   Activity,
   Layers,
   Search,
-  UserCheck,
   Trash2,
-  ChevronRight,
-  TrendingUp,
-  Settings,
-  X
+  Settings
 } from 'lucide-react'
 
 interface AdminStats {

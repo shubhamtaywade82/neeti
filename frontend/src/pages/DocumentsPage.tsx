@@ -10,8 +10,7 @@ import {
   File,
   FileType,
   Loader2,
-  X,
-  ExternalLink
+  X
 } from 'lucide-react'
 
 interface Document {

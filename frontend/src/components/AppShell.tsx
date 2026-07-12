@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { Link, useLocation, useNavigate, Outlet } from 'react-router-dom'
 import { apiClient } from '../api/client'
 import { useAuthStore } from '../stores/authStore'
@@ -15,10 +15,8 @@ import {
   LogOut,
   Menu,
   ChevronRight,
-  Compass,
   X,
   Search,
-  Check,
   Shield,
   FolderOpen,
   FileText

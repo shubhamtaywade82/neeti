@@ -9,8 +9,7 @@ import {
   FileType,
   File,
   Trash2,
-  Loader2,
-  X
+  Loader2
 } from 'lucide-react'
 
 interface Collection {
@@ -40,7 +39,6 @@ export function CollectionDetailPage() {
   const [documents, setDocuments] = useState<Document[]>([])
   const [loading, setLoading] = useState(true)
   const [uploading, setUploading] = useState(false)
-  const [dragOver, setDragOver] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {

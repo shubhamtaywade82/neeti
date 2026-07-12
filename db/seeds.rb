@@ -1,2 +1,6 @@
 load Rails.root.join("db/seeds/01_themes.rb")
+load Rails.root.join("db/seeds/03_knowledge_packs.rb")
 load Rails.root.join("db/seeds/02_sutras.rb")
+load Rails.root.join("db/seeds/seed_gita.rb")
+load Rails.root.join("db/seeds/seed_sunzi.rb")
+load Rails.root.join("db/seeds/seed_stoic.rb")

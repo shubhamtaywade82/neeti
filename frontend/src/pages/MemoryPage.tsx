@@ -131,7 +131,6 @@ export function MemoryPage() {
 
           <div className="space-y-3">
             {insights.map((ins) => {
-              const config = TYPE_CONFIG[ins.type] || TYPE_CONFIG.goal
               const typeColor = ins.type === 'goal' ? 'bg-emerald-500/10 text-emerald-400' :
                                 ins.type === 'preference' ? 'bg-rose-500/10 text-rose-400' :
                                 ins.type === 'pattern' ? 'bg-sky-500/10 text-sky-400' :

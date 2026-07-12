@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { Plus, MessageSquare, Menu, BookOpen, Library, FileText } from 'lucide-react'
+import { Plus, Menu, Library, FileText } from 'lucide-react'
 import { ChatWindow } from '../components/ChatWindow'
 import { ConversationSidebar } from '../components/ConversationSidebar'
 import { SutraDetailDrawer } from '../components/SutraDetailDrawer'

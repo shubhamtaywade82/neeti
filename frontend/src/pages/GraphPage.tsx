@@ -4,11 +4,9 @@ import {
   Network,
   Search,
   BookOpen,
-  Eye,
   Link as LinkIcon,
   Tag,
   Book,
-  Activity,
   ChevronRight
 } from 'lucide-react'
 

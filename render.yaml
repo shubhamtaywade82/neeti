@@ -13,6 +13,7 @@ services:
     buildCommand: |
       bundle install
       bundle exec rails db:migrate
+      bundle exec rails db:seed
     startCommand: bundle exec puma -C config/puma.rb
     envVars:
       - key: DATABASE_URL
@@ -28,7 +29,11 @@ services:
       - key: SOLID_QUEUE_IN_PUMA
         value: "true"
       - key: CORS_ORIGINS
-        value: https://neeti-frontend.onrender.com
+        value: https://YOUR_APP-frontend.onrender.com
+      - key: FRONTEND_URL
+        value: https://YOUR_APP-frontend.onrender.com
+      - key: APP_HOST
+        value: YOUR_APP-api.onrender.com
 
   # React Frontend
   - type: web
@@ -38,7 +43,7 @@ services:
     staticPublishPath: ./frontend/dist
     envVars:
       - key: VITE_API_URL
-        value: https://neeti-api.onrender.com
+        value: https://YOUR_APP-api.onrender.com
     routes:
       - type: rewrite
         source: /*
