@@ -3,6 +3,8 @@ class User < ApplicationRecord
 
   has_many :conversations,  dependent: :destroy
   has_many :user_insights,  dependent: :destroy
+  has_many :collections,    dependent: :destroy
+  has_many :documents,      dependent: :destroy
 
   PLANS = %w[free seeker strategist raja].freeze
   ROLES = %w[user admin].freeze

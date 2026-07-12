@@ -88,7 +88,7 @@ export function PacksPage() {
         <Star
           key={i}
           className={`w-3 h-3 ${
-            i <= rounded ? 'text-saffron-400 fill-saffron-400' : 'text-wisdom-600'
+            i <= rounded ? 'text-primary-400 fill-primary-400' : 'text-surface-300'
           }`}
         />
       )
@@ -100,13 +100,13 @@ export function PacksPage() {
     <div className="max-w-6xl mx-auto px-4 py-8 space-y-8 animate-fade-in">
       {/* Header */}
       <div>
-        <span className="text-[10px] font-bold text-saffron-500 uppercase tracking-widest block mb-1">
+        <span className="text-[10px] font-bold text-primary-500 uppercase tracking-widest block mb-1">
           Knowledge Base
         </span>
-        <h1 className="text-3xl font-bold font-display text-wisdom-100">
+        <h1 className="text-3xl font-bold font-display text-surface-800">
           Knowledge Packs
         </h1>
-        <p className="text-sm text-wisdom-400 mt-1">
+        <p className="text-sm text-surface-500 mt-1">
           Install structured knowledge modules to expand your advisor's reasoning capabilities.
         </p>
       </div>
@@ -114,27 +114,27 @@ export function PacksPage() {
       {/* Toolbar Filter Toggles */}
       <div className="flex flex-col sm:flex-row gap-4 items-stretch sm:items-center justify-between">
         {/* Search */}
-        <div className="flex items-center gap-2 rounded-xl bg-wisdom-900 border border-wisdom-700/40 px-3.5 py-2 flex-1 max-w-md focus-within:border-saffron-600/60 focus-within:shadow-glow transition-all duration-200">
-          <Search className="w-4 h-4 text-wisdom-500" />
+        <div className="flex items-center gap-2 rounded-xl bg-surface-50 border border-surface-200/40 px-3.5 py-2 flex-1 max-w-md focus-within:border-primary-600/60 focus-within:shadow-glow transition-all duration-200">
+          <Search className="w-4 h-4 text-surface-400" />
           <input
             type="text"
             placeholder="Search packs by name, author, or tag..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full bg-transparent border-none text-wisdom-100 placeholder-wisdom-500 text-xs focus:outline-none focus:ring-0 py-0"
+            className="w-full bg-transparent border-none text-surface-800 placeholder-surface-400 text-xs focus:outline-none focus:ring-0 py-0"
           />
         </div>
 
         {/* Tab Controls */}
-        <div className="flex gap-1.5 p-1 bg-wisdom-900 border border-wisdom-700/40 rounded-xl select-none">
+        <div className="flex gap-1.5 p-1 bg-surface-50 border border-surface-200/40 rounded-xl select-none">
           {(['all', 'installed', 'official', 'premium'] as const).map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
               className={`px-4 py-1.5 rounded-lg text-xs font-semibold uppercase tracking-wider transition-all duration-200 ${
                 activeTab === tab
-                  ? 'bg-saffron-500/10 border border-saffron-500/20 text-saffron-400'
-                  : 'border border-transparent text-wisdom-400 hover:text-wisdom-200'
+                  ? 'bg-primary-500/10 border border-primary-500/20 text-primary-400'
+                  : 'border border-transparent text-surface-500 hover:text-surface-700'
               }`}
             >
               {tab}
@@ -150,8 +150,8 @@ export function PacksPage() {
           return (
             <div
               key={pack.id}
-              className={`glass-card border flex flex-col justify-between p-6 rounded-2xl transition-all duration-300 relative group hover:border-wisdom-700/80 hover:-translate-y-0.5 ${
-                isInstalled ? 'border-l-[3px]' : 'border-wisdom-700/40'
+              className={`glass-card border flex flex-col justify-between p-6 rounded-2xl transition-all duration-300 relative group hover:border-surface-200/80 hover:-translate-y-0.5 ${
+                isInstalled ? 'border-l-[3px]' : 'border-surface-200/40'
               }`}
               style={{ borderLeftColor: isInstalled ? pack.color : undefined }}
             >
@@ -166,10 +166,10 @@ export function PacksPage() {
                       {pack.emoji}
                     </div>
                     <div>
-                      <h3 className="text-sm font-bold text-wisdom-100 group-hover:text-saffron-300 transition-colors">
+                      <h3 className="text-sm font-bold text-surface-800 group-hover:text-primary-300 transition-colors">
                         {pack.name}
                       </h3>
-                      <p className="text-[10px] text-wisdom-500 font-medium">
+                      <p className="text-[10px] text-surface-400 font-medium">
                         v{pack.version} · By {pack.author}
                       </p>
                     </div>
@@ -179,7 +179,7 @@ export function PacksPage() {
                     className={`px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider shrink-0 transition-all duration-200 ${
                       isInstalled
                         ? 'bg-emerald-500/10 border border-emerald-500/25 text-emerald-400 hover:bg-red-500/10 hover:border-red-500/25 hover:text-red-400'
-                        : 'bg-saffron-500 hover:bg-saffron-400 text-wisdom-950 shadow-glow'
+                        : 'bg-primary-500 hover:bg-primary-400 text-surface-0 shadow-glow'
                     }`}
                   >
                     {isInstalled ? (
@@ -201,14 +201,14 @@ export function PacksPage() {
                 {/* Tags */}
                 <div className="flex flex-wrap gap-1.5 mt-4">
                   {pack.official && (
-                    <span className="inline-flex items-center gap-1 text-[9px] font-bold text-saffron-400 uppercase tracking-wider bg-saffron-500/10 border border-saffron-500/25 px-2 py-0.5 rounded-md">
+                    <span className="inline-flex items-center gap-1 text-[9px] font-bold text-primary-400 uppercase tracking-wider bg-primary-500/10 border border-primary-500/25 px-2 py-0.5 rounded-md">
                       Official
                     </span>
                   )}
                   {pack.tags.map((tag) => (
                     <span
                       key={tag}
-                      className="text-[9px] font-semibold text-wisdom-400 bg-wisdom-800 border border-wisdom-700/40 px-2 py-0.5 rounded-md"
+                      className="text-[9px] font-semibold text-surface-500 bg-surface-100 border border-surface-200/40 px-2 py-0.5 rounded-md"
                     >
                       {tag}
                     </span>
@@ -216,20 +216,20 @@ export function PacksPage() {
                 </div>
 
                 {/* Description */}
-                <p className="text-xs text-wisdom-400 mt-4 leading-relaxed line-clamp-3">
+                <p className="text-xs text-surface-500 mt-4 leading-relaxed line-clamp-3">
                   {pack.desc}
                 </p>
               </div>
 
               {/* Pack Stats Footer */}
-              <div className="mt-6 pt-4 border-t border-wisdom-700/20">
-                <div className="flex items-center justify-between text-[11px] text-wisdom-400">
+              <div className="mt-6 pt-4 border-t border-surface-200/20">
+                <div className="flex items-center justify-between text-[11px] text-surface-500">
                   <div className="flex items-center gap-2 font-medium">
                     <span>{pack.nodes.toLocaleString()} nodes</span>
-                    <span className="w-1 h-1 rounded-full bg-wisdom-700" />
+                    <span className="w-1 h-1 rounded-full bg-surface-200" />
                     <span>{pack.edges.toLocaleString()} edges</span>
                   </div>
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-wisdom-500">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-surface-400">
                     {pack.tier}
                   </span>
                 </div>
@@ -237,7 +237,7 @@ export function PacksPage() {
                 <div className="flex items-center gap-2 mt-3 justify-between">
                   <div className="flex items-center gap-1.5">
                     {renderStars(pack.rating)}
-                    <span className="text-[10px] text-wisdom-500 font-bold">
+                    <span className="text-[10px] text-surface-400 font-bold">
                       ({pack.reviews})
                     </span>
                   </div>
@@ -248,10 +248,10 @@ export function PacksPage() {
         })}
 
         {filteredPacks.length === 0 && (
-          <div className="col-span-full glass-card border border-wisdom-700/40 p-12 text-center text-wisdom-500 rounded-2xl select-none">
-            <Library className="w-10 h-10 text-wisdom-600 mx-auto mb-3" />
-            <h3 className="text-base font-bold text-wisdom-300">No packs found</h3>
-            <p className="text-sm text-wisdom-500 mt-1 max-w-sm mx-auto">
+          <div className="col-span-full glass-card border border-surface-200/40 p-12 text-center text-surface-400 rounded-2xl select-none">
+            <Library className="w-10 h-10 text-surface-300 mx-auto mb-3" />
+            <h3 className="text-base font-bold text-surface-600">No packs found</h3>
+            <p className="text-sm text-surface-400 mt-1 max-w-sm mx-auto">
               No knowledge packs match your query. Try clearing your search query or filters.
             </p>
           </div>

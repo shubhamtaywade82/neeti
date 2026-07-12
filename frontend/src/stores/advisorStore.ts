@@ -35,7 +35,7 @@ interface AdvisorState {
   setActiveConvoId: (id: number | undefined) => void
   reset: () => void
   cancel: () => void
-  ask: (query: string, conversationId?: number, mode?: string, advisor?: string) => Promise<string>
+  ask: (query: string, conversationId?: number, mode?: string, advisor?: string, retrievalScope?: string) => Promise<string>
 }
 
 export const useAdvisorStore = create<AdvisorState>((set, get) => ({
@@ -59,7 +59,7 @@ export const useAdvisorStore = create<AdvisorState>((set, get) => ({
     set({ isStreaming: false, controller: null })
   },
 
-  ask: async (query, conversationId, mode, advisor) => {
+  ask: async (query, conversationId, mode, advisor, retrievalScope) => {
     set({ streamedText: '', result: null, error: null, isStreaming: true, activeQuery: query })
 
     const token = useAuthStore.getState().token
@@ -82,7 +82,8 @@ export const useAdvisorStore = create<AdvisorState>((set, get) => ({
           query,
           ...(conversationId && { conversation_id: conversationId }),
           ...(mode && { mode }),
-          ...(advisor && { advisor })
+          ...(advisor && { advisor }),
+          ...(retrievalScope && { retrieval_scope: retrievalScope })
         }),
         signal: controller.signal
       })

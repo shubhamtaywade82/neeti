@@ -35,6 +35,7 @@ interface Props {
   onToggleCag?: () => void
   onSelectSutra: (sutra: CitedSutra) => void
   advisor?: string
+  retrievalScope?: string
 }
 
 const ADVISOR_DETAILS: Record<string, {
@@ -57,8 +58,8 @@ const ADVISOR_DETAILS: Record<string, {
       {
         category: 'Leadership & Power',
         icon: Landmark,
-        color: 'text-emerald-400',
-        borderColor: 'border-emerald-500/20 bg-emerald-500/5',
+        color: 'text-accent-400',
+        borderColor: 'border-accent-500/20 bg-accent-500/5',
         queries: [
           'How to earn the loyalty of followers?',
           'Traits of a true strategic leader',
@@ -67,8 +68,8 @@ const ADVISOR_DETAILS: Record<string, {
       {
         category: 'Conflict & Strategy',
         icon: Shield,
-        color: 'text-saffron-400',
-        borderColor: 'border-saffron-500/20 bg-saffron-500/5',
+        color: 'text-primary-400',
+        borderColor: 'border-primary-500/20 bg-primary-500/5',
         queries: [
           'Dealing with hidden enemies at work',
           'When to make peace vs wage war',
@@ -104,8 +105,8 @@ const ADVISOR_DETAILS: Record<string, {
       {
         category: 'Duty & Karma',
         icon: Landmark,
-        color: 'text-emerald-400',
-        borderColor: 'border-emerald-500/20 bg-emerald-500/5',
+        color: 'text-accent-400',
+        borderColor: 'border-accent-500/20 bg-accent-500/5',
         queries: [
           'How to act without attachment to results?',
           'What is my true dharma (duty)?',
@@ -114,8 +115,8 @@ const ADVISOR_DETAILS: Record<string, {
       {
         category: 'Self-Control',
         icon: Shield,
-        color: 'text-saffron-400',
-        borderColor: 'border-saffron-500/20 bg-saffron-500/5',
+        color: 'text-primary-400',
+        borderColor: 'border-primary-500/20 bg-primary-500/5',
         queries: [
           'How to calm an anxious, wandering mind?',
           'Overcoming fear and doubt in action',
@@ -151,8 +152,8 @@ const ADVISOR_DETAILS: Record<string, {
       {
         category: 'Control & Choice',
         icon: Landmark,
-        color: 'text-emerald-400',
-        borderColor: 'border-emerald-500/20 bg-emerald-500/5',
+        color: 'text-accent-400',
+        borderColor: 'border-accent-500/20 bg-accent-500/5',
         queries: [
           'Dichotomy of control: what is mine to decide?',
           'How to handle criticism and insults?',
@@ -161,8 +162,8 @@ const ADVISOR_DETAILS: Record<string, {
       {
         category: 'Resilience',
         icon: Shield,
-        color: 'text-saffron-400',
-        borderColor: 'border-saffron-500/20 bg-saffron-500/5',
+        color: 'text-primary-400',
+        borderColor: 'border-primary-500/20 bg-primary-500/5',
         queries: [
           'Overcoming anxiety and worry about the future',
           'Practicing voluntary discomfort',
@@ -198,8 +199,8 @@ const ADVISOR_DETAILS: Record<string, {
       {
         category: 'Conflict Strategy',
         icon: Landmark,
-        color: 'text-emerald-400',
-        borderColor: 'border-emerald-500/20 bg-emerald-500/5',
+        color: 'text-accent-400',
+        borderColor: 'border-accent-500/20 bg-accent-500/5',
         queries: [
           'How to win without direct fighting?',
           'Assessing the strength of an opponent',
@@ -208,8 +209,8 @@ const ADVISOR_DETAILS: Record<string, {
       {
         category: 'Tactics & Maneuvers',
         icon: Shield,
-        color: 'text-saffron-400',
-        borderColor: 'border-saffron-500/20 bg-saffron-500/5',
+        color: 'text-primary-400',
+        borderColor: 'border-primary-500/20 bg-primary-500/5',
         queries: [
           'Adapting to changing circumstances',
           'The strategic use of deception',
@@ -239,7 +240,7 @@ const ADVISOR_DETAILS: Record<string, {
   }
 }
 
-export function ChatWindow({ conversationId, onConversationCreated, prefillQuery, onPrefillConsumed, cagMode = false, onToggleCag = () => {}, onSelectSutra, advisor = 'chanakya' }: Props) {
+export function ChatWindow({ conversationId, onConversationCreated, prefillQuery, onPrefillConsumed, cagMode = false, onToggleCag = () => {}, onSelectSutra, advisor = 'chanakya', retrievalScope = 'library' }: Props) {
   const [messages, setMessages]       = useState<Message[]>([])
   const { streamedText, isStreaming, result, error, ask, cancel, activeQuery } = useAdvisorStore()
   const { flags } = useFeatureFlagsStore()
@@ -247,7 +248,6 @@ export function ChatWindow({ conversationId, onConversationCreated, prefillQuery
 
   const currentAdvisor = ADVISOR_DETAILS[advisor] || ADVISOR_DETAILS.chanakya
 
-  // Sync historical messages
   useEffect(() => {
     if (!conversationId) {
       setMessages([])
@@ -260,7 +260,6 @@ export function ChatWindow({ conversationId, onConversationCreated, prefillQuery
             role: m.role,
             content: m.content,
             cited_sutras: m.cited_sutras,
-            // If historical messages, mock reasoning steps if enabled
             reasoning: flags.chatReasoning
               ? ['Intent Analysis: user query parsing', 'Selected persona matching', 'Grounded reasoning filters applied']
               : undefined,
@@ -273,7 +272,6 @@ export function ChatWindow({ conversationId, onConversationCreated, prefillQuery
       .catch(() => {})
   }, [conversationId, flags.chatReasoning])
 
-  // Re-fetch messages when streaming completes
   useEffect(() => {
     if (!isStreaming && conversationId) {
       apiClient.get<ApiMessage[]>(`/conversations/${conversationId}/messages`)
@@ -306,7 +304,6 @@ export function ChatWindow({ conversationId, onConversationCreated, prefillQuery
     }
   }, [result, onConversationCreated])
 
-  // Sync citations and append mockup reasoning steps on streaming complete
   useEffect(() => {
     if (result?.cited_sutras) {
       setMessages((prev) => {
@@ -349,10 +346,9 @@ export function ChatWindow({ conversationId, onConversationCreated, prefillQuery
       { role: 'user',      content: query },
       { role: 'assistant', content: '', isStreaming: true }
     ])
-    await ask(query, conversationId, cagMode ? 'cag' : 'retrieval', advisor)
+    await ask(query, conversationId, cagMode ? 'cag' : 'retrieval', advisor, retrievalScope)
   }
 
-  // Compute display messages list (merging history with active background stream)
   const displayMessages = [...messages]
   if (isStreaming && activeQuery) {
     const lastMsg = messages[messages.length - 1]
@@ -372,36 +368,31 @@ export function ChatWindow({ conversationId, onConversationCreated, prefillQuery
   }
 
   return (
-    <div className="flex flex-col h-full bg-wisdom-950 relative overflow-hidden">
-      {/* Background ambient glows */}
+    <div className="flex flex-col h-full bg-surface-0 relative overflow-hidden">
       <div className="absolute top-1/4 left-1/4 w-96 h-96 rounded-full ambient-glow-purple pointer-events-none" />
-      <div className="absolute bottom-1/4 right-1/4 w-96 h-96 rounded-full ambient-glow-saffron pointer-events-none" />
+      <div className="absolute bottom-1/4 right-1/4 w-96 h-96 rounded-full ambient-glow-primary pointer-events-none" />
 
-      {/* Messages area */}
       <div className="flex-1 overflow-y-auto scroll-smooth px-4 py-6 md:px-6 relative z-10">
         {messages.length === 0 && !conversationId && (
           <div className="flex flex-col items-center justify-center min-h-full py-10 animate-fade-in select-none grid-overlay">
-            {/* Centered Glowing Mandala Brand */}
-            <div className="relative flex items-center justify-center w-20 h-20 rounded-full border border-saffron-500/30 bg-wisdom-900/60 shadow-glow mb-6 animate-float">
-              <span className="font-display text-3xl text-saffron-400 font-bold">{currentAdvisor.avatarText}</span>
-              <div className="absolute inset-0 rounded-full border border-saffron-500/10 animate-pulse-glow" />
+            <div className="relative flex items-center justify-center w-20 h-20 rounded-full border border-primary-500/30 bg-surface-50/60 shadow-glow mb-6 animate-float">
+              <span className="font-display text-3xl text-primary-400 font-bold">{currentAdvisor.avatarText}</span>
+              <div className="absolute inset-0 rounded-full border border-primary-500/10 animate-pulse-glow" />
             </div>
 
-            {/* Title & Tagline */}
-            <h1 className="text-white text-xl md:text-2xl font-bold tracking-tight mb-2 font-display text-center">
-              How can NEETI advise you today?
+            <h1 className="text-surface-800 text-xl md:text-2xl font-bold tracking-tight mb-2 font-display text-center">
+              How can KOS advise you today?
             </h1>
-            <p className="animate-fade-in-up delay-200 text-wisdom-500 font-body text-xs md:text-sm mb-10 text-center max-w-sm leading-relaxed px-4">
+            <p className="animate-fade-in-up delay-200 text-surface-400 font-body text-xs md:text-sm mb-10 text-center max-w-sm leading-relaxed px-4">
               Ask anything across your installed knowledge packs. Answers will be grounded and explained.
             </p>
 
-            {/* Categorized suggestions grid */}
             <div className="animate-fade-in-up delay-400 grid grid-cols-1 md:grid-cols-2 gap-4 max-w-2xl w-full px-4">
               {currentAdvisor.suggestions.map((cat, idx) => {
                 const Icon = cat.icon
                 return (
-                  <div key={idx} className="bg-wisdom-900/30 border border-wisdom-700/40 rounded-2xl p-4 flex flex-col gap-3 glass">
-                    <h3 className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-wisdom-400">
+                  <div key={idx} className="bg-surface-50/30 border border-surface-200/40 rounded-2xl p-4 flex flex-col gap-3 glass">
+                    <h3 className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-surface-500">
                       <Icon className={`w-4 h-4 ${cat.color}`} />
                       {cat.category}
                     </h3>
@@ -410,8 +401,8 @@ export function ChatWindow({ conversationId, onConversationCreated, prefillQuery
                         <button
                           key={q}
                           onClick={() => handleSubmit(q)}
-                          className="w-full text-left text-xs text-wisdom-400 hover:text-saffron-300 hover:bg-wisdom-800/40 
-                            border border-transparent hover:border-saffron-500/20 px-3 py-2 rounded-xl transition-all duration-200"
+                          className="w-full text-left text-xs text-surface-500 hover:text-primary-300 hover:bg-surface-100/40 
+                            border border-transparent hover:border-primary-500/20 px-3 py-2 rounded-xl transition-all duration-200"
                         >
                           {q}
                         </button>
@@ -447,7 +438,7 @@ export function ChatWindow({ conversationId, onConversationCreated, prefillQuery
         </div>
 
         {error && (
-          <div className="animate-fade-in max-w-3xl mx-auto text-red-400 text-sm text-center mt-4 px-4 py-2.5 bg-red-950/30 border border-red-800/40 rounded-xl">
+          <div className="animate-fade-in max-w-3xl mx-auto text-danger-400 text-sm text-center mt-4 px-4 py-2.5 bg-danger-950/30 border border-danger-800/40 rounded-xl">
             {error}
           </div>
         )}

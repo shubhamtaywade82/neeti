@@ -74,20 +74,17 @@ export function SubscriptionModal({ open, onClose }: Props) {
   return (
     <Dialog.Root open={open} onOpenChange={(isOpen) => { if (!isOpen) onClose() }}>
       <Dialog.Portal>
-        {/* Backdrop */}
         <Dialog.Overlay className="fixed inset-0 bg-black/70 backdrop-blur-sm animate-fade-in z-50" />
 
-        {/* Content */}
         <Dialog.Content className="fixed inset-0 flex items-center justify-center z-50 p-4">
           <div className="glass-strong rounded-2xl max-w-3xl w-full p-8 animate-scale-in shadow-glow-strong relative">
-            {/* Header */}
             <div className="flex justify-between items-start mb-8">
-              <Dialog.Title className="font-display text-saffron-400 text-2xl font-semibold">
+              <Dialog.Title className="font-display text-primary-400 text-2xl font-semibold">
                 Unlock the Full Wisdom of Chanakya
               </Dialog.Title>
               <Dialog.Close asChild>
                 <button
-                  className="text-wisdom-400 hover:text-wisdom-100 transition-colors duration-200 p-1 rounded-lg hover:bg-wisdom-700/50"
+                  className="text-surface-500 hover:text-surface-800 transition-colors duration-200 p-1 rounded-lg hover:bg-surface-200/50"
                   aria-label="Close"
                 >
                   <X className="w-5 h-5" />
@@ -95,7 +92,6 @@ export function SubscriptionModal({ open, onClose }: Props) {
               </Dialog.Close>
             </div>
 
-            {/* Success message */}
             {success && (
               <div className="flex items-center gap-2 text-green-400 text-sm mb-6 px-4 py-3 rounded-xl bg-green-950/30 border border-green-800/30 animate-fade-in">
                 <Check className="w-4 h-4 flex-shrink-0" />
@@ -106,14 +102,12 @@ export function SubscriptionModal({ open, onClose }: Props) {
               </div>
             )}
 
-            {/* Error message */}
             {error && (
               <div className="text-red-400 text-sm mb-6 px-4 py-3 rounded-xl bg-red-950/30 border border-red-800/30 animate-fade-in">
                 {error}
               </div>
             )}
 
-            {/* Plan cards */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {PLANS.map((plan, i) => {
                 const Icon = plan.icon
@@ -125,49 +119,44 @@ export function SubscriptionModal({ open, onClose }: Props) {
                     key={plan.key}
                     className={`
                       relative rounded-2xl p-5 border transition-all duration-300
-                      bg-wisdom-800/40 hover:bg-wisdom-800/60
+                      bg-surface-100/40 hover:bg-surface-100/60
                       animate-fade-in-up ${delayClass}
                       ${
                         isPopular
-                          ? 'border-saffron-600/50 animate-border-glow shadow-glow'
-                          : 'border-wisdom-500/30 hover:border-saffron-600/40'
+                          ? 'border-primary-600/50 animate-border-glow shadow-glow'
+                          : 'border-surface-400/30 hover:border-primary-600/40'
                       }
                     `}
                   >
-                    {/* Popular badge */}
                     {isPopular && (
                       <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                        <span className="badge-saffron text-[10px] font-semibold uppercase tracking-wider whitespace-nowrap">
+                        <span className="badge-primary text-[10px] font-semibold uppercase tracking-wider whitespace-nowrap">
                           Most Popular
                         </span>
                       </div>
                     )}
 
-                    {/* Plan icon & name */}
                     <div className="flex items-center gap-2 mb-3">
-                      <Icon className="w-5 h-5 text-saffron-500" />
-                      <h3 className="text-wisdom-50 font-semibold text-lg">{plan.name}</h3>
+                      <Icon className="w-5 h-5 text-primary-500" />
+                      <h3 className="text-surface-800 font-semibold text-lg">{plan.name}</h3>
                     </div>
 
-                    {/* Price */}
                     <div className="mb-4">
-                      <span className="font-display text-3xl font-bold text-gradient-saffron">
+                      <span className="font-display text-3xl font-bold text-primary-400">
                         {plan.price}
                       </span>
-                      <span className="text-wisdom-400 text-sm">{plan.period}</span>
+                      <span className="text-surface-500 text-sm">{plan.period}</span>
                     </div>
 
-                    {/* Features */}
                     <ul className="space-y-2 mb-6">
                       {plan.features.map((f) => (
-                        <li key={f} className="flex items-start gap-2 text-wisdom-200 text-xs">
-                          <Check className="w-3.5 h-3.5 text-saffron-500 mt-0.5 flex-shrink-0" />
+                        <li key={f} className="flex items-start gap-2 text-surface-700 text-xs">
+                          <Check className="w-3.5 h-3.5 text-primary-500 mt-0.5 flex-shrink-0" />
                           <span>{f}</span>
                         </li>
                       ))}
                     </ul>
 
-                    {/* Subscribe button */}
                     <button
                       onClick={() => subscribe(plan.key)}
                       disabled={loading === plan.key}

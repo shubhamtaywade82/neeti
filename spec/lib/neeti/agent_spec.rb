@@ -38,6 +38,8 @@ RSpec.describe Neeti::Agent do
 
     context "when reflection score is low" do
       before do
+        # Use a single sutra to trigger reflection (needs_reflection? requires < 2)
+        allow(retriever).to receive(:retrieve).and_return(sutras.take(1))
         allow(provider).to receive(:chat).and_return(
           "Weak advice.",
           '{"good":false,"issues":["lacks sutra citations"],"score":4}',

@@ -9,6 +9,8 @@ export interface FeatureFlags {
   memoryInsightsView: boolean
   chatReasoning: boolean
   chatCitationsToggle: boolean
+  documentsView: boolean
+  collectionsView: boolean
 }
 
 interface FeatureFlagsState {
@@ -24,6 +26,8 @@ const defaultFlags: FeatureFlags = {
   memoryInsightsView: true,
   chatReasoning: true,
   chatCitationsToggle: true,
+  documentsView: true,
+  collectionsView: true,
 }
 
 export const useFeatureFlagsStore = create<FeatureFlagsState>()(

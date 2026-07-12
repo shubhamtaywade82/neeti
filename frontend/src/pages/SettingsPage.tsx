@@ -195,17 +195,17 @@ export function SettingsPage() {
       : 100
 
   return (
-    <div className="flex h-[calc(100vh-3.5rem)] overflow-hidden bg-wisdom-950 font-body relative z-20">
+    <div className="flex h-[calc(100vh-3.5rem)] overflow-hidden bg-surface-0 font-body relative z-20">
       {/* ── Left Sidebar (Vertical Navigation Tabs) ── */}
-      <div className="w-64 shrink-0 border-r border-wisdom-700/40 bg-wisdom-900/40 flex flex-col h-full z-10 select-none">
-        <div className="p-4 border-b border-wisdom-700/30 flex items-center gap-2">
+      <div className="w-64 shrink-0 border-r border-surface-200/40 bg-surface-50/40 flex flex-col h-full z-10 select-none">
+        <div className="p-4 border-b border-surface-200/30 flex items-center gap-2">
           <button
             onClick={() => navigate(-1)}
-            className="p-1 text-wisdom-400 hover:text-saffron-400 hover:bg-wisdom-800/40 rounded-lg transition-colors"
+            className="p-1 text-surface-500 hover:text-primary-400 hover:bg-surface-100/40 rounded-lg transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
           </button>
-          <h2 className="text-sm font-bold text-wisdom-100 font-display">
+          <h2 className="text-sm font-bold text-surface-800 font-display">
             Settings Page
           </h2>
         </div>
@@ -225,12 +225,12 @@ export function SettingsPage() {
                 onClick={() => setActiveTab(tab.id as any)}
                 className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold uppercase tracking-wider transition-all duration-200 border relative ${
                   isActive
-                    ? 'bg-saffron-500/10 border-saffron-500/20 text-saffron-400 font-bold'
-                    : 'border-transparent text-wisdom-400 hover:bg-wisdom-800/40 hover:text-wisdom-200'
+                    ? 'bg-primary-500/10 border-primary-500/20 text-primary-400 font-bold'
+                    : 'border-transparent text-surface-500 hover:bg-surface-100/40 hover:text-surface-700'
                 }`}
               >
                 {isActive && (
-                  <div className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-4 bg-saffron-500 rounded-r-md" />
+                  <div className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-4 bg-primary-500 rounded-r-md" />
                 )}
                 <Icon className="w-4 h-4 shrink-0" />
                 <span>{tab.label}</span>
@@ -241,67 +241,67 @@ export function SettingsPage() {
       </div>
 
       {/* ── Right Content Panel ── */}
-      <div className="flex-1 overflow-y-auto bg-wisdom-950 p-6 sm:p-8">
+      <div className="flex-1 overflow-y-auto bg-surface-0 p-6 sm:p-8">
         <div className="max-w-3xl space-y-6 animate-fade-in-up">
           {/* PROFILE & SECURITY TAB */}
           {activeTab === 'profile' && (
             <div className="space-y-6">
-              <h3 className="text-lg font-bold font-display text-wisdom-100 border-b border-wisdom-700/20 pb-3">
+              <h3 className="text-lg font-bold font-display text-surface-800 border-b border-surface-200/20 pb-3">
                 Profile & Security
               </h3>
 
               {/* Usage stats block */}
               {usage && (
-                <div className="glass-card border border-wisdom-700/40 p-5 rounded-2xl space-y-4">
+                <div className="glass-card border border-surface-200/40 p-5 rounded-2xl space-y-4">
                   <div className="flex justify-between items-center select-none">
-                    <span className="text-xs font-bold text-wisdom-400 uppercase tracking-widest flex items-center gap-1.5">
-                      <Shield className="w-4 h-4 text-saffron-500" />
+                    <span className="text-xs font-bold text-surface-500 uppercase tracking-widest flex items-center gap-1.5">
+                      <Shield className="w-4 h-4 text-primary-500" />
                       Usage & Plan
                     </span>
-                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-saffron-500/10 border border-saffron-500/20 text-saffron-400 uppercase tracking-wider">
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-primary-500/10 border border-primary-500/20 text-primary-400 uppercase tracking-wider">
                       {usage.plan}
                     </span>
                   </div>
                   <div className="space-y-1.5 select-none">
-                    <div className="flex justify-between text-xs text-wisdom-400">
+                    <div className="flex justify-between text-xs text-surface-500">
                       <span>Daily API Query Count</span>
-                      <span className="font-semibold text-wisdom-200">
+                      <span className="font-semibold text-surface-700">
                         {isUnlimited ? `${usage.daily_query_count} / Unlimited` : `${usage.daily_query_count} / ${usage.plan_limit}`}
                       </span>
                     </div>
-                    <div className="w-full h-2 bg-wisdom-800 rounded-full overflow-hidden">
+                    <div className="w-full h-2 bg-surface-100 rounded-full overflow-hidden">
                       <div
-                        className="h-full rounded-full bg-gradient-to-r from-saffron-600 to-saffron-400"
+                        className="h-full rounded-full bg-gradient-to-r from-primary-600 to-primary-400"
                         style={{ width: `${usagePercent}%` }}
                       />
                     </div>
                   </div>
 
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-3 pt-2 select-none">
-                    <div className="p-3 bg-wisdom-900 border border-wisdom-700/40 rounded-xl">
-                      <div className="text-[9px] font-bold text-wisdom-500 uppercase tracking-wider">Total Convos</div>
-                      <div className="text-sm font-semibold text-wisdom-200 mt-1">{usage.total_conversations}</div>
+                    <div className="p-3 bg-surface-50 border border-surface-200/40 rounded-xl">
+                      <div className="text-[9px] font-bold text-surface-400 uppercase tracking-wider">Total Convos</div>
+                      <div className="text-sm font-semibold text-surface-700 mt-1">{usage.total_conversations}</div>
                     </div>
-                    <div className="p-3 bg-wisdom-900 border border-wisdom-700/40 rounded-xl">
-                      <div className="text-[9px] font-bold text-wisdom-500 uppercase tracking-wider">Total Messages</div>
-                      <div className="text-sm font-semibold text-wisdom-200 mt-1">{usage.total_messages}</div>
+                    <div className="p-3 bg-surface-50 border border-surface-200/40 rounded-xl">
+                      <div className="text-[9px] font-bold text-surface-400 uppercase tracking-wider">Total Messages</div>
+                      <div className="text-sm font-semibold text-surface-700 mt-1">{usage.total_messages}</div>
                     </div>
-                    <div className="p-3 bg-wisdom-900 border border-wisdom-700/40 rounded-xl">
-                      <div className="text-[9px] font-bold text-wisdom-500 uppercase tracking-wider">Insights</div>
-                      <div className="text-sm font-semibold text-wisdom-200 mt-1">{usage.insights_extracted}</div>
+                    <div className="p-3 bg-surface-50 border border-surface-200/40 rounded-xl">
+                      <div className="text-[9px] font-bold text-surface-400 uppercase tracking-wider">Insights</div>
+                      <div className="text-sm font-semibold text-surface-700 mt-1">{usage.insights_extracted}</div>
                     </div>
-                    <div className="p-3 bg-wisdom-900 border border-wisdom-700/40 rounded-xl">
-                      <div className="text-[9px] font-bold text-wisdom-500 uppercase tracking-wider">Resets at</div>
-                      <div className="text-xs font-semibold text-wisdom-200 mt-1.5 truncate">{usage.daily_reset_at}</div>
+                    <div className="p-3 bg-surface-50 border border-surface-200/40 rounded-xl">
+                      <div className="text-[9px] font-bold text-surface-400 uppercase tracking-wider">Resets at</div>
+                      <div className="text-xs font-semibold text-surface-700 mt-1.5 truncate">{usage.daily_reset_at}</div>
                     </div>
                   </div>
                 </div>
               )}
 
               {/* Email update card */}
-              <div className="glass-card border border-wisdom-700/40 p-5 rounded-2xl space-y-4">
-                <h4 className="text-xs font-bold text-wisdom-400 uppercase tracking-wider flex items-center gap-1.5">
-                  <Mail className="w-4 h-4 text-saffron-500" />
+              <div className="glass-card border border-surface-200/40 p-5 rounded-2xl space-y-4">
+                <h4 className="text-xs font-bold text-surface-500 uppercase tracking-wider flex items-center gap-1.5">
+                  <Mail className="w-4 h-4 text-primary-500" />
                   Update Email Address
                 </h4>
                 {profileMsg && <Msg type={profileMsg.type} text={profileMsg.text} />}
@@ -315,9 +315,9 @@ export function SettingsPage() {
               </div>
 
               {/* Password change card */}
-              <div className="glass-card border border-wisdom-700/40 p-5 rounded-2xl space-y-4">
-                <h4 className="text-xs font-bold text-wisdom-400 uppercase tracking-wider flex items-center gap-1.5">
-                  <Lock className="w-4 h-4 text-saffron-500" />
+              <div className="glass-card border border-surface-200/40 p-5 rounded-2xl space-y-4">
+                <h4 className="text-xs font-bold text-surface-500 uppercase tracking-wider flex items-center gap-1.5">
+                  <Lock className="w-4 h-4 text-primary-500" />
                   Change Password
                 </h4>
                 {pwMsg && <Msg type={pwMsg.type} text={pwMsg.text} />}
@@ -338,7 +338,7 @@ export function SettingsPage() {
                   Danger Zone
                 </h4>
                 {deleteMsg && <Msg type="err" text={deleteMsg} />}
-                <p className="text-xs text-wisdom-400 leading-relaxed">
+                <p className="text-xs text-surface-500 leading-relaxed">
                   Permanently delete your profile account, conversation logs, and memory models. This cannot be undone.
                 </p>
                 <div className="space-y-3.5">
@@ -357,13 +357,13 @@ export function SettingsPage() {
           {/* AI MODELS ROUTER TAB */}
           {activeTab === 'models' && (
             <div className="space-y-6">
-              <h3 className="text-lg font-bold font-display text-wisdom-100 border-b border-wisdom-700/20 pb-3">
+              <h3 className="text-lg font-bold font-display text-surface-800 border-b border-surface-200/20 pb-3">
                 AI Model Configuration
               </h3>
 
-              <div className="glass-card border border-wisdom-700/40 p-5 rounded-2xl space-y-4">
-                <h4 className="text-xs font-bold text-wisdom-400 uppercase tracking-wider flex items-center gap-1.5">
-                  <Cpu className="w-4 h-4 text-saffron-500" />
+              <div className="glass-card border border-surface-200/40 p-5 rounded-2xl space-y-4">
+                <h4 className="text-xs font-bold text-surface-500 uppercase tracking-wider flex items-center gap-1.5">
+                  <Cpu className="w-4 h-4 text-primary-500" />
                   Primary Reasoning Model
                 </h4>
 
@@ -376,8 +376,8 @@ export function SettingsPage() {
                         onClick={() => setSelectedModelId(m.id)}
                         className={`flex items-center justify-between p-3.5 border rounded-xl cursor-pointer transition-all duration-150 ${
                           isSelected
-                            ? 'bg-saffron-500/5 border-saffron-500/30'
-                            : 'bg-wisdom-900 border-wisdom-700/40 hover:border-wisdom-700/80'
+                            ? 'bg-primary-500/5 border-primary-500/30'
+                            : 'bg-surface-50 border-surface-200/40 hover:border-surface-200/80'
                         }`}
                       >
                         <div className="flex items-center gap-3">
@@ -386,10 +386,10 @@ export function SettingsPage() {
                             name="model-select"
                             checked={isSelected}
                             onChange={() => setSelectedModelId(m.id)}
-                            className="w-4 h-4 accent-saffron-500 bg-transparent border-wisdom-700"
+                            className="w-4 h-4 accent-primary-500 bg-transparent border-surface-200"
                           />
                           <div>
-                            <h5 className="text-xs font-bold text-wisdom-100">{m.name}</h5>
+                            <h5 className="text-xs font-bold text-surface-800">{m.name}</h5>
                             <span
                               className={`inline-block text-[8px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded mt-1.5 ${
                                 m.provider === 'local'
@@ -403,7 +403,7 @@ export function SettingsPage() {
                         </div>
 
                         <div className="flex items-center gap-4">
-                          <span className="text-[10px] text-wisdom-500 font-bold">{m.latency}</span>
+                          <span className="text-[10px] text-surface-400 font-bold">{m.latency}</span>
                           <button
                             onClick={(e) => {
                               e.preventDefault()
@@ -411,7 +411,7 @@ export function SettingsPage() {
                               toggleModelStatus(m.id)
                             }}
                             className={`w-8 h-4.5 rounded-full relative transition-colors duration-200 ${
-                              m.status !== 'off' ? 'bg-emerald-500' : 'bg-wisdom-800'
+                              m.status !== 'off' ? 'bg-emerald-500' : 'bg-surface-100'
                             }`}
                           >
                             <span
@@ -428,16 +428,16 @@ export function SettingsPage() {
               </div>
 
               {/* Automatic Fallback routing */}
-              <div className="glass-card border border-wisdom-700/40 p-5 rounded-2xl space-y-4 select-none">
-                <h4 className="text-xs font-bold text-wisdom-400 uppercase tracking-wider flex items-center gap-1.5">
-                  <Compass className="w-4 h-4 text-saffron-500" />
+              <div className="glass-card border border-surface-200/40 p-5 rounded-2xl space-y-4 select-none">
+                <h4 className="text-xs font-bold text-surface-500 uppercase tracking-wider flex items-center gap-1.5">
+                  <Compass className="w-4 h-4 text-primary-500" />
                   Fallback Routing Chain
                 </h4>
-                <p className="text-xs text-wisdom-400 leading-relaxed">
+                <p className="text-xs text-surface-500 leading-relaxed">
                   Enable automatic model handoffs in case the primary Ollama endpoint is down or times out.
                 </p>
-                <div className="p-3 bg-wisdom-900 border border-wisdom-700/40 rounded-xl text-[11px] text-wisdom-500 flex items-center gap-2">
-                  <AlertCircle className="w-4 h-4 text-saffron-400 shrink-0" />
+                <div className="p-3 bg-surface-50 border border-surface-200/40 rounded-xl text-[11px] text-surface-400 flex items-center gap-2">
+                  <AlertCircle className="w-4 h-4 text-primary-400 shrink-0" />
                   <span>Chain sequence: Ollama (Local) → OpenAI (Standby) → Anthropic (Standby). Latencies tracked per query.</span>
                 </div>
               </div>
@@ -447,16 +447,16 @@ export function SettingsPage() {
           {/* BETA TOGGLES TAB */}
           {activeTab === 'beta' && user?.role === 'admin' && (
             <div className="space-y-6">
-              <h3 className="text-lg font-bold font-display text-wisdom-100 border-b border-wisdom-700/20 pb-3">
+              <h3 className="text-lg font-bold font-display text-surface-800 border-b border-surface-200/20 pb-3">
                 Beta Feature Flags
               </h3>
 
-              <div className="glass-card border border-wisdom-700/40 p-5 rounded-2xl space-y-4">
-                <h4 className="text-xs font-bold text-wisdom-400 uppercase tracking-wider flex items-center gap-1.5">
-                  <ToggleLeft className="w-4 h-4 text-saffron-500" />
+              <div className="glass-card border border-surface-200/40 p-5 rounded-2xl space-y-4">
+                <h4 className="text-xs font-bold text-surface-500 uppercase tracking-wider flex items-center gap-1.5">
+                  <ToggleLeft className="w-4 h-4 text-primary-500" />
                   Admin Feature Flags
                 </h4>
-                <p className="text-xs text-wisdom-400 leading-relaxed">
+                <p className="text-xs text-surface-500 leading-relaxed">
                   Enable or disable incomplete/beta workspace views. Disabling hides their navigational items in the Sidebar.
                 </p>
 
@@ -466,16 +466,16 @@ export function SettingsPage() {
                     return (
                       <div
                         key={cfg.key}
-                        className="flex items-center justify-between gap-6 p-3 bg-wisdom-900 border border-wisdom-700/40 rounded-xl"
+                        className="flex items-center justify-between gap-6 p-3 bg-surface-50 border border-surface-200/40 rounded-xl"
                       >
                         <div className="min-w-0">
-                          <span className="text-xs font-bold text-wisdom-200">{cfg.label}</span>
-                          <p className="text-[10px] text-wisdom-500 mt-0.5 leading-relaxed">{cfg.desc}</p>
+                          <span className="text-xs font-bold text-surface-700">{cfg.label}</span>
+                          <p className="text-[10px] text-surface-400 mt-0.5 leading-relaxed">{cfg.desc}</p>
                         </div>
                         <button
                           onClick={() => setFlag(cfg.key, !isChecked)}
                           className={`w-9 h-5 rounded-full relative transition-colors duration-200 shrink-0 ${
-                            isChecked ? 'bg-saffron-500' : 'bg-wisdom-800'
+                            isChecked ? 'bg-primary-500' : 'bg-surface-100'
                           }`}
                         >
                           <span
@@ -495,7 +495,7 @@ export function SettingsPage() {
           {/* BILLING & SUBSCRIPTIONS TAB */}
           {activeTab === 'billing' && (
             <div className="space-y-6">
-              <h3 className="text-lg font-bold font-display text-wisdom-100 border-b border-wisdom-700/20 pb-3">
+              <h3 className="text-lg font-bold font-display text-surface-800 border-b border-surface-200/20 pb-3">
                 Billing & Subscription Plans
               </h3>
 
@@ -503,25 +503,25 @@ export function SettingsPage() {
 
               {/* Current Plan Overview */}
               {usage && (
-                <div className="glass-card border border-wisdom-700/40 p-5 rounded-2xl space-y-4">
+                <div className="glass-card border border-surface-200/40 p-5 rounded-2xl space-y-4">
                   <div className="flex justify-between items-center select-none">
-                    <span className="text-xs font-bold text-wisdom-400 uppercase tracking-widest flex items-center gap-1.5">
-                      <Shield className="w-4 h-4 text-saffron-500" />
+                    <span className="text-xs font-bold text-surface-500 uppercase tracking-widest flex items-center gap-1.5">
+                      <Shield className="w-4 h-4 text-primary-500" />
                       Active Plan
                     </span>
-                    <span className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-saffron-500/10 border border-saffron-500/20 text-saffron-400 uppercase tracking-widest">
+                    <span className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-primary-500/10 border border-primary-500/20 text-primary-400 uppercase tracking-widest">
                       {usage.plan}
                     </span>
                   </div>
 
                   <div className="flex justify-between items-center text-xs">
                     <div>
-                      <p className="text-wisdom-300 font-semibold">Daily queries quota:</p>
-                      <span className="text-wisdom-500">
+                      <p className="text-surface-600 font-semibold">Daily queries quota:</p>
+                      <span className="text-surface-400">
                         {isUnlimited ? 'Unlimited reasoning capacity' : 'Resets daily at midnight'}
                       </span>
                     </div>
-                    <span className="text-sm font-bold text-wisdom-200 uppercase">
+                    <span className="text-sm font-bold text-surface-700 uppercase">
                       {isUnlimited ? 'Unlimited' : `${usage.daily_query_count} / ${usage.plan_limit}`}
                     </span>
                   </div>
@@ -545,13 +545,13 @@ export function SettingsPage() {
                   return (
                     <div
                       key={key}
-                      className={`glass-card border p-5 rounded-2xl flex flex-col justify-between h-80 hover:border-wisdom-700/80 transition-all duration-200 ${
-                        isCurrent ? 'border-saffron-500/40 bg-saffron-500/[0.02]' : 'border-wisdom-700/40'
+                      className={`glass-card border p-5 rounded-2xl flex flex-col justify-between h-80 hover:border-surface-200/80 transition-all duration-200 ${
+                        isCurrent ? 'border-primary-500/40 bg-primary-500/[0.02]' : 'border-surface-200/40'
                       }`}
                     >
                       <div>
                         <div className="flex items-center justify-between">
-                          <h4 className="text-sm font-bold text-wisdom-100 capitalize">{key} Plan</h4>
+                          <h4 className="text-sm font-bold text-surface-800 capitalize">{key} Plan</h4>
                           {isCurrent && (
                             <span className="inline-flex items-center gap-1 text-[9px] font-bold text-emerald-400 uppercase tracking-widest bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full">
                               Current
@@ -559,19 +559,19 @@ export function SettingsPage() {
                           )}
                         </div>
                         <div className="mt-3.5">
-                          <span className="text-2xl font-bold font-display text-wisdom-100">
+                          <span className="text-2xl font-bold font-display text-surface-800">
                             ₹{plan.price_inr}
                           </span>
-                          <span className="text-[10px] text-wisdom-500 font-semibold block mt-0.5">
+                          <span className="text-[10px] text-surface-400 font-semibold block mt-0.5">
                             per month
                           </span>
                         </div>
 
                         {/* Features */}
-                        <ul className="mt-5 space-y-2 text-[11px] text-wisdom-400 font-medium">
+                        <ul className="mt-5 space-y-2 text-[11px] text-surface-500 font-medium">
                           {plan.features?.map((feat: string, idx: number) => (
                             <li key={idx} className="flex gap-1.5 items-start">
-                              <span className="text-saffron-400">✓</span>
+                              <span className="text-primary-400">✓</span>
                               <span className="line-clamp-1">{feat}</span>
                             </li>
                           ))}
@@ -583,8 +583,8 @@ export function SettingsPage() {
                         disabled={isCurrent}
                         className={`w-full py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all duration-200 mt-6 ${
                           isCurrent
-                            ? 'bg-wisdom-800 text-wisdom-500 border border-wisdom-700/30 cursor-not-allowed'
-                            : 'bg-saffron-500 hover:bg-saffron-400 text-wisdom-950 shadow-glow'
+                            ? 'bg-surface-100 text-surface-400 border border-surface-200/30 cursor-not-allowed'
+                            : 'bg-primary-500 hover:bg-primary-400 text-surface-0 shadow-glow'
                         }`}
                       >
                         {isCurrent ? 'Active Plan' : 'Select Plan'}
@@ -606,7 +606,7 @@ export function SettingsPage() {
 function Input({ label, type, value, onChange }: { label: string; type: string; value: string; onChange: (v: string) => void }) {
   return (
     <div className="space-y-1.5">
-      <label className="text-wisdom-400 text-xs font-semibold select-none">{label}</label>
+      <label className="text-surface-500 text-xs font-semibold select-none">{label}</label>
       <input
         type={type}
         value={value}

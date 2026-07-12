@@ -35,13 +35,15 @@ module Api
 
         mode = params[:mode]&.to_sym == :cag ? :cag : :retrieval
         advisor = advisor_name.to_sym
+        scope = params[:retrieval_scope].presence || 'library'
         result = agent.advise(
           params.require(:query),
-          user:         current_user,
-          conversation: conversation,
-          stream_proc:  stream_proc,
-          mode:         mode,
-          advisor:      advisor
+          user:             current_user,
+          conversation:     conversation,
+          stream_proc:      stream_proc,
+          mode:             mode,
+          advisor:          advisor,
+          retrieval_scope:  scope
         )
 
         # 2. Save full assistant message on successful completion
@@ -56,6 +58,7 @@ module Api
 
         cited = Sutra.where(id: result[:cited_sutra_ids]).map do |s|
           {
+            type: 'sutra',
             id: s.canonical_id,
             preview: s.translation_en&.truncate(80),
             sanskrit: s.sanskrit,
@@ -64,18 +67,30 @@ module Api
             translation_hi: s.translation_hi,
             chapter: s.chapter,
             chapter_title: s.chapter_title,
-            themes: s.themes || [],
-            virtues: s.virtues || [],
-            vices: s.vices || [],
-            situations: s.situations || [],
-            emotions: s.emotions || []
+            pack: s.knowledge_pack&.slug
           }
+        end
+
+        doc_cited = if result[:cited_document_ids].present?
+          Document.where(id: result[:cited_document_ids]).map do |d|
+            {
+              type: 'document',
+              id: d.id,
+              filename: d.filename,
+              title: d.title,
+              file_type: d.file_type,
+              collection: d.collection&.name
+            }
+          end
+        else
+          []
         end
 
         sse.write({
           type:             'complete',
           conversation_id:  conversation.id,
           cited_sutras:     cited,
+          cited_documents:  doc_cited,
           reflection_score: result[:reflection_score],
           mode:             mode
         }.to_json)

@@ -1,6 +1,8 @@
 class Sutra < ApplicationRecord
   include PgSearch::Model
 
+  belongs_to :knowledge_pack, optional: true
+
   pg_search_scope :full_text_search,
     using: { tsearch: { tsvector_column: 'search_vector', dictionary: 'english' } }
 
@@ -104,5 +106,5 @@ class Sutra < ApplicationRecord
 
   validates :canonical_id,   presence: true, uniqueness: true
   validates :translation_en, presence: true
-  validates :chapter,        presence: true, numericality: { only_integer: true, greater_than_or_equal_to: 1, less_than_or_equal_to: 17 }
+  validates :chapter,        presence: true, numericality: { only_integer: true, greater_than_or_equal_to: 1 }
 end

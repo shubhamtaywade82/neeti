@@ -28,30 +28,27 @@ export function LoginPage() {
   }
 
   return (
-    <div className="relative min-h-screen flex items-center justify-center px-4 overflow-hidden bg-gradient-to-br from-wisdom-950 via-wisdom-900 to-wisdom-950">
+    <div className="relative min-h-screen flex items-center justify-center px-4 overflow-hidden bg-gradient-to-br from-surface-0 via-surface-50 to-surface-0">
       {/* Animated gradient overlay */}
-      <div className="absolute inset-0 bg-gradient-to-tr from-saffron-900/10 via-transparent to-saffron-800/5 animate-pulse-glow" />
-
-      {/* Decorative background character */}
-      <span
-        className="absolute select-none pointer-events-none font-display text-[20rem] leading-none text-saffron-400/[0.04] -translate-x-1/4 -translate-y-1/4 top-1/2 left-1/2"
-        aria-hidden="true"
-      >
-        नी
-      </span>
+      <div className="absolute inset-0 bg-gradient-to-tr from-primary-900/10 via-transparent to-primary-800/5 animate-pulse-glow" />
 
       {/* Subtle radial glow behind card */}
-      <div className="absolute w-[500px] h-[500px] rounded-full bg-saffron-500/[0.06] blur-[120px]" />
+      <div className="absolute w-[500px] h-[500px] rounded-full bg-primary-500/[0.06] blur-[120px]" />
 
       {/* Card */}
       <div className="relative z-10 w-full max-w-md animate-scale-in">
         {/* Branding */}
         <div className="text-center mb-8 animate-fade-in">
-          <p className="font-display text-6xl text-saffron-400 animate-float drop-shadow-lg">
-            नीति
+          <div className="w-14 h-14 mx-auto bg-gradient-to-br from-primary-500 to-primary-700 rounded-2xl flex items-center justify-center shadow-glow">
+            <svg className="w-7 h-7 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20" />
+            </svg>
+          </div>
+          <p className="mt-4 font-display text-xl font-bold text-surface-800">
+            Knowledge OS
           </p>
-          <p className="mt-2 font-body text-sm text-wisdom-400 tracking-wide delay-100 animate-fade-in-up">
-            Strategic wisdom for the modern mind
+          <p className="mt-1 font-body text-sm text-surface-500">
+            Your AI workspace for documents, research, and conversations
           </p>
         </div>
 
@@ -60,24 +57,24 @@ export function LoginPage() {
           onSubmit={submit}
           className="glass-strong rounded-2xl p-8 space-y-5 shadow-glow animate-fade-in-up delay-200"
         >
-          <h2 className="font-display text-2xl text-wisdom-100 animate-fade-in delay-100">
+          <h2 className="font-display text-2xl text-surface-800 animate-fade-in delay-100">
             Sign in
           </h2>
 
           {/* Error */}
           {error && (
-            <div className="flex items-center gap-2 rounded-xl bg-red-500/10 border border-red-500/20 px-4 py-3 animate-fade-in">
-              <span className="text-red-400 text-sm font-body">{error}</span>
+            <div className="flex items-center gap-2 rounded-xl bg-danger-500/10 border border-danger-500/20 px-4 py-3 animate-fade-in">
+              <span className="text-danger-400 text-sm font-body">{error}</span>
             </div>
           )}
 
           {/* Email */}
           <div className="space-y-1.5 animate-fade-in-up delay-200">
-            <label htmlFor="login-email" className="block text-xs font-body font-medium text-wisdom-400 uppercase tracking-wider">
+            <label htmlFor="login-email" className="block text-xs font-body font-medium text-surface-400 uppercase tracking-wider">
               Email
             </label>
             <div className="relative">
-              <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-wisdom-500" />
+              <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-surface-500" />
               <input
                 id="login-email"
                 type="email"
@@ -92,11 +89,11 @@ export function LoginPage() {
 
           {/* Password */}
           <div className="space-y-1.5 animate-fade-in-up delay-300">
-            <label htmlFor="login-password" className="block text-xs font-body font-medium text-wisdom-400 uppercase tracking-wider">
+            <label htmlFor="login-password" className="block text-xs font-body font-medium text-surface-400 uppercase tracking-wider">
               Password
             </label>
             <div className="relative">
-              <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-wisdom-500" />
+              <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-surface-500" />
               <input
                 id="login-password"
                 type="password"
@@ -129,11 +126,11 @@ export function LoginPage() {
           </button>
 
           {/* Register link */}
-          <p className="text-center text-sm font-body text-wisdom-500 animate-fade-in-up delay-500">
+          <p className="text-center text-sm font-body text-surface-500 animate-fade-in-up delay-500">
             New here?{' '}
             <Link
               to="/register"
-              className="text-saffron-400 hover:text-saffron-300 transition-colors hover:underline underline-offset-4"
+              className="text-primary-400 hover:text-primary-300 transition-colors hover:underline underline-offset-4"
             >
               Create account
             </Link>

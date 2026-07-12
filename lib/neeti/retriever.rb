@@ -120,9 +120,16 @@ module Neeti
       "thinking"          => %w[strategy wisdom knowledge],
     }.freeze
 
-    def initialize(llm_classifier:, limit: DEFAULT_LIMIT)
-      @llm   = llm_classifier
-      @limit = limit
+    def initialize(llm_classifier:, limit: DEFAULT_LIMIT, pack_ids: nil)
+      @llm      = llm_classifier
+      @limit    = limit
+      @pack_ids = pack_ids
+    end
+
+    def base_scope
+      scope = Sutra.all
+      scope = scope.where(knowledge_pack_id: @pack_ids) if @pack_ids.present?
+      scope
     end
 
     # @param query [String]
@@ -144,14 +151,11 @@ module Neeti
     private
 
     def layer1_metadata(query)
-      # Expand query with synonyms
       expanded_keywords = expand_keywords(query)
       return [] if expanded_keywords.empty?
 
-      # Build OR tsquery from expanded keywords
       or_tsquery = expanded_keywords.map { |k| "plainto_tsquery('english', #{ActiveRecord::Base.connection.quote(k)})" }.join(" || ")
 
-      # Search across all concept categories using join tables
       metadata_tsvector = <<~SQL
         to_tsvector('english', coalesce((
           SELECT string_agg(t.name, ' ')
@@ -185,12 +189,12 @@ module Neeti
         ), ''))
       SQL
 
-      Sutra.where("#{metadata_tsvector} @@ (#{or_tsquery})")
+      base_scope.where("#{metadata_tsvector} @@ (#{or_tsquery})")
            .limit(@limit * 2).to_a
     end
 
     def layer2_fts(query)
-      Sutra.where("search_vector @@ plainto_tsquery('english', ?)", query)
+      base_scope.where("search_vector @@ plainto_tsquery('english', ?)", query)
            .order(Arel.sql(ActiveRecord::Base.sanitize_sql_array(
              ["ts_rank(search_vector, plainto_tsquery('english', ?)) DESC", query]
            )))
@@ -201,11 +205,10 @@ module Neeti
       themes = @llm.classify_themes(query, Theme.pluck(:name))
       return [] if themes.empty?
 
-      # Use join table for theme matching
       sutra_ids = SutraTheme.where(theme_id: Theme.where(name: themes).select(:id))
                     .distinct
                     .pluck(:sutra_id)
-      Sutra.where(id: sutra_ids).limit(@limit * 2).to_a
+      base_scope.where(id: sutra_ids).limit(@limit * 2).to_a
     end
 
     def layer4_graph(existing)
@@ -220,7 +223,7 @@ module Neeti
                     .where.not(sutra_id: existing.map(&:id))
                     .distinct
                     .pluck(:sutra_id)
-      Sutra.where(id: sutra_ids).limit(@limit).to_a
+      base_scope.where(id: sutra_ids).limit(@limit).to_a
     end
 
     def sufficient?(r) = r.size >= MINIMUM_RESULTS

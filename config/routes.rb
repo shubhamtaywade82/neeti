@@ -46,6 +46,12 @@ Rails.application.routes.draw do
         get    'sutras',       to: '/api/v1/admin#sutras'
       end
 
+      # Collections
+      resources :collections, only: [:index, :show, :create, :update, :destroy]
+
+      # Documents
+      resources :documents, only: [:index, :show, :create, :update, :destroy]
+
       # Subscriptions — implemented in Task 8
       get    '/subscriptions/plans',   to: 'subscriptions#plans'
       post   '/subscriptions',         to: 'subscriptions#create'

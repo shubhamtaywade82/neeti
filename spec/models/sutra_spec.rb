@@ -4,7 +4,7 @@ RSpec.describe Sutra, type: :model do
   it { should validate_presence_of(:translation_en) }
   it { should validate_presence_of(:chapter) }
   it { should validate_presence_of(:canonical_id) }
-  it { should validate_numericality_of(:chapter).only_integer.is_greater_than_or_equal_to(1).is_less_than_or_equal_to(17) }
+  it { should validate_numericality_of(:chapter).only_integer.is_greater_than_or_equal_to(1) }
 
   describe "validate_uniqueness_of :canonical_id" do
     subject { create(:sutra, canonical_id: "ch1.verse1a") }

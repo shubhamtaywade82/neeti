@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { clsx } from 'clsx'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
-import { ThumbsUp, ThumbsDown, ChevronDown, ChevronUp, Cpu, Clock, Layers, HelpCircle, Activity } from 'lucide-react'
+import { ThumbsUp, ThumbsDown, ChevronDown, ChevronUp, Cpu, Clock, Layers, Activity } from 'lucide-react'
 import { useFeatureFlagsStore } from '../stores/featureFlagsStore'
 
 interface Props {
@@ -24,21 +24,19 @@ export function MessageBubble({ role, content, isStreaming, avatarText = 'नी
 
   return (
     <div className={clsx('flex mb-6 animate-fade-in-up group/msg', isUser ? 'justify-end' : 'justify-start')}>
-      {/* Assistant avatar */}
       {!isUser && (
-        <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-saffron-500 to-saffron-700 flex items-center justify-center text-xs font-bold text-wisdom-950 mr-3 mt-1 shrink-0 shadow-glow select-none">
+        <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-primary-500 to-primary-700 flex items-center justify-center text-xs font-bold text-surface-0 mr-3 mt-1 shrink-0 shadow-glow select-none">
           {avatarText}
         </div>
       )}
 
       <div className="flex flex-col max-w-[80%] min-w-0">
-        {/* Message bubble */}
         <div
           className={clsx(
             'rounded-2xl px-5 py-3.5 text-xs sm:text-sm leading-relaxed font-body',
             isUser
-              ? 'bg-wisdom-700/40 text-wisdom-100 rounded-br-sm border border-wisdom-700/20'
-              : 'bg-wisdom-900/60 border border-wisdom-700/40 text-wisdom-300 rounded-bl-sm glass'
+              ? 'bg-surface-200/40 text-surface-800 rounded-br-sm border border-surface-200/20'
+              : 'bg-surface-50/60 border border-surface-200/40 text-surface-600 rounded-bl-sm glass'
           )}
         >
           {content ? (
@@ -50,52 +48,51 @@ export function MessageBubble({ role, content, isStreaming, avatarText = 'नी
                   remarkPlugins={[remarkGfm]}
                   components={{
                     p:          ({ children }) => <p className="mb-3 last:mb-0">{children}</p>,
-                    strong:     ({ children }) => <strong className="font-semibold text-saffron-300">{children}</strong>,
-                    em:         ({ children }) => <em className="italic text-wisdom-200">{children}</em>,
-                    h1:         ({ children }) => <h1 className="text-base font-bold text-saffron-400 mt-4 mb-2 font-display">{children}</h1>,
-                    h2:         ({ children }) => <h2 className="text-sm font-bold text-saffron-400 mt-4 mb-2 font-display">{children}</h2>,
-                    h3:         ({ children }) => <h3 className="text-xs font-bold text-saffron-300 mt-3 mb-1.5 font-display">{children}</h3>,
+                    strong:     ({ children }) => <strong className="font-semibold text-primary-300">{children}</strong>,
+                    em:         ({ children }) => <em className="italic text-surface-700">{children}</em>,
+                    h1:         ({ children }) => <h1 className="text-base font-bold text-primary-400 mt-4 mb-2 font-display">{children}</h1>,
+                    h2:         ({ children }) => <h2 className="text-sm font-bold text-primary-400 mt-4 mb-2 font-display">{children}</h2>,
+                    h3:         ({ children }) => <h3 className="text-xs font-bold text-primary-300 mt-3 mb-1.5 font-display">{children}</h3>,
                     ul:         ({ children }) => <ul className="list-disc list-inside space-y-1.5 my-2.5 pl-2">{children}</ul>,
                     ol:         ({ children }) => <ol className="list-decimal list-inside space-y-1.5 my-2.5 pl-2">{children}</ol>,
-                    li:         ({ children }) => <li className="text-wisdom-300">{children}</li>,
+                    li:         ({ children }) => <li className="text-surface-600">{children}</li>,
                     blockquote: ({ children }) => (
-                      <blockquote className="border-l-2 border-saffron-500 pl-3 my-2.5 text-wisdom-400 italic">
+                      <blockquote className="border-l-2 border-primary-500 pl-3 my-2.5 text-surface-500 italic">
                         {children}
                       </blockquote>
                     ),
                     code: ({ children, className }) => {
                       const isBlock = className?.includes('language-')
                       return isBlock ? (
-                        <code className="block bg-wisdom-950/80 border border-wisdom-700/30 rounded-xl px-4 py-3 my-3 text-xs font-mono text-saffron-200 overflow-x-auto whitespace-pre">
+                        <code className="block bg-surface-0/80 border border-surface-200/30 rounded-xl px-4 py-3 my-3 text-xs font-mono text-primary-200 overflow-x-auto whitespace-pre">
                           {children}
                         </code>
                       ) : (
-                        <code className="bg-wisdom-950 border border-wisdom-700/40 rounded-md px-1.5 py-0.5 text-xs font-mono text-saffron-300">
+                        <code className="bg-surface-0 border border-surface-200/40 rounded-md px-1.5 py-0.5 text-xs font-mono text-primary-300">
                           {children}
                         </code>
                       )
                     },
-                    hr: () => <hr className="border-wisdom-700/40 my-4" />,
+                    hr: () => <hr className="border-surface-200/40 my-4" />,
                   }}
                 >
                   {content}
                 </ReactMarkdown>
               )}
               {isStreaming && (
-                <span className="inline-block w-1.5 h-4 bg-saffron-500 ml-0.5 animate-pulse rounded-full align-middle" />
+                <span className="inline-block w-1.5 h-4 bg-primary-500 ml-0.5 animate-pulse rounded-full align-middle" />
               )}
             </>
           ) : isStreaming ? (
             <div className="space-y-4">
-              {/* Stepper thinking steps when flags.chatReasoning is enabled */}
               {flags.chatReasoning && (
-                <div className="flex flex-col gap-2.5 p-3.5 bg-wisdom-950/70 rounded-xl border border-wisdom-700/35 w-full max-w-sm animate-fade-in-up font-body">
-                  <div className="flex items-center gap-2 mb-1 border-b border-wisdom-800/40 pb-1.5 select-none">
+                <div className="flex flex-col gap-2.5 p-3.5 bg-surface-0/70 rounded-xl border border-surface-200/35 w-full max-w-sm animate-fade-in-up font-body">
+                  <div className="flex items-center gap-2 mb-1 border-b border-surface-100/40 pb-1.5 select-none">
                     <span className="relative flex h-2 w-2">
-                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-saffron-400 opacity-75"></span>
-                      <span className="relative inline-flex rounded-full h-2 w-2 bg-saffron-500"></span>
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary-400 opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-2 w-2 bg-primary-500"></span>
                     </span>
-                    <span className="text-[9px] font-bold text-wisdom-300 uppercase tracking-widest">Advisor is thinking</span>
+                    <span className="text-[9px] font-bold text-surface-600 uppercase tracking-widest">Advisor is thinking</span>
                   </div>
                   <div className="flex flex-col gap-2.5 py-0.5">
                     {[
@@ -104,12 +101,12 @@ export function MessageBubble({ role, content, isStreaming, avatarText = 'नी
                       { label: 'Invoking strategic advisor reasoning', desc: 'Applying LLM intent classification' }
                     ].map((s, idx) => (
                       <div key={idx} className="flex items-start gap-2.5 transition-all duration-300">
-                        <div className="w-4.5 h-4.5 rounded-full flex items-center justify-center shrink-0 mt-0.5 text-[9px] font-bold bg-saffron-500/25 text-saffron-400 border border-saffron-500/30 animate-pulse">
+                        <div className="w-4.5 h-4.5 rounded-full flex items-center justify-center shrink-0 mt-0.5 text-[9px] font-bold bg-primary-500/25 text-primary-400 border border-primary-500/30 animate-pulse">
                           {idx + 1}
                         </div>
                         <div className="flex flex-col min-w-0">
-                          <span className="text-xs text-saffron-300 font-semibold">{s.label}</span>
-                          <span className="text-[10px] text-wisdom-400 truncate mt-0.5">{s.desc}...</span>
+                          <span className="text-xs text-primary-300 font-semibold">{s.label}</span>
+                          <span className="text-[10px] text-surface-500 truncate mt-0.5">{s.desc}...</span>
                         </div>
                       </div>
                     ))}
@@ -124,33 +121,32 @@ export function MessageBubble({ role, content, isStreaming, avatarText = 'नी
             </div>
           ) : null}
 
-          {/* Toggleable Reasoning Path inside message box */}
           {!isUser && !isStreaming && reasoning && reasoning.length > 0 && flags.chatReasoning && (
-            <div className="border-t border-wisdom-700/20 mt-4.5 pt-3.5 select-none">
+            <div className="border-t border-surface-200/20 mt-4.5 pt-3.5 select-none">
               <button
                 onClick={() => setShowReasoning(!showReasoning)}
-                className="flex items-center justify-between w-full text-left p-2.5 bg-wisdom-900 border border-wisdom-700/40 rounded-xl text-xs font-semibold text-wisdom-400 hover:text-wisdom-200 transition-colors"
+                className="flex items-center justify-between w-full text-left p-2.5 bg-surface-50 border border-surface-200/40 rounded-xl text-xs font-semibold text-surface-500 hover:text-surface-600 transition-colors"
               >
                 <span className="flex items-center gap-1.5">
-                  <Activity className="w-3.5 h-3.5 text-saffron-500" />
+                  <Activity className="w-3.5 h-3.5 text-primary-500" />
                   <span>Reasoning Path</span>
-                  <span className="text-[10px] text-wisdom-500 font-semibold">• {reasoning.length} steps</span>
+                  <span className="text-[10px] text-surface-400 font-semibold">• {reasoning.length} steps</span>
                 </span>
                 {showReasoning ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
               </button>
 
               {showReasoning && (
-                <div className="mt-2.5 bg-wisdom-950/60 border border-wisdom-700/30 rounded-xl p-3.5 space-y-3 animate-fade-in-up">
+                <div className="mt-2.5 bg-surface-0/60 border border-surface-200/30 rounded-xl p-3.5 space-y-3 animate-fade-in-up">
                   {reasoning.map((step, idx) => (
                     <div key={idx} className="flex gap-3 text-[11px] leading-relaxed">
-                      <span className="w-5 h-5 rounded-full bg-saffron-500/10 border border-saffron-500/25 text-saffron-400 flex items-center justify-center shrink-0 mt-0.5 font-bold">
+                      <span className="w-5 h-5 rounded-full bg-primary-500/10 border border-primary-500/25 text-primary-400 flex items-center justify-center shrink-0 mt-0.5 font-bold">
                         {idx + 1}
                       </span>
                       <div className="flex-1 min-w-0">
-                        <span className="text-[9px] font-bold text-wisdom-500 uppercase tracking-wide block">
+                        <span className="text-[9px] font-bold text-surface-400 uppercase tracking-wide block">
                           Step {idx + 1}
                         </span>
-                        <p className="text-wisdom-300 mt-0.5">{step}</p>
+                        <p className="text-surface-600 mt-0.5">{step}</p>
                       </div>
                     </div>
                   ))}
@@ -160,40 +156,37 @@ export function MessageBubble({ role, content, isStreaming, avatarText = 'नी
           )}
         </div>
 
-        {/* Feedback + Metadata section */}
         {!isUser && !isStreaming && content && (
           <div className="flex items-center justify-between mt-2.5 px-1 select-none">
-            {/* Metadata (latency, model, etc) */}
-            <div className="flex items-center gap-3 text-[10px] text-wisdom-500 font-semibold">
+            <div className="flex items-center gap-3 text-[10px] text-surface-400 font-semibold">
               {model && (
                 <span className="flex items-center gap-1">
-                  <Cpu className="w-3 h-3 text-wisdom-600" />
+                  <Cpu className="w-3 h-3 text-surface-300" />
                   {model}
                 </span>
               )}
               {latency && (
                 <span className="flex items-center gap-1">
-                  <Clock className="w-3 h-3 text-wisdom-600" />
+                  <Clock className="w-3 h-3 text-surface-300" />
                   {latency}
                 </span>
               )}
               {tokens && (
                 <span className="flex items-center gap-1">
-                  <Layers className="w-3 h-3 text-wisdom-600" />
+                  <Layers className="w-3 h-3 text-surface-300" />
                   {tokens} tokens
                 </span>
               )}
             </div>
 
-            {/* Thumbs up/down feedback */}
             <div className="flex items-center gap-1 opacity-0 group-hover/msg:opacity-100 transition-opacity duration-200">
               <button
                 onClick={() => setFeedback((prev) => (prev === 'up' ? null : 'up'))}
                 className={clsx(
                   'p-1 rounded-md transition-colors border border-transparent',
                   feedback === 'up'
-                    ? 'text-saffron-400 bg-saffron-400/10 border-saffron-500/20'
-                    : 'text-wisdom-600 hover:text-wisdom-400 hover:bg-wisdom-800'
+                    ? 'text-primary-400 bg-primary-400/10 border-primary-500/20'
+                    : 'text-surface-300 hover:text-surface-500 hover:bg-surface-100'
                 )}
                 title="Helpful"
               >
@@ -205,7 +198,7 @@ export function MessageBubble({ role, content, isStreaming, avatarText = 'नी
                   'p-1 rounded-md transition-colors border border-transparent',
                   feedback === 'down'
                     ? 'text-red-400 bg-red-400/10 border-red-500/20'
-                    : 'text-wisdom-600 hover:text-wisdom-400 hover:bg-wisdom-800'
+                    : 'text-surface-300 hover:text-surface-500 hover:bg-surface-100'
                 )}
                 title="Not helpful"
               >

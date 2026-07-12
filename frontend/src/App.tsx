@@ -11,6 +11,9 @@ import { MemoryPage } from './pages/MemoryPage'
 import { LoginPage } from './pages/LoginPage'
 import { RegisterPage } from './pages/RegisterPage'
 import { SettingsPage } from './pages/SettingsPage'
+import { DocumentsPage } from './pages/DocumentsPage'
+import { CollectionsPage } from './pages/CollectionsPage'
+import { CollectionDetailPage } from './pages/CollectionDetailPage'
 
 import { AdminPage } from './pages/AdminPage'
 
@@ -41,6 +44,9 @@ export default function App() {
           <Route path="packs" element={<PacksPage />} />
           <Route path="graph" element={<GraphPage />} />
           <Route path="sutras" element={<SutrasPage />} />
+          <Route path="documents" element={<DocumentsPage />} />
+          <Route path="collections" element={<CollectionsPage />} />
+          <Route path="collections/:id" element={<CollectionDetailPage />} />
           <Route path="memory" element={<MemoryPage />} />
           <Route path="settings" element={<SettingsPage />} />
           <Route path="admin" element={<AdminPage />} />

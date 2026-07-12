@@ -20,7 +20,7 @@ interface Conversation {
 }
 
 const ACTIVE_PACKS_METADATA: Record<string, { emoji: string; name: string; desc: string; nodeCount: number; edgeCount: number; color: string }> = {
-  chanakya: { emoji: '🪔', name: 'Chanakya Neeti', desc: 'Ancient Indian treatise on statecraft, economics, and political strategy. Leadership and governance wisdom.', nodeCount: 432, edgeCount: 1280, color: 'border-saffron-500' },
+  chanakya: { emoji: '🪔', name: 'Chanakya Neeti', desc: 'Ancient Indian treatise on statecraft, economics, and political strategy. Leadership and governance wisdom.', nodeCount: 432, edgeCount: 1280, color: 'border-primary-500' },
   gita: { emoji: '🌺', name: 'Bhagavad Gita', desc: 'Dialogue between Prince Arjuna and Lord Krishna on duty, self-mastery, detachment, and righteousness.', nodeCount: 700, edgeCount: 2100, color: 'border-emerald-500' },
   arthashastra: { emoji: '⚖️', name: 'Arthashastra', desc: 'Comprehensive treatise on statecraft, economic policy, and military strategy by Kautilya.', nodeCount: 3421, edgeCount: 7802, color: 'border-indigo-500' },
   stoic: { emoji: '🏛️', name: 'Stoic Meditations', desc: 'Private reflections of Marcus Aurelius on virtue, reason, resilience, and clarity.', nodeCount: 310, edgeCount: 890, color: 'border-slate-400' },
@@ -99,20 +99,20 @@ export function DashboardPage() {
       {/* Welcome Banner */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 select-none">
         <div>
-          <span className="text-[10px] font-bold text-saffron-500 uppercase tracking-widest block mb-1">
+          <span className="text-[10px] font-bold text-primary-500 uppercase tracking-widest block mb-1">
             Dashboard
           </span>
-          <h1 className="text-3xl font-bold font-display text-wisdom-100">
-            Welcome back, <span className="text-transparent bg-clip-text bg-gradient-to-r from-saffron-300 to-saffron-500">Strategist</span>
+          <h1 className="text-3xl font-bold font-display text-surface-800">
+            Welcome back, <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-300 to-primary-500">Strategist</span>
           </h1>
-          <p className="text-sm text-wisdom-400 mt-1">
-            Your knowledge graph has <strong className="text-wisdom-200">3,849</strong> nodes across <strong className="text-wisdom-200">{installedPacks.length}</strong> active packs.
+          <p className="text-sm text-surface-500 mt-1">
+            Your knowledge graph has <strong className="text-surface-700">3,849</strong> nodes across <strong className="text-surface-700">{installedPacks.length}</strong> active packs.
           </p>
         </div>
         <div className="flex gap-3 shrink-0">
           <button
             onClick={() => navigate('/packs')}
-            className="flex items-center gap-2 px-4 py-2.5 bg-wisdom-800 hover:bg-wisdom-700/80 border border-wisdom-700/50 rounded-xl text-xs font-semibold text-wisdom-200 transition-colors"
+            className="flex items-center gap-2 px-4 py-2.5 bg-surface-100 hover:bg-surface-200/80 border border-surface-200/50 rounded-xl text-xs font-semibold text-surface-700 transition-colors"
           >
             <Library className="w-4 h-4" />
             Manage Packs
@@ -130,16 +130,16 @@ export function DashboardPage() {
       {/* Stats Grid */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {[
-          { label: 'Conversations', value: conversations.length, sub: 'All threads', icon: MessageSquare, color: 'text-saffron-400 bg-saffron-500/10 border-saffron-500/10' },
+          { label: 'Conversations', value: conversations.length, sub: 'All threads', icon: MessageSquare, color: 'text-primary-400 bg-primary-500/10 border-primary-500/10' },
           { label: 'Knowledge Packs', value: `${installedPacks.length}/6`, sub: 'Installed ratio', icon: Library, color: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/10' },
           { label: 'Insights Learned', value: insightsCount, sub: 'Extracted about you', icon: Brain, color: 'text-indigo-400 bg-indigo-500/10 border-indigo-500/10' },
           { label: 'Graph Connections', value: '3.9K', sub: 'Cross-references', icon: Network, color: 'text-sky-400 bg-sky-500/10 border-sky-500/10' },
         ].map((stat, idx) => {
           const Icon = stat.icon
           return (
-            <div key={idx} className="glass-card border border-wisdom-700/40 p-5 rounded-2xl flex flex-col justify-between h-32 relative overflow-hidden group hover:border-wisdom-700/80 transition-all duration-300">
+            <div key={idx} className="glass-card border border-surface-200/40 p-5 rounded-2xl flex flex-col justify-between h-32 relative overflow-hidden group hover:border-surface-200/80 transition-all duration-300">
               <div className="flex items-center justify-between">
-                <span className="text-[10px] font-bold text-wisdom-400 uppercase tracking-wider">
+                <span className="text-[10px] font-bold text-surface-500 uppercase tracking-wider">
                   {stat.label}
                 </span>
                 <div className={`w-8 h-8 rounded-lg flex items-center justify-center border ${stat.color}`}>
@@ -147,14 +147,14 @@ export function DashboardPage() {
                 </div>
               </div>
               <div>
-                <h3 className="text-3xl font-semibold text-wisdom-100 font-display">
+                <h3 className="text-3xl font-semibold text-surface-800 font-display">
                   {stat.value}
                 </h3>
-                <p className="text-[11px] text-wisdom-500 mt-1">
+                <p className="text-[11px] text-surface-400 mt-1">
                   {stat.sub}
                 </p>
               </div>
-              <div className="absolute right-[-10px] bottom-[-20px] font-display text-8xl text-wisdom-800/10 group-hover:text-wisdom-800/20 select-none pointer-events-none transition-colors duration-300">
+              <div className="absolute right-[-10px] bottom-[-20px] font-display text-8xl text-surface-100/10 group-hover:text-surface-100/20 select-none pointer-events-none transition-colors duration-300">
                 नी
               </div>
             </div>
@@ -167,13 +167,13 @@ export function DashboardPage() {
         {/* Left Column: Recent Chats */}
         <div className="lg:col-span-2 space-y-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-base font-semibold text-wisdom-100 font-display flex items-center gap-2">
-              <Clock className="w-4 h-4 text-saffron-500" />
+            <h2 className="text-base font-semibold text-surface-800 font-display flex items-center gap-2">
+              <Clock className="w-4 h-4 text-primary-500" />
               Recent Conversations
             </h2>
             <button
               onClick={() => navigate('/chat')}
-              className="text-xs text-saffron-400 hover:text-saffron-300 flex items-center gap-0.5"
+              className="text-xs text-primary-400 hover:text-primary-300 flex items-center gap-0.5"
             >
               View all
               <ChevronRight className="w-3.5 h-3.5" />
@@ -185,26 +185,26 @@ export function DashboardPage() {
               <div
                 key={convo.id}
                 onClick={() => loadConversation(convo.id)}
-                className="glass-card border border-wisdom-700/40 p-4 rounded-xl hover:border-saffron-500/30 cursor-pointer transition-all duration-200 flex gap-4 items-start group"
+                className="glass-card border border-surface-200/40 p-4 rounded-xl hover:border-primary-500/30 cursor-pointer transition-all duration-200 flex gap-4 items-start group"
               >
-                <div className="w-9 h-9 rounded-lg bg-wisdom-800 border border-wisdom-700 flex items-center justify-center text-wisdom-400 group-hover:text-saffron-400 transition-colors">
+                <div className="w-9 h-9 rounded-lg bg-surface-100 border border-surface-200 flex items-center justify-center text-surface-500 group-hover:text-primary-400 transition-colors">
                   <MessageSquare className="w-4 h-4" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between gap-4">
-                    <h4 className="text-sm font-semibold text-wisdom-200 group-hover:text-wisdom-100 truncate transition-colors">
+                    <h4 className="text-sm font-semibold text-surface-700 group-hover:text-surface-800 truncate transition-colors">
                       {convo.title || 'Untitled Conversation'}
                     </h4>
-                    <span className="text-[10px] text-wisdom-500 shrink-0">
+                    <span className="text-[10px] text-surface-400 shrink-0">
                       {new Date(convo.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
                     </span>
                   </div>
-                  <p className="text-xs text-wisdom-400 mt-1 line-clamp-1">
+                  <p className="text-xs text-surface-500 mt-1 line-clamp-1">
                     Strategy advisor session grounding questions under active personas.
                   </p>
                   {convo.advisor && (
                     <div className="flex gap-1.5 mt-2">
-                      <span className="text-[9px] font-semibold px-2 py-0.5 rounded bg-saffron-500/10 border border-saffron-500/20 text-saffron-400 uppercase tracking-wider">
+                      <span className="text-[9px] font-semibold px-2 py-0.5 rounded bg-primary-500/10 border border-primary-500/20 text-primary-400 uppercase tracking-wider">
                         {convo.advisor}
                       </span>
                     </div>
@@ -214,12 +214,12 @@ export function DashboardPage() {
             ))}
 
             {conversations.length === 0 && (
-              <div className="glass-card border border-wisdom-700/40 rounded-xl p-8 text-center text-wisdom-500">
-                <MessageSquare className="w-8 h-8 text-wisdom-600 mx-auto mb-2" />
+              <div className="glass-card border border-surface-200/40 rounded-xl p-8 text-center text-surface-400">
+                <MessageSquare className="w-8 h-8 text-surface-300 mx-auto mb-2" />
                 <p className="text-sm">No conversations yet</p>
                 <button
                   onClick={() => navigate('/chat')}
-                  className="text-xs text-saffron-400 hover:underline mt-1"
+                  className="text-xs text-primary-400 hover:underline mt-1"
                 >
                   Start your first conversation
                 </button>
@@ -231,9 +231,9 @@ export function DashboardPage() {
         {/* Right Column: Quick Start + Latest Insight */}
         <div className="space-y-6">
           {/* Quick Start Card */}
-          <div className="glass-card border border-wisdom-700/40 p-5 rounded-2xl space-y-4">
-            <h2 className="text-sm font-semibold text-wisdom-100 font-display flex items-center gap-2">
-              <Sparkles className="w-4 h-4 text-saffron-500" />
+          <div className="glass-card border border-surface-200/40 p-5 rounded-2xl space-y-4">
+            <h2 className="text-sm font-semibold text-surface-800 font-display flex items-center gap-2">
+              <Sparkles className="w-4 h-4 text-primary-500" />
               Quick Start Prompts
             </h2>
             <div className="flex flex-col gap-2">
@@ -241,7 +241,7 @@ export function DashboardPage() {
                 <button
                   key={idx}
                   onClick={() => startChatPrompt(prompt)}
-                  className="w-full text-left text-xs text-wisdom-400 hover:text-saffron-300 hover:bg-wisdom-800/40 border border-wisdom-700/30 hover:border-saffron-500/20 px-3 py-2.5 rounded-xl transition-all duration-200"
+                  className="w-full text-left text-xs text-surface-500 hover:text-primary-300 hover:bg-surface-100/40 border border-surface-200/30 hover:border-primary-500/20 px-3 py-2.5 rounded-xl transition-all duration-200"
                 >
                   {prompt}
                 </button>
@@ -250,8 +250,8 @@ export function DashboardPage() {
           </div>
 
           {/* Latest Insight Card */}
-          <div className="glass-card border border-wisdom-700/40 p-5 rounded-2xl space-y-3">
-            <h2 className="text-sm font-semibold text-wisdom-100 font-display flex items-center gap-2">
+          <div className="glass-card border border-surface-200/40 p-5 rounded-2xl space-y-3">
+            <h2 className="text-sm font-semibold text-surface-800 font-display flex items-center gap-2">
               <Brain className="w-4 h-4 text-emerald-500" />
               Latest Inferred Insight
             </h2>
@@ -259,7 +259,7 @@ export function DashboardPage() {
               <span className="inline-flex items-center gap-1.5 text-[9px] font-bold text-emerald-400 uppercase tracking-widest bg-emerald-500/10 px-2 py-0.5 rounded-full">
                 🎯 Goal
               </span>
-              <p className="text-xs text-wisdom-300 leading-relaxed">
+              <p className="text-xs text-surface-600 leading-relaxed">
                 {latestInsight}
               </p>
             </div>
@@ -270,13 +270,13 @@ export function DashboardPage() {
       {/* Installed Knowledge Packs Section */}
       <div className="space-y-4">
         <div className="flex items-center justify-between">
-          <h2 className="text-base font-semibold text-wisdom-100 font-display flex items-center gap-2">
-            <Library className="w-4 h-4 text-saffron-500" />
+          <h2 className="text-base font-semibold text-surface-800 font-display flex items-center gap-2">
+            <Library className="w-4 h-4 text-primary-500" />
             Your Knowledge Packs
           </h2>
           <button
             onClick={() => navigate('/packs')}
-            className="text-xs text-saffron-400 hover:text-saffron-300 flex items-center gap-0.5"
+            className="text-xs text-primary-400 hover:text-primary-300 flex items-center gap-0.5"
           >
             Browse all packs
             <ChevronRight className="w-3.5 h-3.5" />
@@ -289,13 +289,13 @@ export function DashboardPage() {
             return (
               <div
                 key={pack.id}
-                className={`glass-card border-l-[3px] border-y border-r border-wisdom-700/40 p-5 rounded-2xl flex flex-col justify-between hover:border-wisdom-700/80 transition-all duration-200 ${pack.color}`}
+                className={`glass-card border-l-[3px] border-y border-r border-surface-200/40 p-5 rounded-2xl flex flex-col justify-between hover:border-surface-200/80 transition-all duration-200 ${pack.color}`}
               >
                 <div>
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex items-center gap-3">
                       <span className="text-2xl">{pack.emoji}</span>
-                      <h4 className="text-sm font-bold text-wisdom-100">
+                      <h4 className="text-sm font-bold text-surface-800">
                         {pack.name}
                       </h4>
                     </div>
@@ -303,11 +303,11 @@ export function DashboardPage() {
                       Active
                     </span>
                   </div>
-                  <p className="text-xs text-wisdom-400 mt-3.5 leading-relaxed line-clamp-2">
+                  <p className="text-xs text-surface-500 mt-3.5 leading-relaxed line-clamp-2">
                     {pack.desc}
                   </p>
                 </div>
-                <div className="text-[10px] text-wisdom-500 mt-4 font-semibold border-t border-wisdom-700/20 pt-3 flex justify-between">
+                <div className="text-[10px] text-surface-400 mt-4 font-semibold border-t border-surface-200/20 pt-3 flex justify-between">
                   <span>{pack.nodeCount} nodes</span>
                   <span>{pack.edgeCount} relations</span>
                 </div>
@@ -319,25 +319,25 @@ export function DashboardPage() {
 
       {/* Recent Activity Log */}
       <div className="space-y-4">
-        <h2 className="text-base font-semibold text-wisdom-100 font-display flex items-center gap-2">
-          <TrendingUp className="w-4 h-4 text-saffron-500" />
+        <h2 className="text-base font-semibold text-surface-800 font-display flex items-center gap-2">
+          <TrendingUp className="w-4 h-4 text-primary-500" />
           Recent Activity Log
         </h2>
-        <div className="glass-card border border-wisdom-700/40 p-5 rounded-2xl space-y-4">
+        <div className="glass-card border border-surface-200/40 p-5 rounded-2xl space-y-4">
           {recentActivity.map((activity, idx) => (
             <div
               key={idx}
-              className="flex gap-3 text-xs leading-relaxed border-b border-wisdom-700/10 last:border-0 pb-3 last:pb-0"
+              className="flex gap-3 text-xs leading-relaxed border-b border-surface-200/10 last:border-0 pb-3 last:pb-0"
             >
               <span
                 className="w-1.5 h-1.5 rounded-full shrink-0 mt-1.5"
                 style={{ backgroundColor: activity.dot }}
               />
               <div className="flex-1 min-w-0">
-                <p className="text-wisdom-200 font-medium truncate">{activity.text}</p>
-                <span className="text-[10px] text-wisdom-500 block mt-0.5">{activity.detail}</span>
+                <p className="text-surface-700 font-medium truncate">{activity.text}</p>
+                <span className="text-[10px] text-surface-400 block mt-0.5">{activity.detail}</span>
               </div>
-              <span className="text-[10px] text-wisdom-500 shrink-0 self-center">
+              <span className="text-[10px] text-surface-400 shrink-0 self-center">
                 {activity.time}
               </span>
             </div>
