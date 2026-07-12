@@ -40,14 +40,14 @@ export function CollectionsPage() {
       setNewName('')
       setNewDesc('')
       setShowCreate(false)
-    } catch (e) { /* ignore */ }
+    } catch { /* ignore */ }
   }
 
   const deleteCollection = async (id: number) => {
     try {
       await apiClient.delete(`/collections/${id}`)
       setCollections(prev => prev.filter(c => c.id !== id))
-    } catch (e) { /* ignore */ }
+    } catch { /* ignore */ }
   }
 
   const filtered = collections.filter(c =>

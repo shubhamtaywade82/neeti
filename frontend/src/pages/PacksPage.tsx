@@ -60,7 +60,7 @@ export function PacksPage() {
         window.dispatchEvent(new Event('storage'))
         if (triggerPackSync) triggerPackSync()
       }
-    } catch (e) {}
+    } catch {}
   }
 
   // Filter packs

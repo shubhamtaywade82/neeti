@@ -32,7 +32,8 @@ module Api
           short_url:       result[:short_url]
         }, status: :created
       rescue => e
-        render json: { error: e.message }, status: :unprocessable_entity
+        Rails.logger.error("Subscription error: #{e.class}: #{e.message}")
+        render json: { error: 'Subscription processing failed. Please try again.' }, status: :unprocessable_entity
       end
 
       def cancel

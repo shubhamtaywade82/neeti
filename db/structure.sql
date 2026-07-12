@@ -1051,7 +1051,7 @@ CREATE TABLE public.users (
     password_digest text NOT NULL,
     plan text DEFAULT 'free'::text NOT NULL,
     daily_query_count integer DEFAULT 0 NOT NULL,
-    daily_reset_at date DEFAULT CURRENT_DATE,
+    daily_reset_at date DEFAULT CURRENT_DATE NOT NULL,
     razorpay_customer_id text,
     razorpay_subscription_id text,
     created_at timestamp(6) without time zone NOT NULL,
@@ -1059,7 +1059,8 @@ CREATE TABLE public.users (
     role character varying DEFAULT 'user'::character varying NOT NULL,
     installed_packs text[] DEFAULT '{chanakya,gita}'::text[],
     reset_token character varying,
-    reset_sent_at timestamp(6) without time zone
+    reset_sent_at timestamp(6) without time zone,
+    token_version integer DEFAULT 0 NOT NULL
 );
 
 
@@ -2083,7 +2084,7 @@ CREATE UNIQUE INDEX index_users_on_email ON public.users USING btree (email);
 -- Name: index_users_on_reset_token; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX index_users_on_reset_token ON public.users USING btree (reset_token);
+CREATE UNIQUE INDEX index_users_on_reset_token ON public.users USING btree (reset_token);
 
 
 --
@@ -2322,6 +2323,7 @@ ALTER TABLE ONLY public.sutra_vices
 SET search_path TO "$user", public;
 
 INSERT INTO "schema_migrations" (version) VALUES
+('20260712110223'),
 ('20260712083609'),
 ('20260712000005'),
 ('20260712000004'),

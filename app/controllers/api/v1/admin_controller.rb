@@ -34,7 +34,7 @@ module Api::V1
 
       total = scope.count
       page  = (params[:page] || 1).to_i
-      per   = (params[:per]  || 20).to_i
+      per   = [[(params[:per] || 20).to_i, 100].min, 1].max
       users = scope.offset((page - 1) * per).limit(per)
 
       render json: {
@@ -57,7 +57,8 @@ module Api::V1
     rescue ActiveRecord::RecordNotFound
       render json: { error: 'User not found' }, status: :not_found
     rescue => e
-      render json: { error: e.message }, status: :unprocessable_entity
+      Rails.logger.error("Admin update_user error: #{e.class}: #{e.message}")
+      render json: { error: 'Update failed.' }, status: :unprocessable_entity
     end
 
     # DELETE /api/v1/admin/users/:id

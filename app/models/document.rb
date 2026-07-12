@@ -6,6 +6,7 @@ class Document < ApplicationRecord
   validates :filename, presence: true
   validates :file_type, presence: true, inclusion: { in: %w[pdf md txt docx] }
   validates :file_size, numericality: { less_than_or_equal_to: 20.megabytes }, if: -> { file_size.present? }
+  validates :status, inclusion: { in: %w[pending processing ready error] }
 
   scope :ready, -> { where(status: 'ready') }
   scope :processing, -> { where(status: 'processing') }

@@ -3,6 +3,7 @@ class KnowledgePack < ApplicationRecord
 
   validates :slug, presence: true, uniqueness: true
   validates :name, presence: true
+  validates :tier, inclusion: { in: %w[Free Seeker Strategist Raja] }, allow_nil: true
 
   scope :official, -> { where(official: true) }
   scope :free, -> { where(premium: false) }

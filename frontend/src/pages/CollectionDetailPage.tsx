@@ -71,7 +71,7 @@ export function CollectionDetailPage() {
       })
       setDocuments(prev => [data.document, ...prev])
       setCollection(prev => prev ? { ...prev, document_count: prev.document_count + 1 } : prev)
-    } catch (e) { /* ignore */ }
+    } catch { /* ignore */ }
     setUploading(false)
   }
 
@@ -80,7 +80,7 @@ export function CollectionDetailPage() {
       await apiClient.delete(`/documents/${docId}`)
       setDocuments(prev => prev.filter(d => d.id !== docId))
       setCollection(prev => prev ? { ...prev, document_count: prev.document_count - 1 } : prev)
-    } catch (e) { /* ignore */ }
+    } catch { /* ignore */ }
   }
 
   const formatSize = (bytes: number) => {
