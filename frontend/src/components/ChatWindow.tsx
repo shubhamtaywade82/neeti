@@ -338,6 +338,10 @@ export function ChatWindow({ conversationId, onConversationCreated, prefillQuery
   }, [result, flags.chatReasoning])
 
   useEffect(() => {
+    return () => { cancel() }
+  }, [cancel])
+
+  useEffect(() => {
     if (prefillQuery) {
       handleSubmit(prefillQuery)
       onPrefillConsumed?.()
@@ -346,10 +350,11 @@ export function ChatWindow({ conversationId, onConversationCreated, prefillQuery
   }, [prefillQuery])
 
   const handleSubmit = async (query: string) => {
+    const id = ++messageCounter
     setMessages((prev) => [
       ...prev,
-      { role: 'user',      content: query },
-      { role: 'assistant', content: '', isStreaming: true }
+      { id: `user-${id}`, role: 'user', content: query },
+      { id: `assistant-${id}`, role: 'assistant', content: '', isStreaming: true }
     ])
     await ask(query, conversationId, cagMode ? 'cag' : 'retrieval', advisor, retrievalScope)
   }
@@ -362,12 +367,12 @@ export function ChatWindow({ conversationId, onConversationCreated, prefillQuery
     
     if (!hasUserMsg && !hasAssistantMsg) {
       displayMessages.push(
-        { role: 'user', content: activeQuery },
-        { role: 'assistant', content: streamedText, isStreaming: true }
+        { id: 'stream-user', role: 'user', content: activeQuery },
+        { id: 'stream-assistant', role: 'assistant', content: streamedText, isStreaming: true }
       )
     } else if (hasUserMsg && !hasAssistantMsg) {
       displayMessages.push(
-        { role: 'assistant', content: streamedText, isStreaming: true }
+        { id: 'stream-assistant', role: 'assistant', content: streamedText, isStreaming: true }
       )
     }
   }
@@ -421,8 +426,8 @@ export function ChatWindow({ conversationId, onConversationCreated, prefillQuery
         )}
 
         <div className="max-w-3xl mx-auto space-y-6">
-          {displayMessages.map((msg, i) => (
-            <div key={i} className="flex flex-col">
+          {displayMessages.map((msg) => (
+            <div key={msg.id} className="flex flex-col">
               <MessageBubble
                 role={msg.role}
                 content={msg.role === 'assistant' && msg.isStreaming ? streamedText : msg.content}
