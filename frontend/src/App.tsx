@@ -2,6 +2,7 @@ import type { ReactNode } from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { useAuthStore } from './stores/authStore'
 import { AppShell } from './components/AppShell'
+import { ErrorBoundary } from './components/ErrorBoundary'
 import { DashboardPage } from './pages/DashboardPage'
 import { ChatPage } from './pages/ChatPage'
 import { PacksPage } from './pages/PacksPage'
@@ -27,6 +28,7 @@ function RequireAuth({ children }: { children: ReactNode }) {
 export default function App() {
   return (
     <BrowserRouter>
+      <ErrorBoundary>
       <Routes>
         {/* Public Routes */}
         <Route path="/login" element={<LoginPage />} />
@@ -59,6 +61,7 @@ export default function App() {
         {/* Fallback */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
+      </ErrorBoundary>
     </BrowserRouter>
   )
 }
