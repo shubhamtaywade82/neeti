@@ -11,8 +11,8 @@ RSpec.describe UserMailer, type: :mailer do
     end
 
     it "renders the body" do
-      expect(mail.text_part.body.encoded).to match("Reset your KOS password")
-      expect(mail.text_part.body.encoded).to match("reset-password?token=")
+      expect(mail.text_part.body.encoded).to include("Reset your KOS password")
+      expect(mail.text_part.body.encoded).to include("/reset-password?token=")
     end
   end
 end

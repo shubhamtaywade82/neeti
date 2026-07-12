@@ -36,3 +36,5 @@ end
 group :test do
   gem "simplecov", require: false
 end
+
+gem "rack-attack", ">= 6.7"

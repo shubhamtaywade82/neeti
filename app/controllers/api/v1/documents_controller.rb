@@ -24,6 +24,18 @@ module Api
         ext = File.extname(file.original_filename).downcase.delete('.')
         return render json: { error: "Unsupported file type: .#{ext}" }, status: :unprocessable_entity unless %w[pdf md txt docx].include?(ext)
 
+        allowed_mimes = {
+          'pdf' => 'application/pdf',
+          'md'  => 'text/markdown',
+          'txt' => 'text/plain',
+          'docx' => 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+        }
+        actual_type = Marcel::MimeType.for(file)
+        expected = allowed_mimes[ext]
+        if expected && actual_type != expected
+          return render json: { error: 'File content does not match its extension.' }, status: :unprocessable_entity
+        end
+
         doc = current_user.documents.create!(
           filename: file.original_filename,
           title: params[:title] || file.original_filename,

@@ -25,6 +25,8 @@ services:
         value: production
       - key: RAILS_LOG_TO_STDOUT
         value: "true"
+      - key: SOLID_QUEUE_IN_PUMA
+        value: "true"
       - key: CORS_ORIGINS
         value: https://neeti-frontend.onrender.com
 

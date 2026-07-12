@@ -1,6 +1,8 @@
 class User < ApplicationRecord
   has_secure_password
 
+  validates :password, length: { minimum: 8 }, if: :password
+
   has_many :conversations,  dependent: :destroy
   has_many :user_insights,  dependent: :destroy
   has_many :collections,    dependent: :destroy

@@ -125,6 +125,16 @@ export function LoginPage() {
             )}
           </button>
 
+          {/* Forgot password */}
+          <div className="text-right -mt-1">
+            <Link
+              to="/forgot-password"
+              className="text-xs text-surface-500 hover:text-primary-400 transition-colors"
+            >
+              Forgot password?
+            </Link>
+          </div>
+
           {/* Register link */}
           <p className="text-center text-sm font-body text-surface-500 animate-fade-in-up delay-500">
             New here?{' '}
