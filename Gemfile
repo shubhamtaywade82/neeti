@@ -8,7 +8,7 @@ gem "bootsnap", require: false
 gem "tzinfo-data", platforms: %i[windows jruby]
 
 gem "bcrypt", "~> 3.1.7"
-gem "jwt", "~> 2.8"
+gem "jwt", "~> 3.2"
 gem "ollama-client", "~> 1.0"
 gem "anthropic", "~> 0.3.2"
 gem "pg_search", "~> 2.3"
