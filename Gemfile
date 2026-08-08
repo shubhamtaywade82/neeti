@@ -10,7 +10,7 @@ gem "tzinfo-data", platforms: %i[windows jruby]
 gem "bcrypt", "~> 3.1.7"
 gem "jwt", "~> 3.2"
 gem "ollama-client", "~> 1.0"
-gem "anthropic", "~> 0.3.2"
+gem "anthropic", "~> 1.59.0"
 gem "pg_search", "~> 2.3"
 gem "razorpay", "~> 3.2"
 gem "oj", "~> 3.17"
