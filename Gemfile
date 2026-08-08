@@ -24,6 +24,8 @@ gem "dotenv-rails", "~> 3.1"
 gem "rack-cors", "~> 3.0"
 gem "pdf-reader", "~> 2.12"
 gem "docx", "~> 0.8"
+gem "ruby_llm", "~> 1.16"
+gem "async"
 
 group :development, :test do
   gem "rspec-rails", "~> 8.0"

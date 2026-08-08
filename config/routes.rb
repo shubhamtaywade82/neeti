@@ -54,6 +54,9 @@ Rails.application.routes.draw do
       # Documents
       resources :documents, only: [:index, :show, :create, :update, :destroy]
 
+      # AI Chats (Compliance Agent)
+      resources :chats, only: [:create, :show]
+
       # Subscriptions — implemented in Task 8
       get    '/subscriptions/plans',   to: 'subscriptions#plans'
       post   '/subscriptions',         to: 'subscriptions#create'
