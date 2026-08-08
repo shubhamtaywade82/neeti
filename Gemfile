@@ -21,7 +21,7 @@ gem "solid_cable", "~> 3.0"
 gem "faraday", "~> 2.9"
 gem "faraday-retry", "~> 2.2"
 gem "dotenv-rails", "~> 3.1"
-gem "rack-cors", "~> 2.0"
+gem "rack-cors", "~> 3.0"
 gem "pdf-reader", "~> 2.12"
 gem "docx", "~> 0.8"
 
