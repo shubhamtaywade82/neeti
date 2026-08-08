@@ -1,38 +1,23 @@
 ```
-# Dependency directories
+# Dependencies
 vendor/bundle/
 .bundle/
-
-# Build artifacts
-*.gem
-pkg/
-
-# Logs
-*.log
+Gemfile.lock
 
 # Environment
 .env
 .env.local
-*.env.*
+.env.*
 
-# Coverage
-coverage/
-*.gcov
-*.lcov
+# Logs and temp files
+*.log
+*.tmp
 
-# Processed files
-*.rbc
-*.sass-cache/
-.sass-cache/
+# Editors
+.vscode/
+.idea/
 
-# Documentation
-.rdoc
- yardoc/
-
-# Security
-config/master.key
-
-# Temporary files
-tmp/
-*~
+# OS generated files
+.DS_Store
+Thumbs.db
 ```
