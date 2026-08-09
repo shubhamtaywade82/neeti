@@ -1,7 +1,9 @@
 source "https://rubygems.org"
-ruby "3.1.2"
+ruby "3.3.6"
 
-gem "rails", "8.1.3"
+gem "rails", "8.1.3.1"
+gem "msgpack", ">= 1.8.2"
+gem "net-imap", ">= 0.6.4.1"
 gem "pg", "~> 1.5"
 gem "puma", ">= 6.0"
 gem "bootsnap", require: false
@@ -33,6 +35,9 @@ group :development, :test do
   gem "faker", "~> 3.3"
   gem "shoulda-matchers", "~> 8.0"
   gem "webmock", "~> 3.23"
+  gem "brakeman", require: false
+  gem "bundler-audit", require: false
+  gem "rubocop-rails-omakase", require: false
 end
 
 group :test do

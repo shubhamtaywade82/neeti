@@ -11,7 +11,7 @@ RSpec.describe Neeti::Providers::Anthropic do
         "id" => "msg_01abc",
         "type" => "message",
         "role" => "assistant",
-        "content" => [{ "type" => "text", "text" => "Virtue is its own reward." }],
+        "content" => [ { "type" => "text", "text" => "Virtue is its own reward." } ],
         "model" => "claude-3-5-sonnet-20241022",
         "stop_reason" => "end_turn",
         "usage" => { "input_tokens" => 10, "output_tokens" => 6 }
@@ -28,19 +28,19 @@ RSpec.describe Neeti::Providers::Anthropic do
     end
 
     it "returns the text content as a string" do
-      result = provider.chat(messages: [{ role: "user", content: "Hello" }])
+      result = provider.chat(messages: [ { role: "user", content: "Hello" } ])
       expect(result).to include("Virtue")
     end
 
     it "returns a String" do
-      result = provider.chat(messages: [{ role: "user", content: "Hello" }])
+      result = provider.chat(messages: [ { role: "user", content: "Hello" } ])
       expect(result).to be_a(String)
     end
 
     it "calls stream proc with the full response when stream is provided" do
       received = []
       provider.chat(
-        messages: [{ role: "user", content: "Hello" }],
+        messages: [ { role: "user", content: "Hello" } ],
         stream: ->(token) { received << token }
       )
       expect(received).not_to be_empty

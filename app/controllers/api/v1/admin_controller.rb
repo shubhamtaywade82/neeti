@@ -7,22 +7,22 @@ module Api::V1
       render json: {
         users: {
           total:       User.count,
-          admins:      User.where(role: 'admin').count,
+          admins:      User.where(role: "admin").count,
           by_plan:     User.group(:plan).count,
-          new_today:   User.where('created_at >= ?', Date.today).count,
-          new_week:    User.where('created_at >= ?', 1.week.ago).count,
+          new_today:   User.where("created_at >= ?", Date.today).count,
+          new_week:    User.where("created_at >= ?", 1.week.ago).count
         },
         conversations: {
           total:     Conversation.count,
-          today:     Conversation.where('created_at >= ?', Date.today).count,
+          today:     Conversation.where("created_at >= ?", Date.today).count
         },
         messages: {
           total:   Message.count,
-          today:   Message.where('created_at >= ?', Date.today).count,
+          today:   Message.where("created_at >= ?", Date.today).count
         },
         sutras:  { total: Sutra.count },
         themes:  { total: Theme.count },
-        insights: { total: UserInsight.count },
+        insights: { total: UserInsight.count }
       }
     end
 
@@ -30,11 +30,11 @@ module Api::V1
     def users
       scope = User.order(created_at: :desc)
       scope = scope.where(plan: params[:plan]) if params[:plan].present?
-      scope = scope.where('email ILIKE ?', "%#{params[:q]}%") if params[:q].present?
+      scope = scope.where("email ILIKE ?", "%#{params[:q]}%") if params[:q].present?
 
       total = scope.count
       page  = (params[:page] || 1).to_i
-      per   = [[(params[:per] || 20).to_i, 100].min, 1].max
+      per   = [ [ (params[:per] || 20).to_i, 100 ].min, 1 ].max
       users = scope.offset((page - 1) * per).limit(per)
 
       render json: {
@@ -55,20 +55,20 @@ module Api::V1
       target.update!(admin_user_params)
       render json: { id: target.id, email: target.email, plan: target.plan, role: target.role }
     rescue ActiveRecord::RecordNotFound
-      render json: { error: 'User not found' }, status: :not_found
+      render json: { error: "User not found" }, status: :not_found
     rescue => e
       Rails.logger.error("Admin update_user error: #{e.class}: #{e.message}")
-      render json: { error: 'Update failed.' }, status: :unprocessable_entity
+      render json: { error: "Update failed." }, status: :unprocessable_entity
     end
 
     # DELETE /api/v1/admin/users/:id
     def destroy_user
       target = User.find(params[:id])
-      return render json: { error: 'Cannot delete self' }, status: :unprocessable_entity if target == current_user
+      return render json: { error: "Cannot delete self" }, status: :unprocessable_entity if target == current_user
       target.destroy
       head :no_content
     rescue ActiveRecord::RecordNotFound
-      render json: { error: 'User not found' }, status: :not_found
+      render json: { error: "User not found" }, status: :not_found
     end
 
     # GET /api/v1/admin/sutras?q=text&chapter=1

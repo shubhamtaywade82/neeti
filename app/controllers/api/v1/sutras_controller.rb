@@ -8,7 +8,7 @@ module Api
         if params[:search].present?
           sutras = sutras.full_text_search(params[:search])
         end
-        if params[:theme].present? && params[:theme] != 'all'
+        if params[:theme].present? && params[:theme] != "all"
           # Fallback if by_theme scope fails or on legacy columns
           begin
             sutras = sutras.by_theme(params[:theme])
@@ -20,8 +20,8 @@ module Api
         # Map to format expected by frontend SutrasPage
         rendered = sutras.map do |s|
           # Determine pack name from canonical_id format (e.g. 'chanakya' or 'gita')
-          pack = s.canonical_id.include?(':') ? s.canonical_id.split(':').first : 'chanakya'
-          sutra_number = s.canonical_id.include?('.') ? s.canonical_id.split('.').last.to_i : s.id
+          pack = s.canonical_id.include?(":") ? s.canonical_id.split(":").first : "chanakya"
+          sutra_number = s.canonical_id.include?(".") ? s.canonical_id.split(".").last.to_i : s.id
 
           {
             id: s.id,

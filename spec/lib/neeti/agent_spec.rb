@@ -7,7 +7,7 @@ RSpec.describe Neeti::Agent do
   let(:retriever) { instance_double(Neeti::Retriever) }
   let(:user)      { create(:user) }
   let(:convo)     { create(:conversation, user: user) }
-  let(:sutras)    { create_list(:sutra, 3, themes: ["wisdom"]) }
+  let(:sutras)    { create_list(:sutra, 3, themes: [ "wisdom" ]) }
 
   subject(:agent) { described_class.new(retriever: retriever, provider: provider) }
 

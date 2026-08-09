@@ -3,11 +3,11 @@ require 'rails_helper'
 
 RSpec.describe Neeti::Evaluator do
   before do
-    create(:theme, name: 'laziness',        related_theme_names: ['self-discipline'])
-    create(:theme, name: 'self-discipline', related_theme_names: ['laziness'])
-    create(:sutra, themes: ['laziness'],        translation_en: 'Laziness destroys progress')
-    create(:sutra, themes: ['self-discipline'], translation_en: 'Discipline leads to success')
-    create(:sutra, themes: ['courage'],         translation_en: 'The brave succeed')
+    create(:theme, name: 'laziness',        related_theme_names: [ 'self-discipline' ])
+    create(:theme, name: 'self-discipline', related_theme_names: [ 'laziness' ])
+    create(:sutra, themes: [ 'laziness' ],        translation_en: 'Laziness destroys progress')
+    create(:sutra, themes: [ 'self-discipline' ], translation_en: 'Discipline leads to success')
+    create(:sutra, themes: [ 'courage' ],         translation_en: 'The brave succeed')
   end
 
   describe '.run' do

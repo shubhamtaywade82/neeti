@@ -2,7 +2,7 @@
 module Neeti
   class IntentRouter
     CATEGORIES = %i[self_harm abuse minors medical legal sexual_violence].freeze
-    
+
     # Priority when multiple fire. Order matters.
     PRIORITY = %i[self_harm sexual_violence minors abuse medical legal].freeze
 
@@ -77,7 +77,7 @@ module Neeti
       # FAIL CLOSED. An unavailable classifier means we cannot establish safety,
       # so we route. A user with a career question sees a resource card. Acceptable.
       @logger.error(event: "intent_router.classifier_failed", error: e.class.name)
-      [:medical]  # generic "needs a human" bucket
+      [ :medical ]  # generic "needs a human" bucket
     end
 
     def verdict(categories, stage)

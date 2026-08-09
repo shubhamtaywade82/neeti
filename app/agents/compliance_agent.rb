@@ -3,7 +3,7 @@ class ComplianceAgent < RubyLLM::Agent
   chat_model Chat # Tells ruby_llm to persist conversations to your Chat model
 
   # Use a reasoning-heavy model via Ollama Cloud
-  model 'deepseek-r1:14b', provider: :ollama
+  model "deepseek-r1:14b", provider: :ollama
 
   # Give the model a larger computation budget to deliberate
   thinking effort: :high, budget: 8000

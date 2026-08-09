@@ -13,8 +13,8 @@ RSpec.describe Sutra, type: :model do
 
   describe ".by_theme" do
     it "returns sutras matching the given theme" do
-      wisdom  = create(:sutra, themes: ["wisdom"])
-      courage = create(:sutra, themes: ["courage"])
+      wisdom  = create(:sutra, themes: [ "wisdom" ])
+      courage = create(:sutra, themes: [ "courage" ])
       expect(Sutra.by_theme("wisdom")).to include(wisdom)
       expect(Sutra.by_theme("wisdom")).not_to include(courage)
     end
@@ -29,57 +29,57 @@ RSpec.describe Sutra, type: :model do
 
   describe ".matching_any" do
     it "returns sutras matching any of the given themes" do
-      s1 = create(:sutra, themes: ["greed"])
-      s2 = create(:sutra, themes: ["courage"])
-      s3 = create(:sutra, themes: ["wisdom"])
+      s1 = create(:sutra, themes: [ "greed" ])
+      s2 = create(:sutra, themes: [ "courage" ])
+      s3 = create(:sutra, themes: [ "wisdom" ])
       result = Sutra.matching_any(%w[greed courage], :themes)
       expect(result).to include(s1, s2)
       expect(result).not_to include(s3)
     end
   end
-  
+
   describe "advisory_status enum" do
     it "defaults to pending" do
       sutra = build(:sutra)
       expect(sutra.advisory_status).to eq("pending")
     end
-    
+
     it "accepts valid statuses" do
       %w[pending active contextual excluded].each do |status|
         sutra = build(:sutra, advisory_status: status)
         expect(sutra).to be_valid
       end
     end
-    
+
     it "rejects invalid statuses" do
       sutra = build(:sutra, advisory_status: "invalid")
       expect(sutra).not_to be_valid
       expect(sutra.errors[:advisory_status]).to include("is not included in the list")
     end
   end
-  
+
   describe ".retrievable scope" do
     it "includes active sutras" do
       active_sutra = create(:sutra, advisory_status: :active)
       expect(Sutra.retrievable).to include(active_sutra)
     end
-    
+
     it "includes contextual sutras" do
       contextual_sutra = create(:sutra, advisory_status: :contextual)
       expect(Sutra.retrievable).to include(contextual_sutra)
     end
-    
+
     it "excludes pending sutras" do
       pending_sutra = create(:sutra, advisory_status: :pending)
       expect(Sutra.retrievable).not_to include(pending_sutra)
     end
-    
+
     it "excludes excluded sutras" do
       excluded_sutra = create(:sutra, advisory_status: :excluded)
       expect(Sutra.retrievable).not_to include(excluded_sutra)
     end
   end
-  
+
   describe "curation validation" do
     it "requires curated_by when status changes from pending" do
       sutra = create(:sutra, advisory_status: :pending)
@@ -87,14 +87,14 @@ RSpec.describe Sutra, type: :model do
       expect(sutra).not_to be_valid
       expect(sutra.errors[:curated_by]).to include("must be set when changing from pending status")
     end
-    
+
     it "requires curated_at when status changes from pending" do
       sutra = create(:sutra, advisory_status: :pending, curated_by: "Test User")
       sutra.update(advisory_status: :active, curated_at: nil)
       expect(sutra).not_to be_valid
       expect(sutra.errors[:curated_at]).to include("must be set when changing from pending status")
     end
-    
+
     it "allows status change with proper curation info" do
       sutra = create(:sutra, advisory_status: :pending)
       sutra.update(

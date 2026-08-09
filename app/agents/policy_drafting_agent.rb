@@ -2,7 +2,7 @@
 class PolicyDraftingAgent < RubyLLM::Agent
   chat_model Chat
 
-  model 'gpt-oss:120b', provider: :ollama
+  model "gpt-oss:120b", provider: :ollama
 
   schema PolicyUpdateSchema
 

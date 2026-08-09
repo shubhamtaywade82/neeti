@@ -9,29 +9,29 @@ module Api
 
       def create
         unless params[:query].to_s.strip.present?
-          response.headers['Content-Type'] = 'text/event-stream'
+          response.headers["Content-Type"] = "text/event-stream"
           sse = SSE.new(response.stream, retry: 300)
-          sse.write({ type: 'error', message: 'Query cannot be empty.' }.to_json)
+          sse.write({ type: "error", message: "Query cannot be empty." }.to_json)
           sse.close
           return
         end
 
-        response.headers['Content-Type']      = 'text/event-stream'
-        response.headers['Cache-Control']     = 'no-cache'
-        response.headers['X-Accel-Buffering'] = 'no'
+        response.headers["Content-Type"]      = "text/event-stream"
+        response.headers["Cache-Control"]     = "no-cache"
+        response.headers["X-Accel-Buffering"] = "no"
 
         sse          = SSE.new(response.stream, retry: 300)
         advisor_param = params[:advisor]
         advisor_name = if advisor_param.is_a?(ActionController::Parameters)
                          advisor_param[:advisor]
-                       elsif advisor_param.is_a?(String)
+        elsif advisor_param.is_a?(String)
                          advisor_param
-                       end
-        advisor_name ||= 'chanakya'
+        end
+        advisor_name ||= "chanakya"
 
         conversation = load_or_create_conversation(advisor_name)
         # 1. Save user message immediately so it's not lost
-        user_msg = conversation.messages.create!(role: 'user', content: params[:query])
+        user_msg = conversation.messages.create!(role: "user", content: params[:query])
 
         agent        = Neeti::Agent.new
         accumulated_advice = +""
@@ -46,32 +46,33 @@ module Api
             stream_parser.write_token(token)
           else
             accumulated_advice << token
-            sse.write({ type: 'token', content: token }.to_json)
+            sse.write({ type: "token", content: token }.to_json)
           end
         }
 
         mode = params[:mode]&.to_sym == :cag ? :cag : :retrieval
         advisor = advisor_name.to_sym
-        scope = params[:retrieval_scope].presence || 'library'
-        
+        scope = params[:retrieval_scope].presence || "library"
+
         # Use IntentRouter to detect crisis/safety-sensitive queries
-        intent = Neeti::IntentRouter.new(params[:query]).call
+        intent = Neeti::IntentRouter.new(params[:query], session_elevated: session_elevated?).call
 
         if intent.routed?
-          # Show safety resources immediately, bypass agent
-          sse.write({
-            type: 'crisis',
-            message: 'It sounds like you\'re going through something difficult.',
-            resources: [
-              { name: 'National Suicide Prevention Lifeline', contact: '988 (US/Canada)' },
-              { name: 'International Association for Suicide Prevention', contact: 'https://www.iasp.info/resources/Crisis_Centres/' },
-              { name: 'Crisis Text Line', contact: 'Text HOME to 741741' }
-            ]
-          }.to_json)
+          # FR-107: never persist query text for a routed consultation.
+          SafetyEvent.create!(
+            user: current_user,
+            category: intent.category.to_s,
+            detection_stage: intent.stage.to_s,
+            occurred_at: Time.current
+          )
+
+          # Show safety resources immediately, bypass agent and citation corpus entirely
+          payload = SafeResponseBuilder.new(intent.categories).call
+          sse.write({ type: "crisis", **payload }.to_json)
           sse.close
           return
         end
-        
+
         result = agent.advise(
           params.require(:query),
           user:             current_user,
@@ -81,11 +82,11 @@ module Api
           advisor:          advisor,
           retrieval_scope:  scope
         )
-        
+
         # Initialize citation gate with retrieved sutras
         retrieved_sutras = Sutra.where(id: result[:cited_sutra_ids])
         citation_gate = Neeti::CitationGate.new(retrieved_sutra_ids: retrieved_sutras)
-        
+
         # Re-process accumulated advice through citation gate to catch any missed markers
         if accumulated_advice.present? && citation_gate.hallucinated?(accumulated_advice)
           filtered_advice = citation_gate.process(accumulated_advice)
@@ -95,7 +96,7 @@ module Api
 
         # 2. Save full assistant message on successful completion
         conversation.messages.create!(
-          role:            'assistant',
+          role:            "assistant",
           content:         result[:advice],
           cited_sutra_ids: result[:cited_sutra_ids],
           tokens_used:     result[:advice].split.length
@@ -105,7 +106,7 @@ module Api
 
         cited = Sutra.where(id: result[:cited_sutra_ids]).map do |s|
           {
-            type: 'sutra',
+            type: "sutra",
             id: s.canonical_id,
             preview: s.translation_en&.truncate(80),
             sanskrit: s.sanskrit,
@@ -121,7 +122,7 @@ module Api
         doc_cited = if result[:cited_document_ids].present?
           Document.where(id: result[:cited_document_ids]).map do |d|
             {
-              type: 'document',
+              type: "document",
               id: d.id,
               filename: d.filename,
               title: d.title,
@@ -134,7 +135,7 @@ module Api
         end
 
         sse.write({
-          type:             'complete',
+          type:             "complete",
           conversation_id:  conversation.id,
           cited_sutras:     cited,
           cited_documents:  doc_cited,
@@ -146,13 +147,13 @@ module Api
         # 3. Client disconnected mid-stream (e.g. navigated away). Save what was generated.
         if accumulated_advice.strip.present?
           conversation.messages.create!(
-            role:        'assistant',
+            role:        "assistant",
             content:     accumulated_advice,
             tokens_used: accumulated_advice.split.length
           )
         end
       rescue => e
-        sse.write({ type: 'error', message: 'Advisor temporarily unavailable.' }.to_json)
+        sse.write({ type: "error", message: "Advisor temporarily unavailable." }.to_json)
         Rails.logger.error("Advisor error: #{e.class}: #{e.message}")
       ensure
         sse.close
@@ -171,15 +172,21 @@ module Api
         end
       end
 
+      # TDD §5.3: once routed in a session, subsequent turns get elevated
+      # sensitivity — a user does not get to rephrase past the gate.
+      def session_elevated?
+        current_user.safety_events.where("occurred_at > ?", 2.hours.ago).exists?
+      end
+
       def check_quota!
         if current_user.daily_reset_at < Date.today
           current_user.update!(daily_query_count: 0, daily_reset_at: Date.today)
         end
         if current_user.daily_query_count >= current_user.plan_limit
           render json: {
-            error:       'Daily query limit reached.',
+            error:       "Daily query limit reached.",
             limit:       current_user.plan_limit,
-            upgrade_url: '/api/v1/subscriptions/plans'
+            upgrade_url: "/api/v1/subscriptions/plans"
           }, status: :too_many_requests
         end
       end

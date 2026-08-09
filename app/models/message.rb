@@ -2,12 +2,9 @@ class Message < ApplicationRecord
   belongs_to :conversation
   belongs_to :chat, optional: true
   has_many :tool_calls, dependent: :destroy
-  
+
   validates :role,    presence: true, inclusion: { in: %w[user assistant] }
   validates :content, presence: true
-
-  # Ruby LLM integration - thinking and cost tracking
-  serialize :cited_sutra_ids, coder: JSON
 
   # Cost calculation helper
   def total_tokens

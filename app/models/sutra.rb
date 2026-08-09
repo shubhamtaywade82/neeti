@@ -4,7 +4,7 @@ class Sutra < ApplicationRecord
   belongs_to :knowledge_pack, optional: true
 
   pg_search_scope :full_text_search,
-    using: { tsearch: { tsvector_column: 'search_vector', dictionary: 'english' } }
+    using: { tsearch: { tsvector_column: "search_vector", dictionary: "english" } }
 
   # --- Normalized associations (Phase 2) ---
   has_many :sutra_themes,     dependent: :delete_all
@@ -58,7 +58,7 @@ class Sutra < ApplicationRecord
           situations: :sutra_situations, emotions: :sutra_emotions
         }[assoc]
         send(join_assoc).delete_all
-        themes = values.map { |name| Theme.find_or_create_by!(name: name) { |t| t.category ||= 'concept' } }
+        themes = values.map { |name| Theme.find_or_create_by!(name: name) { |t| t.category ||= "concept" } }
         themes.each { |t| send(join_assoc).build(theme: t) }
       else
         super(values)
@@ -84,10 +84,10 @@ class Sutra < ApplicationRecord
          setweight(to_tsvector('english', COALESCE(?, '')), 'C') ||
          setweight(to_tsvector('english', COALESCE(?, '')), 'C')
        WHERE id = ?",
-      translation_en || '',
-      transliteration || '',
-      themes_agg || '',
-      situations_agg || '',
+      translation_en || "",
+      transliteration || "",
+      themes_agg || "",
+      situations_agg || "",
       id
     ])
 
@@ -107,7 +107,7 @@ class Sutra < ApplicationRecord
   validates :canonical_id,   presence: true, uniqueness: true
   validates :translation_en, presence: true
   validates :chapter,        presence: true, numericality: { only_integer: true, greater_than_or_equal_to: 1 }
-  
+
   # --- Advisory status enum for safety curation ---
   # pending: 0 - not yet reviewed, EXCLUDED from retrieval by default
   # active: 1 - safe for general advice, unrestricted
@@ -118,11 +118,11 @@ class Sutra < ApplicationRecord
     active: 1,
     contextual: 2,
     excluded: 3
-  }
+  }, validate: true
 
   # THE SAFETY SCOPE. Every retrieval channel must pass through this.
   # A channel that constructs its own base relation is a defect.
-  scope :retrievable, -> { where(advisory_status: [:active, :contextual]) }
+  scope :retrievable, -> { where(advisory_status: [ :active, :contextual ]) }
 
   validates :advisory_status, presence: true
   validate :curation_complete_when_decided
@@ -131,9 +131,8 @@ class Sutra < ApplicationRecord
 
   def curation_complete_when_decided
     return if pending?
-    
-    if curated_by.blank? || curated_at.blank?
-      errors.add(:base, "curated_by and curated_at required when status is not pending")
-    end
+
+    errors.add(:curated_by, "must be set when changing from pending status") if curated_by.blank?
+    errors.add(:curated_at, "must be set when changing from pending status") if curated_at.blank?
   end
 end

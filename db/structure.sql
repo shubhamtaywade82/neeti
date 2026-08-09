@@ -1,7 +1,6 @@
 SET statement_timeout = 0;
 SET lock_timeout = 0;
 SET idle_in_transaction_session_timeout = 0;
-SET transaction_timeout = 0;
 SET client_encoding = 'UTF8';
 SET standard_conforming_strings = on;
 SELECT pg_catalog.set_config('search_path', '', false);
@@ -11,10 +10,17 @@ SET client_min_messages = warning;
 SET row_security = off;
 
 --
--- Name: public; Type: SCHEMA; Schema: -; Owner: -
+-- Name: vector; Type: EXTENSION; Schema: -; Owner: -
 --
 
--- *not* creating schema, since initdb creates it
+CREATE EXTENSION IF NOT EXISTS vector WITH SCHEMA public;
+
+
+--
+-- Name: EXTENSION vector; Type: COMMENT; Schema: -; Owner: -
+--
+
+COMMENT ON EXTENSION vector IS 'vector data type and ivfflat and hnsw access methods';
 
 
 --
@@ -78,6 +84,77 @@ CREATE TABLE public.ar_internal_metadata (
 
 
 --
+-- Name: chats; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.chats (
+    id bigint NOT NULL,
+    user_id bigint NOT NULL,
+    agent_type character varying NOT NULL,
+    title character varying,
+    metadata text,
+    message_count integer DEFAULT 0,
+    total_cost numeric(15,6) DEFAULT 0.0,
+    created_at timestamp(6) without time zone NOT NULL,
+    updated_at timestamp(6) without time zone NOT NULL
+);
+
+
+--
+-- Name: chats_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.chats_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: chats_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.chats_id_seq OWNED BY public.chats.id;
+
+
+--
+-- Name: citations; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.citations (
+    id bigint NOT NULL,
+    consultation_id bigint NOT NULL,
+    sutra_id bigint NOT NULL,
+    "position" integer NOT NULL,
+    relevance_rank integer,
+    applied_interpretation text,
+    created_at timestamp(6) without time zone NOT NULL,
+    updated_at timestamp(6) without time zone NOT NULL
+);
+
+
+--
+-- Name: citations_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.citations_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: citations_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.citations_id_seq OWNED BY public.citations.id;
+
+
+--
 -- Name: collections; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -114,6 +191,53 @@ ALTER SEQUENCE public.collections_id_seq OWNED BY public.collections.id;
 
 
 --
+-- Name: consultations; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.consultations (
+    id bigint NOT NULL,
+    user_id bigint NOT NULL,
+    parent_id bigint,
+    public_id character varying NOT NULL,
+    query_text text,
+    title character varying,
+    status integer DEFAULT 0 NOT NULL,
+    routed_category character varying,
+    detection_stage character varying,
+    response_text text,
+    retrieval_ms integer,
+    generation_ms integer,
+    model_used character varying,
+    corpus_version character varying,
+    citations_proposed integer DEFAULT 0 NOT NULL,
+    gate_violations integer DEFAULT 0 NOT NULL,
+    credits_consumed integer DEFAULT 0 NOT NULL,
+    user_reaction integer,
+    created_at timestamp(6) without time zone NOT NULL,
+    updated_at timestamp(6) without time zone NOT NULL
+);
+
+
+--
+-- Name: consultations_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.consultations_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: consultations_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.consultations_id_seq OWNED BY public.consultations.id;
+
+
+--
 -- Name: conversations; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -144,6 +268,42 @@ CREATE SEQUENCE public.conversations_id_seq
 --
 
 ALTER SEQUENCE public.conversations_id_seq OWNED BY public.conversations.id;
+
+
+--
+-- Name: credit_ledger_entries; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.credit_ledger_entries (
+    id bigint NOT NULL,
+    user_id bigint NOT NULL,
+    consultation_id bigint,
+    amount integer NOT NULL,
+    transaction_type integer NOT NULL,
+    description character varying,
+    balance_after integer NOT NULL,
+    idempotency_key character varying,
+    created_at timestamp(6) without time zone NOT NULL
+);
+
+
+--
+-- Name: credit_ledger_entries_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.credit_ledger_entries_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: credit_ledger_entries_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.credit_ledger_entries_id_seq OWNED BY public.credit_ledger_entries.id;
 
 
 --
@@ -279,7 +439,14 @@ CREATE TABLE public.messages (
     cited_sutra_ids bigint[] DEFAULT '{}'::bigint[],
     tokens_used integer,
     created_at timestamp(6) without time zone NOT NULL,
-    updated_at timestamp(6) without time zone NOT NULL
+    updated_at timestamp(6) without time zone NOT NULL,
+    thinking_text text,
+    thinking_tokens integer,
+    output_tokens integer,
+    input_tokens integer,
+    total_cost numeric(15,6),
+    thinking_cost numeric(15,6),
+    chat_id bigint
 );
 
 
@@ -300,6 +467,73 @@ CREATE SEQUENCE public.messages_id_seq
 --
 
 ALTER SEQUENCE public.messages_id_seq OWNED BY public.messages.id;
+
+
+--
+-- Name: retrieval_candidates; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.retrieval_candidates (
+    id bigint NOT NULL,
+    consultation_id bigint NOT NULL,
+    sutra_id bigint NOT NULL,
+    channel_ranks jsonb DEFAULT '{}'::jsonb NOT NULL,
+    fused_score double precision NOT NULL,
+    final_rank integer NOT NULL,
+    was_cited boolean DEFAULT false NOT NULL,
+    created_at timestamp(6) without time zone NOT NULL
+);
+
+
+--
+-- Name: retrieval_candidates_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.retrieval_candidates_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: retrieval_candidates_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.retrieval_candidates_id_seq OWNED BY public.retrieval_candidates.id;
+
+
+--
+-- Name: safety_events; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.safety_events (
+    id bigint NOT NULL,
+    user_id bigint NOT NULL,
+    category character varying NOT NULL,
+    detection_stage character varying NOT NULL,
+    occurred_at timestamp(6) without time zone NOT NULL
+);
+
+
+--
+-- Name: safety_events_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.safety_events_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: safety_events_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.safety_events_id_seq OWNED BY public.safety_events.id;
 
 
 --
@@ -917,7 +1151,21 @@ CREATE TABLE public.sutras (
     source_url text,
     created_at timestamp(6) without time zone NOT NULL,
     updated_at timestamp(6) without time zone NOT NULL,
-    knowledge_pack_id bigint
+    knowledge_pack_id bigint,
+    advisory_status integer DEFAULT 0 NOT NULL,
+    curation_note text,
+    curated_by character varying,
+    curated_at timestamp(6) without time zone,
+    translation_source character varying,
+    tone character varying,
+    applicability character varying[] DEFAULT '{}'::character varying[],
+    corpus_id bigint,
+    embedding public.vector,
+    embedding_model character varying,
+    embedding_source_digest character varying,
+    embedded_at timestamp(6) without time zone,
+    CONSTRAINT chk_sutras_advisory_status CHECK (((advisory_status >= 0) AND (advisory_status <= 3))),
+    CONSTRAINT chk_sutras_curated_when_decided CHECK (((advisory_status = 0) OR ((curated_by IS NOT NULL) AND (curated_at IS NOT NULL))))
 );
 
 
@@ -1008,6 +1256,44 @@ ALTER SEQUENCE public.themes_id_seq OWNED BY public.themes.id;
 
 
 --
+-- Name: tool_calls; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.tool_calls (
+    id bigint NOT NULL,
+    chat_id bigint NOT NULL,
+    message_id bigint NOT NULL,
+    tool_name character varying NOT NULL,
+    arguments jsonb,
+    result jsonb,
+    success boolean DEFAULT true,
+    error_message text,
+    execution_time_ms integer,
+    created_at timestamp(6) without time zone NOT NULL,
+    updated_at timestamp(6) without time zone NOT NULL
+);
+
+
+--
+-- Name: tool_calls_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.tool_calls_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: tool_calls_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.tool_calls_id_seq OWNED BY public.tool_calls.id;
+
+
+--
 -- Name: user_insights; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -1060,7 +1346,9 @@ CREATE TABLE public.users (
     installed_packs text[] DEFAULT '{chanakya,gita}'::text[],
     reset_token character varying,
     reset_sent_at timestamp(6) without time zone,
-    token_version integer DEFAULT 0 NOT NULL
+    token_version integer DEFAULT 0 NOT NULL,
+    credit_balance integer DEFAULT 2 NOT NULL,
+    last_credit_reset date
 );
 
 
@@ -1084,6 +1372,20 @@ ALTER SEQUENCE public.users_id_seq OWNED BY public.users.id;
 
 
 --
+-- Name: chats id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.chats ALTER COLUMN id SET DEFAULT nextval('public.chats_id_seq'::regclass);
+
+
+--
+-- Name: citations id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.citations ALTER COLUMN id SET DEFAULT nextval('public.citations_id_seq'::regclass);
+
+
+--
 -- Name: collections id; Type: DEFAULT; Schema: public; Owner: -
 --
 
@@ -1091,10 +1393,24 @@ ALTER TABLE ONLY public.collections ALTER COLUMN id SET DEFAULT nextval('public.
 
 
 --
+-- Name: consultations id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.consultations ALTER COLUMN id SET DEFAULT nextval('public.consultations_id_seq'::regclass);
+
+
+--
 -- Name: conversations id; Type: DEFAULT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.conversations ALTER COLUMN id SET DEFAULT nextval('public.conversations_id_seq'::regclass);
+
+
+--
+-- Name: credit_ledger_entries id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.credit_ledger_entries ALTER COLUMN id SET DEFAULT nextval('public.credit_ledger_entries_id_seq'::regclass);
 
 
 --
@@ -1123,6 +1439,20 @@ ALTER TABLE ONLY public.knowledge_packs ALTER COLUMN id SET DEFAULT nextval('pub
 --
 
 ALTER TABLE ONLY public.messages ALTER COLUMN id SET DEFAULT nextval('public.messages_id_seq'::regclass);
+
+
+--
+-- Name: retrieval_candidates id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.retrieval_candidates ALTER COLUMN id SET DEFAULT nextval('public.retrieval_candidates_id_seq'::regclass);
+
+
+--
+-- Name: safety_events id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.safety_events ALTER COLUMN id SET DEFAULT nextval('public.safety_events_id_seq'::regclass);
 
 
 --
@@ -1273,6 +1603,13 @@ ALTER TABLE ONLY public.themes ALTER COLUMN id SET DEFAULT nextval('public.theme
 
 
 --
+-- Name: tool_calls id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.tool_calls ALTER COLUMN id SET DEFAULT nextval('public.tool_calls_id_seq'::regclass);
+
+
+--
 -- Name: user_insights id; Type: DEFAULT; Schema: public; Owner: -
 --
 
@@ -1295,6 +1632,22 @@ ALTER TABLE ONLY public.ar_internal_metadata
 
 
 --
+-- Name: chats chats_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.chats
+    ADD CONSTRAINT chats_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: citations citations_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.citations
+    ADD CONSTRAINT citations_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: collections collections_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -1303,11 +1656,27 @@ ALTER TABLE ONLY public.collections
 
 
 --
+-- Name: consultations consultations_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.consultations
+    ADD CONSTRAINT consultations_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: conversations conversations_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.conversations
     ADD CONSTRAINT conversations_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: credit_ledger_entries credit_ledger_entries_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.credit_ledger_entries
+    ADD CONSTRAINT credit_ledger_entries_pkey PRIMARY KEY (id);
 
 
 --
@@ -1340,6 +1709,22 @@ ALTER TABLE ONLY public.knowledge_packs
 
 ALTER TABLE ONLY public.messages
     ADD CONSTRAINT messages_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: retrieval_candidates retrieval_candidates_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.retrieval_candidates
+    ADD CONSTRAINT retrieval_candidates_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: safety_events safety_events_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.safety_events
+    ADD CONSTRAINT safety_events_pkey PRIMARY KEY (id);
 
 
 --
@@ -1519,6 +1904,14 @@ ALTER TABLE ONLY public.themes
 
 
 --
+-- Name: tool_calls tool_calls_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.tool_calls
+    ADD CONSTRAINT tool_calls_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: user_insights user_insights_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -1539,6 +1932,55 @@ ALTER TABLE ONLY public.users
 --
 
 CREATE UNIQUE INDEX idx_theme_relationships_unique ON public.theme_relationships USING btree (source_theme_id, target_theme_id, relationship_type);
+
+
+--
+-- Name: index_chats_on_agent_type; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_chats_on_agent_type ON public.chats USING btree (agent_type);
+
+
+--
+-- Name: index_chats_on_user_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_chats_on_user_id ON public.chats USING btree (user_id);
+
+
+--
+-- Name: index_chats_on_user_id_and_created_at; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_chats_on_user_id_and_created_at ON public.chats USING btree (user_id, created_at);
+
+
+--
+-- Name: index_citations_on_consultation_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_citations_on_consultation_id ON public.citations USING btree (consultation_id);
+
+
+--
+-- Name: index_citations_on_consultation_id_and_position; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX index_citations_on_consultation_id_and_position ON public.citations USING btree (consultation_id, "position");
+
+
+--
+-- Name: index_citations_on_consultation_id_and_sutra_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX index_citations_on_consultation_id_and_sutra_id ON public.citations USING btree (consultation_id, sutra_id);
+
+
+--
+-- Name: index_citations_on_sutra_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_citations_on_sutra_id ON public.citations USING btree (sutra_id);
 
 
 --
@@ -1563,10 +2005,73 @@ CREATE UNIQUE INDEX index_collections_on_user_id_and_slug ON public.collections 
 
 
 --
+-- Name: index_consultations_on_parent_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_consultations_on_parent_id ON public.consultations USING btree (parent_id);
+
+
+--
+-- Name: index_consultations_on_public_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX index_consultations_on_public_id ON public.consultations USING btree (public_id);
+
+
+--
+-- Name: index_consultations_on_status; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_consultations_on_status ON public.consultations USING btree (status);
+
+
+--
+-- Name: index_consultations_on_user_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_consultations_on_user_id ON public.consultations USING btree (user_id);
+
+
+--
+-- Name: index_consultations_on_user_id_and_created_at; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_consultations_on_user_id_and_created_at ON public.consultations USING btree (user_id, created_at);
+
+
+--
 -- Name: index_conversations_on_user_id; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX index_conversations_on_user_id ON public.conversations USING btree (user_id);
+
+
+--
+-- Name: index_credit_ledger_entries_on_consultation_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_credit_ledger_entries_on_consultation_id ON public.credit_ledger_entries USING btree (consultation_id);
+
+
+--
+-- Name: index_credit_ledger_entries_on_idempotency_key; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX index_credit_ledger_entries_on_idempotency_key ON public.credit_ledger_entries USING btree (idempotency_key) WHERE (idempotency_key IS NOT NULL);
+
+
+--
+-- Name: index_credit_ledger_entries_on_user_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_credit_ledger_entries_on_user_id ON public.credit_ledger_entries USING btree (user_id);
+
+
+--
+-- Name: index_credit_ledger_entries_on_user_id_and_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_credit_ledger_entries_on_user_id_and_id ON public.credit_ledger_entries USING btree (user_id, id);
 
 
 --
@@ -1612,6 +2117,13 @@ CREATE UNIQUE INDEX index_knowledge_packs_on_slug ON public.knowledge_packs USIN
 
 
 --
+-- Name: index_messages_on_chat_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_messages_on_chat_id ON public.messages USING btree (chat_id);
+
+
+--
 -- Name: index_messages_on_conversation_id; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -1623,6 +2135,48 @@ CREATE INDEX index_messages_on_conversation_id ON public.messages USING btree (c
 --
 
 CREATE INDEX index_messages_on_role ON public.messages USING btree (role);
+
+
+--
+-- Name: index_retrieval_candidates_on_consultation_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_retrieval_candidates_on_consultation_id ON public.retrieval_candidates USING btree (consultation_id);
+
+
+--
+-- Name: index_retrieval_candidates_on_consultation_id_and_final_rank; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_retrieval_candidates_on_consultation_id_and_final_rank ON public.retrieval_candidates USING btree (consultation_id, final_rank);
+
+
+--
+-- Name: index_retrieval_candidates_on_created_at; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_retrieval_candidates_on_created_at ON public.retrieval_candidates USING btree (created_at);
+
+
+--
+-- Name: index_retrieval_candidates_on_sutra_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_retrieval_candidates_on_sutra_id ON public.retrieval_candidates USING btree (sutra_id);
+
+
+--
+-- Name: index_safety_events_on_user_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_safety_events_on_user_id ON public.safety_events USING btree (user_id);
+
+
+--
+-- Name: index_safety_events_on_user_id_and_occurred_at; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_safety_events_on_user_id_and_occurred_at ON public.safety_events USING btree (user_id, occurred_at);
 
 
 --
@@ -1962,6 +2516,20 @@ CREATE INDEX index_sutra_virtues_on_theme_id ON public.sutra_virtues USING btree
 
 
 --
+-- Name: index_sutras_on_advisory_status; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_sutras_on_advisory_status ON public.sutras USING btree (advisory_status);
+
+
+--
+-- Name: index_sutras_on_applicability; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_sutras_on_applicability ON public.sutras USING gin (applicability);
+
+
+--
 -- Name: index_sutras_on_canonical_id; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -1973,6 +2541,13 @@ CREATE UNIQUE INDEX index_sutras_on_canonical_id ON public.sutras USING btree (c
 --
 
 CREATE INDEX index_sutras_on_chapter ON public.sutras USING btree (chapter);
+
+
+--
+-- Name: index_sutras_on_corpus_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_sutras_on_corpus_id ON public.sutras USING btree (corpus_id);
 
 
 --
@@ -2060,6 +2635,34 @@ CREATE INDEX index_themes_on_related_theme_names ON public.themes USING gin (rel
 
 
 --
+-- Name: index_tool_calls_on_chat_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_tool_calls_on_chat_id ON public.tool_calls USING btree (chat_id);
+
+
+--
+-- Name: index_tool_calls_on_chat_id_and_created_at; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_tool_calls_on_chat_id_and_created_at ON public.tool_calls USING btree (chat_id, created_at);
+
+
+--
+-- Name: index_tool_calls_on_message_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_tool_calls_on_message_id ON public.tool_calls USING btree (message_id);
+
+
+--
+-- Name: index_tool_calls_on_tool_name; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_tool_calls_on_tool_name ON public.tool_calls USING btree (tool_name);
+
+
+--
 -- Name: index_user_insights_on_search_vector; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -2109,6 +2712,14 @@ CREATE TRIGGER user_insights_sv_trigger BEFORE INSERT OR UPDATE ON public.user_i
 
 
 --
+-- Name: messages fk_rails_0f670de7ba; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.messages
+    ADD CONSTRAINT fk_rails_0f670de7ba FOREIGN KEY (chat_id) REFERENCES public.chats(id);
+
+
+--
 -- Name: sutra_vices fk_rails_175c91a4ce; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -2122,6 +2733,22 @@ ALTER TABLE ONLY public.sutra_vices
 
 ALTER TABLE ONLY public.sutra_situations
     ADD CONSTRAINT fk_rails_1de77a5a26 FOREIGN KEY (theme_id) REFERENCES public.themes(id) ON DELETE CASCADE;
+
+
+--
+-- Name: retrieval_candidates fk_rails_1f94229922; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.retrieval_candidates
+    ADD CONSTRAINT fk_rails_1f94229922 FOREIGN KEY (sutra_id) REFERENCES public.sutras(id);
+
+
+--
+-- Name: safety_events fk_rails_2aed3f8369; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.safety_events
+    ADD CONSTRAINT fk_rails_2aed3f8369 FOREIGN KEY (user_id) REFERENCES public.users(id);
 
 
 --
@@ -2146,6 +2773,14 @@ ALTER TABLE ONLY public.solid_queue_recurring_executions
 
 ALTER TABLE ONLY public.solid_queue_failed_executions
     ADD CONSTRAINT fk_rails_39bbc7a631 FOREIGN KEY (job_id) REFERENCES public.solid_queue_jobs(id) ON DELETE CASCADE;
+
+
+--
+-- Name: credit_ledger_entries fk_rails_3fc2e794d1; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.credit_ledger_entries
+    ADD CONSTRAINT fk_rails_3fc2e794d1 FOREIGN KEY (user_id) REFERENCES public.users(id);
 
 
 --
@@ -2189,6 +2824,14 @@ ALTER TABLE ONLY public.sutra_virtues
 
 
 --
+-- Name: retrieval_candidates fk_rails_73d30e454f; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.retrieval_candidates
+    ADD CONSTRAINT fk_rails_73d30e454f FOREIGN KEY (consultation_id) REFERENCES public.consultations(id);
+
+
+--
 -- Name: user_insights fk_rails_7b73695c72; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -2229,11 +2872,27 @@ ALTER TABLE ONLY public.document_chunks
 
 
 --
+-- Name: consultations fk_rails_9b0f4a6718; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.consultations
+    ADD CONSTRAINT fk_rails_9b0f4a6718 FOREIGN KEY (parent_id) REFERENCES public.consultations(id);
+
+
+--
 -- Name: collections fk_rails_9b33697360; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.collections
     ADD CONSTRAINT fk_rails_9b33697360 FOREIGN KEY (user_id) REFERENCES public.users(id);
+
+
+--
+-- Name: tool_calls fk_rails_9c8daee481; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.tool_calls
+    ADD CONSTRAINT fk_rails_9c8daee481 FOREIGN KEY (message_id) REFERENCES public.messages(id);
 
 
 --
@@ -2293,11 +2952,51 @@ ALTER TABLE ONLY public.sutra_emotions
 
 
 --
+-- Name: chats fk_rails_e555f43151; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.chats
+    ADD CONSTRAINT fk_rails_e555f43151 FOREIGN KEY (user_id) REFERENCES public.users(id);
+
+
+--
+-- Name: citations fk_rails_e598a99a1e; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.citations
+    ADD CONSTRAINT fk_rails_e598a99a1e FOREIGN KEY (sutra_id) REFERENCES public.sutras(id);
+
+
+--
+-- Name: tool_calls fk_rails_e6051f6876; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.tool_calls
+    ADD CONSTRAINT fk_rails_e6051f6876 FOREIGN KEY (chat_id) REFERENCES public.chats(id);
+
+
+--
 -- Name: theme_relationships fk_rails_ead6e0014c; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.theme_relationships
     ADD CONSTRAINT fk_rails_ead6e0014c FOREIGN KEY (target_theme_id) REFERENCES public.themes(id);
+
+
+--
+-- Name: consultations fk_rails_eb9663633d; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.consultations
+    ADD CONSTRAINT fk_rails_eb9663633d FOREIGN KEY (user_id) REFERENCES public.users(id);
+
+
+--
+-- Name: credit_ledger_entries fk_rails_f65d36d41a; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.credit_ledger_entries
+    ADD CONSTRAINT fk_rails_f65d36d41a FOREIGN KEY (consultation_id) REFERENCES public.consultations(id);
 
 
 --
@@ -2317,12 +3016,24 @@ ALTER TABLE ONLY public.sutra_vices
 
 
 --
+-- Name: citations fk_rails_ff7cb7af44; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.citations
+    ADD CONSTRAINT fk_rails_ff7cb7af44 FOREIGN KEY (consultation_id) REFERENCES public.consultations(id);
+
+
+--
 -- PostgreSQL database dump complete
 --
 
 SET search_path TO "$user", public;
 
 INSERT INTO "schema_migrations" (version) VALUES
+('20260809000003'),
+('20260809000002'),
+('20260809000001'),
+('20260808000001'),
 ('20260712110223'),
 ('20260712083609'),
 ('20260712000005'),

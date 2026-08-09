@@ -1,7 +1,7 @@
 # lib/neeti/evaluator.rb
 module Neeti
   class Evaluator
-    BENCHMARK_PATH = Rails.root.join('db/eval/benchmark_queries.json')
+    BENCHMARK_PATH = Rails.root.join("db/eval/benchmark_queries.json")
 
     Result = Struct.new(:id, :query, :expected_themes, :retrieved_themes,
                         :sutras_found, :theme_hits, :recall, keyword_init: true)
@@ -12,15 +12,15 @@ module Neeti
       retriever = Retriever.new(llm_classifier: NullClassifier.new)
 
       results = queries.map do |q|
-        sutras   = retriever.retrieve(q['query'])
+        sutras   = retriever.retrieve(q["query"])
         ret_themes = sutras.flat_map { |s| s.themes.map(&:name) }.map(&:downcase).uniq
-        expected   = q['expected_themes'].map(&:downcase)
+        expected   = q["expected_themes"].map(&:downcase)
         hits       = (expected & ret_themes).size
         recall     = expected.empty? ? 1.0 : hits.to_f / expected.size
 
         Result.new(
-          id:               q['id'],
-          query:            q['query'],
+          id:               q["id"],
+          query:            q["query"],
           expected_themes:  expected,
           retrieved_themes: ret_themes,
           sutras_found:     sutras.size,

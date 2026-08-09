@@ -22,7 +22,7 @@ RSpec.describe Neeti::LlmClassifier do
     it "filters out themes not in known_themes list" do
       allow(provider).to receive(:chat).and_return('["greed", "unknown_theme"]')
       result = classifier.classify_themes("test", %w[greed desire])
-      expect(result).to eq(["greed"])
+      expect(result).to eq([ "greed" ])
     end
 
     it "returns [] when LLM returns empty array" do
@@ -34,7 +34,7 @@ RSpec.describe Neeti::LlmClassifier do
     it "handles JSON embedded in other text" do
       allow(provider).to receive(:chat).and_return('Here are themes: ["greed"] — enjoy!')
       result = classifier.classify_themes("test", %w[greed desire])
-      expect(result).to eq(["greed"])
+      expect(result).to eq([ "greed" ])
     end
   end
 end

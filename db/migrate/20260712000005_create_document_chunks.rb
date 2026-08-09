@@ -8,6 +8,6 @@ class CreateDocumentChunks < ActiveRecord::Migration[8.1]
       t.float :embedding, array: true, default: []
       t.timestamps
     end
-    add_index :document_chunks, [:document_id, :position]
+    add_index :document_chunks, [ :document_id, :position ]
   end
 end

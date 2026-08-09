@@ -9,5 +9,12 @@ FactoryBot.define do
     vices                   { %w[greed anger laziness].sample(1) }
     situations              { %w[career conflict leadership].sample(1) }
     emotions                { %w[fear ambition desire].sample(1) }
+
+    after(:build) do |sutra|
+      next if sutra.pending? || sutra.advisory_status.nil?
+
+      sutra.curated_by ||= "Test Curator"
+      sutra.curated_at ||= Time.current
+    end
   end
 end

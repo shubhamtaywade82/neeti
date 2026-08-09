@@ -1,6 +1,6 @@
 class Theme < ApplicationRecord
-  has_many :outgoing_relationships, class_name: 'ThemeRelationship', foreign_key: :source_theme_id, dependent: :destroy
-  has_many :incoming_relationships, class_name: 'ThemeRelationship', foreign_key: :target_theme_id, dependent: :destroy
+  has_many :outgoing_relationships, class_name: "ThemeRelationship", foreign_key: :source_theme_id, dependent: :destroy
+  has_many :incoming_relationships, class_name: "ThemeRelationship", foreign_key: :target_theme_id, dependent: :destroy
   has_many :related_themes, through: :outgoing_relationships, source: :target_theme
 
   validates :name,     presence: true, uniqueness: true
@@ -24,7 +24,7 @@ class Theme < ApplicationRecord
       SELECT DISTINCT name FROM theme_graph
     SQL
 
-    find_by_sql([sql, { seeds: seed_names, max_depth: depth }]).map(&:name)
+    find_by_sql([ sql, { seeds: seed_names, max_depth: depth } ]).map(&:name)
   end
 
   # Transition setter: store names to sync after save (parent id may be nil here)

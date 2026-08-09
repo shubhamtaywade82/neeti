@@ -14,7 +14,7 @@ verses.each_with_index do |v, i|
     s.translation_hi = v['text']
     s.transliteration = ''
     s.sanskrit = ''
-    s.themes = [v['theme']]
+    s.themes = [ v['theme'] ]
     s.chapter_title = "Chapter #{v['chapter']}"
     s.source_url = ''
   end

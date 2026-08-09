@@ -1,7 +1,7 @@
 module Api
   module V1
     class SubscriptionsController < ApplicationController
-      skip_before_action :authenticate!, only: [:plans, :webhook]
+      skip_before_action :authenticate!, only: [ :plans, :webhook ]
 
       def plans
         render json: { plans: RazorpayService::PLAN_DETAILS }
@@ -10,13 +10,13 @@ module Api
       def create
         plan = params.require(:plan)
         unless %w[seeker strategist raja].include?(plan)
-          return render json: { error: 'Invalid plan' }, status: :unprocessable_entity
+          return render json: { error: "Invalid plan" }, status: :unprocessable_entity
         end
 
-        if ENV['RAZORPAY_KEY_ID'].blank?
+        if ENV["RAZORPAY_KEY_ID"].blank?
           current_user.update!(plan: plan)
           return render json: {
-            mode:      'dev',
+            mode:      "dev",
             activated: true,
             plan:      plan,
             short_url: nil
@@ -25,7 +25,7 @@ module Api
 
         result = RazorpayService.new.create_subscription(current_user, plan)
         render json: {
-          mode:            'razorpay',
+          mode:            "razorpay",
           activated:       false,
           plan:            plan,
           subscription_id: result[:subscription_id],
@@ -33,7 +33,7 @@ module Api
         }, status: :created
       rescue => e
         Rails.logger.error("Subscription error: #{e.class}: #{e.message}")
-        render json: { error: 'Subscription processing failed. Please try again.' }, status: :unprocessable_entity
+        render json: { error: "Subscription processing failed. Please try again." }, status: :unprocessable_entity
       end
 
       def cancel
@@ -42,10 +42,10 @@ module Api
 
       def webhook
         body      = request.raw_post
-        signature = request.headers['X-Razorpay-Signature']
+        signature = request.headers["X-Razorpay-Signature"]
 
         unless RazorpayService.new.verify_webhook_signature(body, signature)
-          return render json: { error: 'Invalid signature' }, status: :forbidden
+          return render json: { error: "Invalid signature" }, status: :forbidden
         end
 
         handle_event(JSON.parse(body))
@@ -62,19 +62,19 @@ module Api
       end
 
       def handle_event(payload)
-        event = payload['event']
-        sub   = payload.dig('payload', 'subscription', 'entity')
+        event = payload["event"]
+        sub   = payload.dig("payload", "subscription", "entity")
         return unless sub
 
-        user = User.find_by(razorpay_subscription_id: sub['id'])
+        user = User.find_by(razorpay_subscription_id: sub["id"])
         return unless user
 
         case event
-        when 'subscription.activated'
-          plan = plan_by_plan_id[sub['plan_id']]
+        when "subscription.activated"
+          plan = plan_by_plan_id[sub["plan_id"]]
           user.update!(plan: plan) if plan
-        when 'subscription.cancelled', 'subscription.completed', 'subscription.expired'
-          user.update!(plan: 'free', razorpay_subscription_id: nil)
+        when "subscription.cancelled", "subscription.completed", "subscription.expired"
+          user.update!(plan: "free", razorpay_subscription_id: nil)
         end
       end
     end

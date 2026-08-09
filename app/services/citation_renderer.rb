@@ -15,12 +15,12 @@ class CitationRenderer
   def call
     @sutra_ids.each_with_index.map do |id, idx|
       sutra = @sutras.fetch(id)
-      
+
       # Defence in depth: even post-gate, assert the safety status.
       unless sutra.advisory_status_active? || sutra.advisory_status_contextual?
         raise "Non-retrievable sutra #{id} reached rendering — investigate immediately"
       end
-      
+
       {
         position: idx + 1,
         sutra_id: sutra.id,

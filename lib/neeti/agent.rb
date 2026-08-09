@@ -8,7 +8,7 @@ module Neeti
       @provider  = provider || ModelRouter.for(:advice)
     end
 
-    def advise(query, user:, conversation:, stream_proc: nil, mode: :retrieval, advisor: :chanakya, retrieval_scope: 'library')
+    def advise(query, user:, conversation:, stream_proc: nil, mode: :retrieval, advisor: :chanakya, retrieval_scope: "library")
       pack_ids = if user.installed_packs.present?
         KnowledgePack.where(slug: user.installed_packs).pluck(:id)
       end
@@ -21,9 +21,9 @@ module Neeti
       )
 
       sutras, context_text, doc_chunks = if mode == :cag
-        installed_slugs = user.installed_packs || ['chanakya']
+        installed_slugs = user.installed_packs || [ "chanakya" ]
         all = Sutra.joins(:knowledge_pack).where(knowledge_packs: { slug: installed_slugs }).to_a
-        [all, all.map(&:translation_en).join("\n"), []]
+        [ all, all.map(&:translation_en).join("\n"), [] ]
       else
         retrieved = if %w[library all].include?(retrieval_scope)
           retriever.retrieve(query)
@@ -35,7 +35,7 @@ module Neeti
         else
           []
         end
-        [retrieved, nil, doc_chunks]
+        [ retrieved, nil, doc_chunks ]
       end
 
       insights = MemoryStore.retrieve_insights(user)
@@ -59,16 +59,16 @@ module Neeti
 
     private
 
-    def retrieve_user_docs(query, user, scope: 'documents')
+    def retrieve_user_docs(query, user, scope: "documents")
       return [] unless user.documents.ready.exists?
 
       query_embedding = embed_query(query)
       return [] if query_embedding.blank?
 
-      chunks = DocumentChunk.joins(:document).where(documents: { user_id: user.id, status: 'ready' })
+      chunks = DocumentChunk.joins(:document).where(documents: { user_id: user.id, status: "ready" })
 
-      if scope.start_with?('collection:')
-        collection_id = scope.split(':').last.to_i
+      if scope.start_with?("collection:")
+        collection_id = scope.split(":").last.to_i
         chunks = chunks.where(documents: { collection_id: collection_id })
       end
 
@@ -76,9 +76,9 @@ module Neeti
     end
 
     def embed_query(query)
-      require 'net/http'
-      require 'json'
-      require 'uri'
+      require "net/http"
+      require "json"
+      require "uri"
 
       uri = URI.parse("#{ENV.fetch('OLLAMA_URL', 'http://localhost:11434')}/api/embed")
       http = Net::HTTP.new(uri.host, uri.port)
@@ -86,12 +86,12 @@ module Neeti
       http.read_timeout = 30
 
       request = Net::HTTP::Post.new(uri)
-      request['Content-Type'] = 'application/json'
-      request.body = { model: 'nomic-embed-text', input: [query] }.to_json
+      request["Content-Type"] = "application/json"
+      request.body = { model: "nomic-embed-text", input: [ query ] }.to_json
       response = http.request(request)
 
       if response.code.to_i == 200
-        JSON.parse(response.body)['embeddings']&.first
+        JSON.parse(response.body)["embeddings"]&.first
       end
     rescue => e
       Rails.logger.error("Query embedding error: #{e.message}")
@@ -139,7 +139,7 @@ module Neeti
     end
 
     def reflect(draft, query, sources)
-      source_texts = sources.map { |s| s.respond_to?(:translation_en) ? s.translation_en : s.content }.join(' | ')
+      source_texts = sources.map { |s| s.respond_to?(:translation_en) ? s.translation_en : s.content }.join(" | ")
       msgs = [
         { role: "system", content: Prompts::REFLECTION_SYSTEM },
         { role: "user",   content: "Question: #{query}\nSources: #{source_texts}\nDraft: #{draft}\nEvaluate." }

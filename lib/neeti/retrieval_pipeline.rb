@@ -3,7 +3,7 @@ module Neeti
   class RetrievalPipeline
     MINIMUM_RESULTS = 3
     DEFAULT_LIMIT   = 5
-    
+
     # Channel weights for RRF fusion (higher = more important)
     CHANNEL_WEIGHTS = {
       metadata:     1.0,
@@ -13,7 +13,7 @@ module Neeti
       embedding:    1.5,
       user_docs:    1.0
     }.freeze
-    
+
     STOPWORDS = %w[i my am is are was were be been have has had do does
                    did will would could should may might a an the in on
                    at to of for with by from about what how why when who
@@ -127,7 +127,7 @@ module Neeti
       "raise"             => %w[family knowledge self-discipline],
       "educate"           => %w[family knowledge],
       "strategic"         => %w[strategy wisdom leadership],
-      "thinking"          => %w[strategy wisdom knowledge],
+      "thinking"          => %w[strategy wisdom knowledge]
     }.freeze
 
     def initialize(llm_classifier:, limit: DEFAULT_LIMIT, pack_ids: nil, user: nil)
@@ -148,14 +148,14 @@ module Neeti
         embedding: channel_embedding(query),
         user_docs: channel_user_docs(query)
       }
-      
+
       # Run graph expansion on combined results from other channels
       seed_sutras = (channel_results[:metadata] + channel_results[:fts] + channel_results[:llm]).uniq
       channel_results[:graph] = channel_graph(seed_sutras)
-      
+
       # Apply RRF fusion across all channels
       fused_results = rrf_fusion(channel_results)
-      
+
       finalize(fused_results)
     end
 
@@ -209,7 +209,7 @@ module Neeti
     def channel_fts(query)
       base_scope.retrievable.where("search_vector @@ plainto_tsquery('english', ?)", query)
            .order(Arel.sql(ActiveRecord::Base.sanitize_sql_array(
-             ["ts_rank(search_vector, plainto_tsquery('english', ?)) DESC", query]
+             [ "ts_rank(search_vector, plainto_tsquery('english', ?)) DESC", query ]
            )))
            .limit(@limit * 2).to_a
     end
@@ -243,8 +243,8 @@ module Neeti
 
     # Channel 5: Embedding cosine similarity (NEW)
     def channel_embedding(query)
-      return [] unless Sutra.column_names.include?('embedding')
-      
+      return [] unless Sutra.column_names.include?("embedding")
+
       query_embedding = embed_query(query)
       return [] if query_embedding.blank?
 
@@ -255,7 +255,7 @@ module Neeti
         .order(Arel.sql("embedding <=> ?", "[#{query_embedding.join(',')}]"))
         .limit(@limit * 2)
         .to_a
-      
+
       sutras
     rescue => e
       Rails.logger.error("Embedding retrieval error: #{e.message}")
@@ -265,14 +265,14 @@ module Neeti
     # Channel 6: User document RAG (preserved from original Retriever)
     def channel_user_docs(query)
       return [] unless @user && @user.documents.ready.exists?
-      
+
       query_embedding = embed_query(query)
       return [] if query_embedding.blank?
 
       chunks = DocumentChunk.joins(:document)
-        .where(documents: { user_id: @user.id, status: 'ready' })
+        .where(documents: { user_id: @user.id, status: "ready" })
         .similar_to(query_embedding, limit: MAX_DOC_CHUNKS)
-      
+
       # Return as hash to distinguish from Sutra objects
       chunks.map { |c| { type: :document_chunk, chunk: c, document: c.document } }
     end
@@ -281,18 +281,18 @@ module Neeti
     def rrf_fusion(channel_results)
       rank_scores = Hash.new(0)
       k = 60  # RRF constant
-      
+
       channel_results.each do |channel, results|
         weight = CHANNEL_WEIGHTS[channel]
         results.each_with_index do |result, idx|
           # Extract sutra ID (handle both Sutra objects and document chunks)
           sutra_id = result.is_a?(Sutra) ? result.id : nil
           next unless sutra_id
-          
+
           rank_scores[sutra_id] += weight / (k + idx + 1)
         end
       end
-      
+
       # Sort by fused score and return Sutra objects
       sorted_ids = rank_scores.sort_by { |_, score| -score }.map(&:first)
       Sutra.where(id: sorted_ids).index_by(&:id).values_at(*sorted_ids).compact
@@ -303,7 +303,7 @@ module Neeti
 
     def keywords(query)
       query.downcase
-           .gsub(/[^a-z\s]/, '')
+           .gsub(/[^a-z\s]/, "")
            .split
            .reject { |w| STOPWORDS.include?(w) || w.length < 3 }
     end
@@ -324,11 +324,11 @@ module Neeti
       scope = scope.where(knowledge_pack_id: @pack_ids) if @pack_ids.present?
       scope
     end
-    
+
     def embed_query(query)
-      require 'net/http'
-      require 'json'
-      require 'uri'
+      require "net/http"
+      require "json"
+      require "uri"
 
       uri = URI.parse("#{ENV.fetch('OLLAMA_URL', 'http://localhost:11434')}/api/embed")
       http = Net::HTTP.new(uri.host, uri.port)
@@ -336,12 +336,12 @@ module Neeti
       http.read_timeout = 30
 
       request = Net::HTTP::Post.new(uri)
-      request['Content-Type'] = 'application/json'
-      request.body = { model: 'nomic-embed-text', input: [query] }.to_json
+      request["Content-Type"] = "application/json"
+      request.body = { model: "nomic-embed-text", input: [ query ] }.to_json
       response = http.request(request)
 
       if response.code.to_i == 200
-        JSON.parse(response.body)['embeddings']&.first
+        JSON.parse(response.body)["embeddings"]&.first
       end
     rescue => e
       Rails.logger.error("Query embedding error: #{e.message}")

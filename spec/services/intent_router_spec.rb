@@ -56,7 +56,7 @@ RSpec.describe Neeti::IntentRouter do
     context "classifier fallback" do
       it "routes via the classifier when no lexical pattern matches" do
         allow(SafetyClassifier).to receive(:new).and_return(
-          instance_double(SafetyClassifier, call: SafetyClassifier::Result.new(categories: [:legal], confidence: 0.8))
+          instance_double(SafetyClassifier, call: SafetyClassifier::Result.new(categories: [ :legal ], confidence: 0.8))
         )
 
         verdict = described_class.new("Ambiguous phrasing the regex can't catch").call

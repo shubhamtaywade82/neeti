@@ -117,7 +117,7 @@ module Neeti
       "raise"             => %w[family knowledge self-discipline],
       "educate"           => %w[family knowledge],
       "strategic"         => %w[strategy wisdom leadership],
-      "thinking"          => %w[strategy wisdom knowledge],
+      "thinking"          => %w[strategy wisdom knowledge]
     }.freeze
 
     def initialize(llm_classifier:, limit: DEFAULT_LIMIT, pack_ids: nil)
@@ -196,7 +196,7 @@ module Neeti
     def layer2_fts(query)
       base_scope.where("search_vector @@ plainto_tsquery('english', ?)", query)
            .order(Arel.sql(ActiveRecord::Base.sanitize_sql_array(
-             ["ts_rank(search_vector, plainto_tsquery('english', ?)) DESC", query]
+             [ "ts_rank(search_vector, plainto_tsquery('english', ?)) DESC", query ]
            )))
            .limit(@limit * 2).to_a
     end
@@ -231,7 +231,7 @@ module Neeti
 
     def keywords(query)
       query.downcase
-           .gsub(/[^a-z\s]/, '')
+           .gsub(/[^a-z\s]/, "")
            .split
            .reject { |w| STOPWORDS.include?(w) || w.length < 3 }
     end

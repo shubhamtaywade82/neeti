@@ -14,7 +14,7 @@ class User < ApplicationRecord
   PLANS = %w[free seeker strategist raja].freeze
   ROLES = %w[user admin].freeze
   validates :role, inclusion: { in: ROLES }
-  def admin? = role == 'admin'
+  def admin? = role == "admin"
 
   validates :email,
             presence: true,
@@ -23,16 +23,16 @@ class User < ApplicationRecord
   validates :plan, inclusion: { in: PLANS }
 
   before_save { self.email = email.downcase }
-  
+
   # --- Credit-based billing (new system) ---
   FREE_DAILY_CREDITS = 2
-  
+
   def credit_balance
     super || 0
   end
-  
+
   def grant_daily_credits!
-    return unless plan == 'free'
+    return unless plan == "free"
 
     with_lock { grant_daily_credits_locked! }
   end
@@ -44,7 +44,7 @@ class User < ApplicationRecord
 
   def spend_credits(amount:, consultation_id:, description:)
     with_lock do
-      grant_daily_credits_locked! if plan == 'free'
+      grant_daily_credits_locked! if plan == "free"
       raise ArgumentError, "Insufficient credits" if credit_balance < amount
 
       new_balance = credit_balance - amount
@@ -52,7 +52,7 @@ class User < ApplicationRecord
       CreditLedgerEntry.create!(
         user: self,
         amount: -amount,
-        transaction_type: 'consultation_spend',
+        transaction_type: "consultation_spend",
         description: description,
         balance_after: new_balance,
         consultation_id: consultation_id
@@ -61,7 +61,7 @@ class User < ApplicationRecord
       update_column(:credit_balance, new_balance)
     end
   end
-  
+
   def bump_token_version!
     increment!(:token_version)
   end
@@ -72,7 +72,7 @@ class User < ApplicationRecord
   end
 
   def plan_limit
-    { 'free' => 3 }.fetch(plan, Float::INFINITY)
+    { "free" => 3 }.fetch(plan, Float::INFINITY)
   end
 
   private
@@ -80,12 +80,12 @@ class User < ApplicationRecord
   def grant_daily_credits_locked!
     return unless last_credit_reset.nil? || last_credit_reset < Date.today
 
-    new_balance = [credit_balance + FREE_DAILY_CREDITS, 10].min
+    new_balance = [ credit_balance + FREE_DAILY_CREDITS, 10 ].min
 
     CreditLedgerEntry.create!(
       user: self,
       amount: FREE_DAILY_CREDITS,
-      transaction_type: 'daily_grant',
+      transaction_type: "daily_grant",
       description: "Daily free credits (#{Date.today})",
       balance_after: new_balance
     )

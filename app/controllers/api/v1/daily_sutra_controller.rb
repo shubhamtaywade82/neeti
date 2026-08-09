@@ -3,7 +3,7 @@ module Api
     class DailySutraController < ApplicationController
       def show
         count = Sutra.count
-        return render json: { error: 'No sutras seeded' }, status: :service_unavailable if count.zero?
+        return render json: { error: "No sutras seeded" }, status: :service_unavailable if count.zero?
 
         index  = Date.today.yday % count
         sutra  = Sutra.order(:id).offset(index).first

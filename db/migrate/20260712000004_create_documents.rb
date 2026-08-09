@@ -16,6 +16,6 @@ class CreateDocuments < ActiveRecord::Migration[8.1]
       t.jsonb :metadata, default: {}
       t.timestamps
     end
-    add_index :documents, [:user_id, :status]
+    add_index :documents, [ :user_id, :status ]
   end
 end

@@ -55,14 +55,14 @@ Rails.application.configure do
   # config.action_mailer.raise_delivery_errors = false
 
   # Set host to be used by links generated in mailer templates.
-  config.action_mailer.default_url_options = { host: ENV.fetch('APP_HOST', 'localhost:3000') }
+  config.action_mailer.default_url_options = { host: ENV.fetch("APP_HOST", "localhost:3000") }
 
   # Specify outgoing SMTP server via env vars.
   config.action_mailer.smtp_settings = {
-    user_name:            ENV.fetch('SMTP_USERNAME', ''),
-    password:             ENV.fetch('SMTP_PASSWORD', ''),
-    address:              ENV.fetch('SMTP_ADDRESS', ''),
-    port:                 ENV.fetch('SMTP_PORT', 587).to_i,
+    user_name:            ENV.fetch("SMTP_USERNAME", ""),
+    password:             ENV.fetch("SMTP_PASSWORD", ""),
+    address:              ENV.fetch("SMTP_ADDRESS", ""),
+    port:                 ENV.fetch("SMTP_PORT", 587).to_i,
     authentication:       :plain,
     enable_starttls_auto: true
   }
@@ -79,7 +79,7 @@ Rails.application.configure do
 
   # Enable DNS rebinding protection and other `Host` header attacks.
   config.hosts = [
-    ENV.fetch('APP_HOST', 'localhost'),
+    ENV.fetch("APP_HOST", "localhost"),
     /.*\.onrender\.com/
   ]
 

@@ -30,7 +30,7 @@ module Api
         end
         render json: messages
       rescue ActiveRecord::RecordNotFound
-        render json: { error: 'Not found' }, status: :not_found
+        render json: { error: "Not found" }, status: :not_found
       end
     end
   end

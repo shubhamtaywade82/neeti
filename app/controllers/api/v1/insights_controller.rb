@@ -10,10 +10,10 @@ module Api
         # so they can see the Memory dashboard populated.
         if insights.empty?
           initial_data = [
-            { type: 'goal', content: 'Recurring interest in leadership under uncertainty' },
-            { type: 'preference', content: 'Prefers principle-based advice over tactical shortcuts' },
-            { type: 'pattern', content: 'Building a decision framework for strategic risk' },
-            { type: 'goal', content: 'Actively building a knowledge system for decision-making' }
+            { type: "goal", content: "Recurring interest in leadership under uncertainty" },
+            { type: "preference", content: "Prefers principle-based advice over tactical shortcuts" },
+            { type: "pattern", content: "Building a decision framework for strategic risk" },
+            { type: "goal", content: "Actively building a knowledge system for decision-making" }
           ]
           initial_data.each do |item|
             current_user.user_insights.create!(
@@ -26,22 +26,22 @@ module Api
 
         rendered = insights.map do |i|
           emoji = case i.insight_type
-                  when 'goal' then '🎯'
-                  when 'preference' then '⚖️'
-                  when 'pattern' then '🔍'
-                  when 'challenge' then '⚠️'
-                  else '👤'
-                  end
+          when "goal" then "\u{1F3AF}"
+          when "preference" then "\u2696\uFE0F"
+          when "pattern" then "\u{1F50D}"
+          when "challenge" then "\u26A0\uFE0F"
+          else "\u{1F464}"
+          end
 
           {
             id: i.id,
-            type: i.insight_type || 'goal',
+            type: i.insight_type || "goal",
             icon: emoji,
             label: i.content,
-            source: 'Derived from active sessions',
+            source: "Derived from active sessions",
             confidence: 0.90,
             explicit: true,
-            date: i.created_at.strftime('%b %d, %Y')
+            date: i.created_at.strftime("%b %d, %Y")
           }
         end
 
@@ -53,7 +53,7 @@ module Api
         insight.destroy
         head :no_content
       rescue ActiveRecord::RecordNotFound
-        render json: { error: 'Not found' }, status: :not_found
+        render json: { error: "Not found" }, status: :not_found
       end
     end
   end

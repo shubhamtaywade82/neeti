@@ -2,7 +2,7 @@
 namespace :neeti do
   desc "Run retrieval quality benchmark (optional LIMIT=N for subset)"
   task evaluate: :environment do
-    limit = ENV['LIMIT']&.to_i
+    limit = ENV["LIMIT"]&.to_i
     puts "Running Neeti retrieval benchmark#{" (first #{limit})" if limit}...\n\n"
 
     report = Neeti::Evaluator.run(limit: limit)
@@ -20,7 +20,7 @@ namespace :neeti do
     puts "Worst: [#{report[:worst][:id]}] #{report[:worst][:query].truncate(50)} (#{(report[:worst][:recall] * 100).round}%)"
     puts "=" * 60
 
-    if ENV['VERBOSE']
+    if ENV["VERBOSE"]
       puts "\nPer-query breakdown:"
       report[:results].sort_by(&:recall).each do |r|
         status = r.recall >= 1.0 ? "+" : r.recall > 0 ? "~" : "x"

@@ -9,7 +9,7 @@ class CreateCollections < ActiveRecord::Migration[8.1]
       t.integer :position, default: 0
       t.timestamps
     end
-    add_index :collections, [:user_id, :slug], unique: true
-    add_index :collections, [:user_id, :name], unique: true
+    add_index :collections, [ :user_id, :slug ], unique: true
+    add_index :collections, [ :user_id, :name ], unique: true
   end
 end

@@ -16,12 +16,12 @@ RSpec.describe Neeti::Providers::Ollama do
     end
 
     it "returns response content string" do
-      result = provider.chat(messages: [{ role: "user", content: "Hello" }])
+      result = provider.chat(messages: [ { role: "user", content: "Hello" } ])
       expect(result).to include("wise")
     end
 
     it "returns a String" do
-      result = provider.chat(messages: [{ role: "user", content: "Hello" }])
+      result = provider.chat(messages: [ { role: "user", content: "Hello" } ])
       expect(result).to be_a(String)
     end
 
@@ -30,7 +30,7 @@ RSpec.describe Neeti::Providers::Ollama do
       # We verify the full response is returned and stream proc receives the complete content.
       received = []
       result = provider.chat(
-        messages: [{ role: "user", content: "Hello" }],
+        messages: [ { role: "user", content: "Hello" } ],
         stream: ->(token) { received << token }
       )
       # In non-streaming mode with stream proc, content is passed through proc

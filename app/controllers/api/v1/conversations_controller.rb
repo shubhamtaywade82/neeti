@@ -11,7 +11,7 @@ module Api
         conversation = current_user.conversations.find(params[:id])
         render json: conversation.as_json(include: :messages)
       rescue ActiveRecord::RecordNotFound
-        render json: { error: 'Not found' }, status: :not_found
+        render json: { error: "Not found" }, status: :not_found
       end
 
       def destroy
@@ -19,7 +19,7 @@ module Api
         conversation.destroy
         head :no_content
       rescue ActiveRecord::RecordNotFound
-        render json: { error: 'Not found' }, status: :not_found
+        render json: { error: "Not found" }, status: :not_found
       end
     end
   end

@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require 'ollama/client'
+require "ollama/client"
 
 module Neeti
   module Providers
@@ -8,9 +8,9 @@ module Neeti
       DEFAULT_MODEL = "qwen3.5:4b"
 
       def initialize(model: nil)
-        @model = model || ENV.fetch('OLLAMA_MODEL', DEFAULT_MODEL)
+        @model = model || ENV.fetch("OLLAMA_MODEL", DEFAULT_MODEL)
         config = ::Ollama::Config.new
-        config.base_url = ENV.fetch('OLLAMA_URL', 'http://localhost:11434')
+        config.base_url = ENV.fetch("OLLAMA_URL", "http://localhost:11434")
         config.model    = @model
         config.timeout  = 300
         @client = ::Ollama::Client.new(config: config)

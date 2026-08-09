@@ -19,32 +19,32 @@ module Api
 
       def create
         file = params[:file]
-        return render json: { error: 'No file provided' }, status: :bad_request unless file
+        return render json: { error: "No file provided" }, status: :bad_request unless file
 
         if file.size > 20.megabytes
-          return render json: { error: 'File too large (max 20MB)' }, status: :unprocessable_entity
+          return render json: { error: "File too large (max 20MB)" }, status: :unprocessable_entity
         end
 
         original_name = file.original_filename.presence
-        return render json: { error: 'File has no name' }, status: :bad_request unless original_name
+        return render json: { error: "File has no name" }, status: :bad_request unless original_name
 
-        ext = File.extname(original_name).downcase.delete('.')
+        ext = File.extname(original_name).downcase.delete(".")
         return render json: { error: "Unsupported file type: .#{ext}" }, status: :unprocessable_entity unless %w[pdf md txt docx].include?(ext)
 
         allowed_mimes = {
-          'pdf' => 'application/pdf',
-          'md'  => 'text/markdown',
-          'txt' => 'text/plain',
-          'docx' => 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+          "pdf" => "application/pdf",
+          "md"  => "text/markdown",
+          "txt" => "text/plain",
+          "docx" => "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
         }
         actual_type = Marcel::MimeType.for(file)
         expected = allowed_mimes[ext]
         if expected && actual_type != expected
-          return render json: { error: 'File content does not match its extension.' }, status: :unprocessable_entity
+          return render json: { error: "File content does not match its extension." }, status: :unprocessable_entity
         end
 
         if params[:collection_id].present? && !current_user.collections.exists?(id: params[:collection_id])
-          return render json: { error: 'Collection not found' }, status: :not_found
+          return render json: { error: "Collection not found" }, status: :not_found
         end
 
         doc = current_user.documents.create!(
@@ -54,7 +54,7 @@ module Api
           file_size: file.size,
           storage_key: store_file(file),
           collection_id: params[:collection_id],
-          status: 'pending'
+          status: "pending"
         )
 
         DocumentProcessingJob.perform_later(doc.id)
@@ -73,7 +73,7 @@ module Api
         doc.update!(title: params[:title]) if params[:title]
         if params.key?(:collection_id)
           if params[:collection_id].present? && !current_user.collections.exists?(id: params[:collection_id])
-            return render json: { error: 'Collection not found' }, status: :not_found
+            return render json: { error: "Collection not found" }, status: :not_found
           end
           doc.update!(collection_id: params[:collection_id])
         end
@@ -83,11 +83,11 @@ module Api
       private
 
       def store_file(file)
-        dir = Rails.root.join('storage', 'uploads', Time.now.strftime('%Y/%m/%d'))
+        dir = Rails.root.join("storage", "uploads", Time.now.strftime("%Y/%m/%d"))
         FileUtils.mkdir_p(dir)
         safe_name = "#{SecureRandom.hex(8)}_#{File.basename(file.original_filename)}"
         path = dir.join(safe_name)
-        File.open(path, 'wb') { |f| f.write(file.read) }
+        File.open(path, "wb") { |f| f.write(file.read) }
         path.to_s
       end
 

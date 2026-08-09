@@ -3,17 +3,17 @@ class DocumentProcessingJob < ApplicationJob
 
   CHUNK_SIZE = 512
   CHUNK_OVERLAP = 128
-  EMBEDDING_MODEL = 'nomic-embed-text'
+  EMBEDDING_MODEL = "nomic-embed-text"
 
   def perform(document_id)
     doc = Document.find(document_id)
-    doc.update!(status: 'processing')
+    doc.update!(status: "processing")
 
     text = extract_text(doc)
-    return doc.update!(status: 'error', error_message: 'No text could be extracted') if text.blank?
+    return doc.update!(status: "error", error_message: "No text could be extracted") if text.blank?
 
     chunks = chunk_text(text)
-    return doc.update!(status: 'error', error_message: 'Text too short after chunking') if chunks.empty?
+    return doc.update!(status: "error", error_message: "Text too short after chunking") if chunks.empty?
 
     doc.update!(
       token_count: estimate_tokens(text),
@@ -31,9 +31,9 @@ class DocumentProcessingJob < ApplicationJob
       )
     end
 
-    doc.update!(status: 'ready')
+    doc.update!(status: "ready")
   rescue => e
-    doc.update!(status: 'error', error_message: e.message)
+    doc.update!(status: "error", error_message: e.message)
     Rails.logger.error("DocumentProcessingJob(#{document_id}): #{e.class}: #{e.message}")
   end
 
@@ -41,11 +41,11 @@ class DocumentProcessingJob < ApplicationJob
 
   def extract_text(doc)
     case doc.file_type
-    when 'pdf'
+    when "pdf"
       extract_pdf(doc.storage_key)
-    when 'md', 'txt'
+    when "md", "txt"
       File.read(doc.storage_key)
-    when 'docx'
+    when "docx"
       extract_docx(doc.storage_key)
     else
       File.read(doc.storage_key)
@@ -79,7 +79,7 @@ class DocumentProcessingJob < ApplicationJob
     while i < words.length
       chunk_words = words[i, CHUNK_SIZE]
       break if chunk_words.empty?
-      chunks << chunk_words.join(' ')
+      chunks << chunk_words.join(" ")
       i += CHUNK_SIZE - CHUNK_OVERLAP
     end
 
@@ -89,9 +89,9 @@ class DocumentProcessingJob < ApplicationJob
   def generate_embeddings(chunks)
     return [] if chunks.empty?
 
-    require 'net/http'
-    require 'json'
-    require 'uri'
+    require "net/http"
+    require "json"
+    require "uri"
 
     uri = URI.parse("#{ENV.fetch('OLLAMA_URL', 'http://localhost:11434')}/api/embed")
     http = Net::HTTP.new(uri.host, uri.port)
@@ -99,7 +99,7 @@ class DocumentProcessingJob < ApplicationJob
     http.read_timeout = 120
 
     request = Net::HTTP::Post.new(uri)
-    request['Content-Type'] = 'application/json'
+    request["Content-Type"] = "application/json"
     request.body = {
       model: EMBEDDING_MODEL,
       input: chunks
@@ -109,7 +109,7 @@ class DocumentProcessingJob < ApplicationJob
 
     if response.code.to_i == 200
       data = JSON.parse(response.body)
-      data['embeddings'] || []
+      data["embeddings"] || []
     else
       Rails.logger.error("Embedding API error: #{response.code} #{response.body}")
       chunks.map { |_| [] }

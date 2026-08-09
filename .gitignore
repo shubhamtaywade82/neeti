@@ -1,1 +1,44 @@
-Nothing needs to be added to .gitignore since only a markdown file (CLAUDE_CODE_EFFICIENCY.md) was added, which is a source/config file and not a build artifact, dependency, or temporary file.
+# See https://help.github.com/articles/ignoring-files for more about ignoring files.
+
+# Ignore bundler config.
+/.bundle
+
+# Ignore all environment files.
+/.env*
+
+# Ignore all logfiles and tempfiles.
+/log/*
+/tmp/*
+!/log/.keep
+!/tmp/.keep
+
+# Ignore pidfiles, but keep the directory.
+/tmp/pids/*
+!/tmp/pids/.keep
+
+# Ignore storage (uploaded files in development and any SQLite databases).
+/storage/*
+!/storage/.keep
+/tmp/storage/*
+!/tmp/storage/.keep
+
+/public/assets
+
+# Ignore master key for decrypting credentials and any other unencrypted secrets.
+/config/master.key
+
+# dotenv, dotenv-rails
+/.env.local
+/.env.*.local
+
+# frontend build artifacts / dependencies
+/frontend/node_modules/
+/frontend/dist/
+
+# Editors
+.vscode/
+.idea/
+
+# OS generated files
+.DS_Store
+Thumbs.db

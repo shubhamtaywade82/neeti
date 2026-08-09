@@ -1,15 +1,10 @@
 class SafetyEvent < ApplicationRecord
   belongs_to :user
-  belongs_to :consultation, optional: true
-  
-  validates :event_type, presence: true
-  
-  enum event_type: { 
-    crisis_detected: 0, 
-    hallucination_blocked: 1, 
-    excluded_sutra_attempted: 2 
-  }
-  
-  scope :crisis, -> { where(event_type: :crisis_detected) }
-  scope :hallucinations, -> { where(event_type: :hallucination_blocked) }
+
+  validates :category, presence: true, inclusion: { in: Neeti::IntentRouter::CATEGORIES.map(&:to_s) }
+  validates :detection_stage, presence: true, inclusion: { in: %w[lexical classifier] }
+  validates :occurred_at, presence: true
+
+  scope :crisis, -> { where(category: "self_harm") }
+  scope :recent, -> { where("occurred_at > ?", 24.hours.ago) }
 end

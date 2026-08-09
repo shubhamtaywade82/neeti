@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require 'anthropic'
+require "anthropic"
 
 module Neeti
   module Providers
@@ -9,15 +9,14 @@ module Neeti
       MAX_TOKENS    = 2048
 
       def initialize(model: nil)
-        @model  = model || ENV.fetch('ANTHROPIC_MODEL', DEFAULT_MODEL)
+        @model  = model || ENV.fetch("ANTHROPIC_MODEL", DEFAULT_MODEL)
         @client = ::Anthropic::Client.new(
-          access_token: ENV.fetch('ANTHROPIC_API_KEY', 'placeholder')
+          api_key: ENV.fetch("ANTHROPIC_API_KEY", "placeholder")
         )
       end
 
       def name = :anthropic
 
-      # Anthropic gem (0.3.x) uses Faraday under the hood.
       # Streaming delivers the full response back via the same return value.
       # We implement a simplified approach: always fetch the full response and
       # optionally pipe it through the stream proc as a single "token".
@@ -33,8 +32,8 @@ module Neeti
         }
         params[:system] = system_msg unless system_msg.empty?
 
-        response = @client.messages(parameters: params)
-        text = response.dig("content", 0, "text") || ""
+        response = @client.messages.create(**params)
+        text = response.content.find { |block| block.type == :text }&.text.to_s
 
         stream.call(text) if stream.respond_to?(:call) && !text.empty?
         text

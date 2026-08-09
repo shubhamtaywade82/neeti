@@ -2,8 +2,8 @@
 module Api
   module V1
     class ChatsController < ApplicationController
-      before_action :set_chat, only: [:show]
-      before_action :authorize_chat!, only: [:show]
+      before_action :set_chat, only: [ :show ]
+      before_action :authorize_chat!, only: [ :show ]
 
       def create
         # Create a persisted chat session tied to the user

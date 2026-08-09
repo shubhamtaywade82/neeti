@@ -7,7 +7,7 @@ module Api::V1
     def update
       if params[:password].present? || params[:email].present?
         unless current_user.authenticate(params[:current_password])
-          return render json: { error: 'Current password is required to change email or password.' }, status: :unprocessable_entity
+          return render json: { error: "Current password is required to change email or password." }, status: :unprocessable_entity
         end
       end
 
@@ -21,17 +21,17 @@ module Api::V1
 
     def destroy
       unless current_user.authenticate(params[:password])
-        return render json: { error: 'Incorrect password' }, status: :unprocessable_entity
+        return render json: { error: "Incorrect password" }, status: :unprocessable_entity
       end
       current_user.destroy
-      render json: { message: 'Account deleted' }
+      render json: { message: "Account deleted" }
     end
 
     def usage
       render json: {
         plan:              current_user.plan,
         daily_query_count: current_user.daily_query_count,
-        plan_limit:        current_user.plan_limit == Float::INFINITY ? 'unlimited' : current_user.plan_limit,
+        plan_limit:        current_user.plan_limit == Float::INFINITY ? "unlimited" : current_user.plan_limit,
         daily_reset_at:    current_user.daily_reset_at,
         total_conversations: current_user.conversations.count,
         total_messages:    Message.joins(:conversation).where(conversations: { user: current_user }).count,

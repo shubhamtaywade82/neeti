@@ -2,7 +2,7 @@
 
 module Neeti
   class CorpusCache
-    CACHE_KEY = 'neeti:corpus:all_sutras'
+    CACHE_KEY = "neeti:corpus:all_sutras"
     TTL       = 1.hour
 
     def self.all_sutras

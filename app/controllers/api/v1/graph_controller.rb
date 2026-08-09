@@ -21,7 +21,7 @@ module Api
           {
             id: t.id.to_s,
             name: t.name,
-            category: t.category || 'concept',
+            category: t.category || "concept",
             sutras: referencing_sutras
           }
         end
@@ -30,7 +30,7 @@ module Api
           {
             source: r.source_theme_id.to_s,
             target: r.target_theme_id.to_s,
-            type: r.relationship_type || 'relates',
+            type: r.relationship_type || "relates",
             strength: r.weight || 0.8
           }
         end
