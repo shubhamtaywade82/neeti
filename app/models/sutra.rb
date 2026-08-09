@@ -107,4 +107,10 @@ class Sutra < ApplicationRecord
   validates :canonical_id,   presence: true, uniqueness: true
   validates :translation_en, presence: true
   validates :chapter,        presence: true, numericality: { only_integer: true, greater_than_or_equal_to: 1 }
+  
+  # --- Advisory status enum for safety curation ---
+  enum advisory_status: { active: 0, contextual: 1, excluded: 2 }, suffix: true
+  
+  # --- Scope for retrievable sutras (active + contextual) ---
+  scope :retrievable, -> { where(advisory_status: [:active, :contextual]) }
 end

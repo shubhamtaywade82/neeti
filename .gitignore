@@ -1,14 +1,15 @@
 ```
-# Dependency directories
+# Dependencies
 vendor/bundle/
 .bundle/
 
-# Build artifacts
-*.gem
-pkg/
-
 # Logs
 *.log
+log/*.log
+
+# Temporary files
+tmp/
+*.tmp
 
 # Environment
 .env
@@ -17,22 +18,28 @@ pkg/
 
 # Coverage
 coverage/
-*.gcov
-*.lcov
+*.coverage
+.htmlcov/
 
-# Processed files
+# Database
+db/*.sqlite3
+db/*.db
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Ruby specific
+*.gem
 *.rbc
-*.sass-cache/
+.rake_opts
+pkg/
+*.so
+*.bundle
+Gemfile.lock
+
+# Rails specific
+public/system/
+storage/
 .sass-cache/
-
-# Documentation
-.rdoc
- yardoc/
-
-# Security
-config/master.key
-
-# Temporary files
-tmp/
-*~
 ```
