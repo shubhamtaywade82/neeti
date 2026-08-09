@@ -1,56 +1,51 @@
 class Consultation < ApplicationRecord
   belongs_to :user
-  belongs_to :conversation
-  
-  has_many :citations, dependent: :destroy
-  has_many :retrieval_candidates, dependent: :destroy
-  has_many :credit_ledger_entries, dependent: :destroy
-  has_many :safety_events, dependent: :destroy
-  
-  has_many :sutras, through: :citations
-  
-  before_create :generate_permalink_token
-  
-  enum status: { pending: 0, completed: 1, archived: 2 }
-  
-  scope :recent, -> { order(created_at: :desc) }
-  scope :completed, -> { where(status: :completed) }
-  
-  # Cost in credits (default 1 per consultation)
-  def credit_cost
-    super || 1
+  belongs_to :parent, class_name: "Consultation", optional: true
+  has_many :children, class_name: "Consultation", foreign_key: :parent_id, dependent: :nullify
+  has_many :citations, -> { order(:position) }, dependent: :destroy
+  has_many :cited_sutras, through: :citations, source: :sutra
+  has_many :retrieval_candidates, dependent: :delete_all
+
+  encrypts :query_text
+  encrypts :response_text
+
+  enum :status, {
+    submitted: 0,
+    routed: 1,
+    retrieving: 2,
+    no_grounding: 3,
+    generating: 4,
+    delivered: 5,
+    gate_failed: 6,
+    errored: 7
+  }
+
+  enum :user_reaction, {
+    useful: 0,
+    not_what_i_needed: 1,
+    didnt_apply: 2
+  }, prefix: :reaction
+
+  before_validation :assign_public_id, on: :create
+
+  validates :public_id, presence: true, uniqueness: true
+  validate :query_text_absent_when_routed
+
+  BILLABLE_STATUSES = %w[delivered].freeze
+
+  def billable?
+    BILLABLE_STATUSES.include?(status)
   end
-  
-  # Generate unique token for shareable permalink
-  def generate_permalink_token
-    self.permalink_token = SecureRandom.urlsafe_base64(12)
+
+  private
+
+  def assign_public_id
+    self.public_id ||= SecureRandom.urlsafe_base64(9)
   end
-  
-  # Shareable URL for this consultation
-  def shareable_url
-    Rails.application.routes.url_helpers.consultation_url(self, token: permalink_token)
-  rescue
-    "/consultations/#{id}"
-  end
-  
-  # Record citations after advice is generated
-  def record_citations!(sutra_ids)
-    sutra_ids.each_with_index do |sutra_id, idx|
-      citations.find_or_create_by!(
-        sutra_id: sutra_id,
-        position: idx
-      )
-    end
-  end
-  
-  # Log retrieval candidates for auditing/evaluation
-  def log_retrieval!(channel:, sutra: nil, document_chunk: nil, rank:, score:)
-    retrieval_candidates.create!(
-      channel: channel,
-      sutra: sutra,
-      document_chunk: document_chunk,
-      rank_position: rank,
-      rrf_score: score
-    )
+
+  # FR-107: routed queries are not persisted.
+  def query_text_absent_when_routed
+    return unless routed?
+    errors.add(:query_text, "must not be stored for routed consultations") if query_text.present?
   end
 end

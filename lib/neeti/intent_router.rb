@@ -1,123 +1,84 @@
 # lib/neeti/intent_router.rb
 module Neeti
   class IntentRouter
-    # Crisis keywords that should bypass retrieval and trigger safety response
-    CRISIS_KEYWORDS = %w[
-      suicide suicidal kill myself death die depressed depression
-      hurt harm self-harm self-harming overdose
-      emergency crisis help immediately urgent
-      murder homicide violence attack threaten threatened
-    ].freeze
+    CATEGORIES = %i[self_harm abuse minors medical legal sexual_violence].freeze
     
-    # Greeting/small talk patterns that need minimal retrieval
-    GREETING_PATTERNS = [
-      /\b(hi|hello|hey|greetings|namaste)\b/i,
-      /\b(how are you|how's it going|what's up)\b/i,
-      /\b(good morning|good afternoon|good evening)\b/i,
-      /\b(thank(s| you)|thanks a lot|appreciate)\b/i,
-      /\b(yes|no|okay|ok|sure|maybe)\b$/i,
-    ].freeze
-    
-    # Simple factual questions that can use reduced retrieval
-    FACTUAL_PATTERNS = [
-      /^what is /i,
-      /^who is /i,
-      /^when did /i,
-      /^where is /i,
-      /^how many /i,
-      /^define /i,
-      /^explain /i,
-    ].freeze
-    
-    def initialize(llm_classifier: nil)
-      @llm = llm_classifier
-    end
-    
-    # Route a query to determine handling strategy
-    # Returns { route: symbol, confidence: float, reason: string }
-    def route(query)
-      return crisis_route(query) if crisis?(query)
-      return greeting_route(query) if greeting?(query)
-      return factual_route(query) if factual?(query)
+    # Priority when multiple fire. Order matters.
+    PRIORITY = %i[self_harm sexual_violence minors abuse medical legal].freeze
+
+    # Stage 1: deliberately over-broad. A false positive costs a user 15 seconds.
+    # A false negative is unacceptable. Expand from real logs; never contract
+    # without eval-set evidence.
+    PATTERNS = {
+      self_harm: /\b(suicid\w*|kill(ing)? myself|end(ing)? my life|take my own life|
+                   self.?harm|hurt(ing)? myself|cut(ting)? myself|want to die|
+                   don'?t want to (be here|live)|no reason to live|better off dead|
+                   overdos\w*)\b/xi,
       
-      # Default: full retrieval pipeline
-      default_route(query)
-    end
-    
-    # Check if query indicates crisis/emergency requiring immediate safety response
-    def crisis?(query)
-      normalized = query.downcase.strip
+      abuse: /\b(hits? me|hit(ting)? me|beats? me|beat(ing|s)? (me|her|him)|
+               abus(e|es|ive|ing)|assault\w*|threaten(s|ed|ing) (me|to kill)|
+               scared (of|for) my (husband|wife|partner|father|mother|boyfriend|girlfriend)|
+               won'?t let me leave|controls? (everything|me|my)|
+               gets? violent|throws? things at me|marital rape|dowry harass\w*)\b/xi,
       
-      # Keyword match
-      return true if CRISIS_KEYWORDS.any? { |kw| normalized.include?(kw) }
+      minors: /\b(my (son|daughter|child|kid|nephew|niece)|a (child|minor|student))\b
+               .{0,80}
+               \b(abus\w*|hurt|hit|beat|touch\w*|inappropriat\w*|groom\w*|
+                  harass\w*|bull(y|ied|ying)|self.?harm|suicid\w*)\b/xim,
       
-      # Pattern match for self-harm ideation
-      return true if normalized =~ /(want|need|think about|planning) to (hurt|kill|end) myself/i
-      return true if normalized =~ /(life is|feels) (pointless|hopeless|worthless)/i
+      medical: /\b(diagnos\w*|prescri\w*|dosage|mg of|symptom\w*|chest pain|
+                 can'?t breathe|seizure|stroke|bleeding|pregnan\w*|
+                 psychiatri\w*|bipolar|schizophren\w*|panic attack\w*|
+                 antidepress\w*|stop(ping)? my medication)\b/xi,
       
-      false
+      legal: /\b(lawsuit|suing|sue (him|her|them|my)|court (case|date|hearing)|
+               police (report|complaint|case)|FIR\b|arrest\w*|bail|
+               legal (action|notice|proceeding)|custody battle|divorce (petition|proceeding))\b/xi,
+      
+      sexual_violence: /\b(rap(e|ed|ing)|sexual(ly)? (assault\w*|abus\w*|harass\w*)|
+                        molested|forced me to|without my consent)\b/xi
+    }.freeze
+
+    Verdict = Struct.new(:routed?, :category, :categories, :stage, keyword_init: true)
+
+    def initialize(query, session_elevated: false, logger: Rails.logger)
+      @query = query.to_s
+      @elevated = session_elevated
+      @logger = logger
     end
-    
-    # Check if query is simple greeting/small talk
-    def greeting?(query)
-      GREETING_PATTERNS.any? { |pattern| query.match?(pattern) }
+
+    def call
+      lexical = lexical_match
+      return verdict(lexical, :lexical) if lexical.any?
+
+      # Stage 2 runs on EVERY query that clears Stage 1 — not only on suspicious ones.
+      # Lexical patterns cannot enumerate natural language; the classifier is the
+      # real gate and the regex is a fast path.
+      classified = classifier_match
+      return verdict(classified, :classifier) if classified.any?
+
+      Verdict.new(routed?: false, category: nil, categories: [], stage: nil)
     end
-    
-    # Check if query is simple factual question
-    def factual?(query)
-      FACTUAL_PATTERNS.any? { |pattern| query.match?(pattern) } && query.split.size < 10
-    end
-    
+
     private
-    
-    def crisis_route(query)
-      {
-        route: :crisis,
-        confidence: 1.0,
-        reason: 'Crisis/emergency detected - bypass retrieval, show safety resources',
-        action: :show_safety_resources
-      }
+
+    def lexical_match
+      PATTERNS.select { |_, pattern| pattern.match?(@query) }.keys
     end
-    
-    def greeting_route(query)
-      {
-        route: :greeting,
-        confidence: 0.9,
-        reason: 'Greeting/small talk - minimal retrieval needed',
-        action: :minimal_retrieval
-      }
+
+    def classifier_match
+      result = SafetyClassifier.new(@query, elevated: @elevated).call
+      result.categories
+    rescue StandardError => e
+      # FAIL CLOSED. An unavailable classifier means we cannot establish safety,
+      # so we route. A user with a career question sees a resource card. Acceptable.
+      @logger.error(event: "intent_router.classifier_failed", error: e.class.name)
+      [:medical]  # generic "needs a human" bucket
     end
-    
-    def factual_route(query)
-      {
-        route: :factual,
-        confidence: 0.7,
-        reason: 'Factual question - use focused retrieval',
-        action: :focused_retrieval
-      }
-    end
-    
-    def default_route(query)
-      # Use LLM classifier for ambiguous cases if available
-      if @llm && ambiguous?(query)
-        classification = @llm.classify_intent(query)
-        return classification if classification[:confidence] > 0.6
-      end
-      
-      {
-        route: :full_retrieval,
-        confidence: 0.5,
-        reason: 'Standard query - use full retrieval pipeline',
-        action: :full_retrieval
-      }
-    end
-    
-    def ambiguous?(query)
-      # Query is ambiguous if it's neither clearly factual nor clearly advice-seeking
-      words = query.downcase.split
-      words.size.between?(5, 20) && 
-        !GREETING_PATTERNS.any? { |p| query.match?(p) } &&
-        !FACTUAL_PATTERNS.any? { |p| query.match?(p) }
+
+    def verdict(categories, stage)
+      primary = PRIORITY.find { |c| categories.include?(c) } || categories.first
+      Verdict.new(routed?: true, category: primary, categories: categories, stage: stage)
     end
   end
 end
