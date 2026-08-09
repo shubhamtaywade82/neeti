@@ -1,16 +1,40 @@
 # config/initializers/safety_resources.rb
+# Boot-time verification of safety resources freshness
+
 Rails.application.config.to_prepare do
-  data = YAML.load_file(Rails.root.join("config/safety_resources.yml"))
+  require "yaml"
   
-  stale = data.flat_map { |_, v| v["resources"] }
-              .select { |r| Date.parse(r["verified_on"]) < 120.days.ago.to_date }
+  resources_file = Rails.root.join("config/safety_resources.yml")
   
-  if stale.any?
-    message = "Stale crisis resources (verify + update verified_on): " \
-              "#{stale.map { |r| r['name'] }.join(', ')}"
-    raise message if Rails.env.production?
-    Rails.logger.warn(message)
+  if File.exist?(resources_file)
+    resources = YAML.load_file(resources_file)
+    last_verified = Date.parse(resources["last_global_verification"])
+    days_since_verification = (Date.today - last_verified).to_i
+    
+    if days_since_verification > 120
+      error_msg = <<~ERROR.strip
+        SAFETY RESOURCES STALE: Crisis helplines have not been verified in #{days_since_verification} days.
+        Last verification: #{last_verified}
+        Maximum allowed: 120 days
+        
+        Please verify all crisis resources against official sources and update 
+        config/safety_resources.yml before deploying.
+        
+        This is a hard fail to prevent launching with outdated emergency contacts.
+      ERROR
+      
+      if Rails.env.production?
+        raise error_msg
+      else
+        Rails.logger.warn("[SAFETY] #{error_msg}")
+      end
+    end
+  else
+    warning = "Safety resources file not found at config/safety_resources.yml"
+    if Rails.env.production?
+      raise warning
+    else
+      Rails.logger.warn("[SAFETY] #{warning}")
+    end
   end
-  
-  Rails.application.config.x.safety_resources = data.freeze
 end

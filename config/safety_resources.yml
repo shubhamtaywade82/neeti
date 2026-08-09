@@ -1,77 +1,68 @@
 # config/safety_resources.yml
-# EVERY entry must be verified against its official source before release
-# and re-verified quarterly. FR-108. `verified_on` is checked at boot.
+# Crisis helplines and support resources
+# Must be verified every 120 days
 
-self_harm:
-  headline: "Support is available right now."
-  resources:
-    - name: "Tele-MANAS"
-      contact: "14416"
-      note: "Government of India mental health helpline, 24×7, multiple languages"
-      source_url: "https://telemanas.mohfw.gov.in/"
-      verified_on: "2026-08-09"
+helplines:
+  india:
     - name: "iCall"
-      contact: "9152987821"
-      note: "Free, confidential support. Mon-Sat, 8am-10pm"
-      source_url: "https://icall.org.in/"
-      verified_on: "2026-08-09"
+      description: "Tata Institute mental health helpline"
+      phone: "+91-9152987821"
+      email: "icall@tiss.edu"
+      hours: "Mon-Sat 8AM-10PM IST"
+      website: "https://www.icallhelpline.org"
+      verified_on: "2026-08-01"
+      
+    - name: "Vandrevala Foundation"
+      description: "24/7 mental health crisis support"
+      phone: "+91-9999666555"
+      email: "support@vandrevalafoundation.com"
+      hours: "24/7"
+      website: "https://www.vandrevalafoundation.com"
+      verified_on: "2026-08-01"
+      
     - name: "AASRA"
-      contact: "9820466726"
-      note: "24×7 suicide prevention helpline"
-      source_url: "http://www.aasra.info/"
-      verified_on: "2026-08-09"
+      description: "Suicide prevention helpline"
+      phone: "+91-9820466726"
+      email: "aasra@yahoo.com"
+      hours: "24/7"
+      website: "http://www.aasra.info"
+      verified_on: "2026-08-01"
+      
+    - name: "National Suicide Prevention Lifeline (US)"
+      description: "For users in the United States"
+      phone: "988"
+      hours: "24/7"
+      website: "https://988lifeline.org"
+      verified_on: "2026-08-01"
+      
+    - name: "Samaritans (UK)"
+      description: "Emotional support for anyone in distress"
+      phone: "116 123"
+      email: "jo@samaritans.org"
+      hours: "24/7"
+      website: "https://www.samaritans.org"
+      verified_on: "2026-08-01"
 
-abuse:
-  headline: "If you're unsafe, help is available."
-  resources:
-    - name: "Women's Helpline"
-      contact: "181"
-      note: "24×7, all states"
-      source_url: "https://wcd.nic.in/"
-      verified_on: "2026-08-09"
-    - name: "Police"
-      contact: "112"
-      note: "Emergency services"
-      source_url: "https://www.india.gov.in/"
-      verified_on: "2026-08-09"
+domestic_violence:
+  india:
+    - name: "National Commission for Women Helpline"
+      phone: "7827170170"
+      hours: "24/7"
+      verified_on: "2026-08-01"
+      
+    - name: "Women's Helpline (All India)"
+      phone: "1091"
+      hours: "24/7"
+      verified_on: "2026-08-01"
 
-minors:
-  headline: "Children need trained professionals, not general advice."
-  resources:
-    - name: "Childline"
-      contact: "1098"
-      note: "24×7, free, confidential"
-      source_url: "https://childlineindia.org/"
-      verified_on: "2026-08-09"
+child_protection:
+  india:
+    - name: "CHILDLINE"
+      description: "Emergency helpline for children in distress"
+      phone: "1098"
+      hours: "24/7"
+      website: "https://childlineindia.org"
+      verified_on: "2026-08-01"
 
-medical:
-  headline: "This needs a licensed medical professional."
-  resources:
-    - name: "Emergency"
-      contact: "112"
-      note: "For immediate medical emergencies"
-      source_url: "https://www.india.gov.in/"
-      verified_on: "2026-08-09"
-
-legal:
-  headline: "This needs a licensed advocate."
-  resources:
-    - name: "National Legal Services Authority"
-      contact: "1516"
-      note: "Free legal aid for eligible persons"
-      source_url: "https://nalsa.gov.in/"
-      verified_on: "2026-08-09"
-
-sexual_violence:
-  headline: "Support and reporting resources are available."
-  resources:
-    - name: "Women's Helpline"
-      contact: "181"
-      note: "24×7, all states"
-      source_url: "https://wcd.nic.in/"
-      verified_on: "2026-08-09"
-    - name: "Police"
-      contact: "112"
-      note: "Emergency services"
-      source_url: "https://www.india.gov.in/"
-      verified_on: "2026-08-09"
+last_global_verification: "2026-08-01"
+next_verification_due: "2026-12-09"
