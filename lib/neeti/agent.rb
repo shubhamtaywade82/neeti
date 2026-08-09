@@ -13,7 +13,12 @@ module Neeti
         KnowledgePack.where(slug: user.installed_packs).pluck(:id)
       end
 
-      retriever = @retriever || Retriever.new(llm_classifier: LlmClassifier.new, pack_ids: pack_ids)
+      # Use RetrievalPipeline instead of Retriever (supports 5-channel RRF fusion)
+      retriever = @retriever || RetrievalPipeline.new(
+        llm_classifier: LlmClassifier.new,
+        pack_ids: pack_ids,
+        user: user
+      )
 
       sutras, context_text, doc_chunks = if mode == :cag
         installed_slugs = user.installed_packs || ['chanakya']
