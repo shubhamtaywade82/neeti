@@ -1,0 +1,77 @@
+# config/safety_resources.yml
+# EVERY entry must be verified against its official source before release
+# and re-verified quarterly. FR-108. `verified_on` is checked at boot.
+
+self_harm:
+  headline: "Support is available right now."
+  resources:
+    - name: "Tele-MANAS"
+      contact: "14416"
+      note: "Government of India mental health helpline, 24×7, multiple languages"
+      source_url: "https://telemanas.mohfw.gov.in/"
+      verified_on: "2026-08-09"
+    - name: "iCall"
+      contact: "9152987821"
+      note: "Free, confidential support. Mon-Sat, 8am-10pm"
+      source_url: "https://icall.org.in/"
+      verified_on: "2026-08-09"
+    - name: "AASRA"
+      contact: "9820466726"
+      note: "24×7 suicide prevention helpline"
+      source_url: "http://www.aasra.info/"
+      verified_on: "2026-08-09"
+
+abuse:
+  headline: "If you're unsafe, help is available."
+  resources:
+    - name: "Women's Helpline"
+      contact: "181"
+      note: "24×7, all states"
+      source_url: "https://wcd.nic.in/"
+      verified_on: "2026-08-09"
+    - name: "Police"
+      contact: "112"
+      note: "Emergency services"
+      source_url: "https://www.india.gov.in/"
+      verified_on: "2026-08-09"
+
+minors:
+  headline: "Children need trained professionals, not general advice."
+  resources:
+    - name: "Childline"
+      contact: "1098"
+      note: "24×7, free, confidential"
+      source_url: "https://childlineindia.org/"
+      verified_on: "2026-08-09"
+
+medical:
+  headline: "This needs a licensed medical professional."
+  resources:
+    - name: "Emergency"
+      contact: "112"
+      note: "For immediate medical emergencies"
+      source_url: "https://www.india.gov.in/"
+      verified_on: "2026-08-09"
+
+legal:
+  headline: "This needs a licensed advocate."
+  resources:
+    - name: "National Legal Services Authority"
+      contact: "1516"
+      note: "Free legal aid for eligible persons"
+      source_url: "https://nalsa.gov.in/"
+      verified_on: "2026-08-09"
+
+sexual_violence:
+  headline: "Support and reporting resources are available."
+  resources:
+    - name: "Women's Helpline"
+      contact: "181"
+      note: "24×7, all states"
+      source_url: "https://wcd.nic.in/"
+      verified_on: "2026-08-09"
+    - name: "Police"
+      contact: "112"
+      note: "Emergency services"
+      source_url: "https://www.india.gov.in/"
+      verified_on: "2026-08-09"
