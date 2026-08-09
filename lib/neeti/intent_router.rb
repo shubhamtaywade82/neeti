@@ -9,34 +9,38 @@ module Neeti
     # Stage 1: deliberately over-broad. A false positive costs a user 15 seconds.
     # A false negative is unacceptable. Expand from real logs; never contract
     # without eval-set evidence.
+    # NOTE: these patterns use /x (extended mode), which makes literal
+    # whitespace insignificant. Every inter-word space in a phrase must be
+    # written as \s+ or it silently never matches (e.g. "kill(ing)? myself"
+    # would match "kill(ing)?myself", not the real phrase with a space).
     PATTERNS = {
-      self_harm: /\b(suicid\w*|kill(ing)? myself|end(ing)? my life|take my own life|
-                   self.?harm|hurt(ing)? myself|cut(ting)? myself|want to die|
-                   don'?t want to (be here|live)|no reason to live|better off dead|
+      self_harm: /\b(suicid\w*|kill(ing)?\s+myself|end(ing)?\s+my\s+life|take\s+my\s+own\s+life|
+                   self.?harm|hurt(ing)?\s+myself|cut(ting)?\s+myself|want\s+to\s+die|
+                   don'?t\s+want\s+to\s+(be\s+here|live)|no\s+reason\s+to\s+live|better\s+off\s+dead|
                    overdos\w*)\b/xi,
-      
-      abuse: /\b(hits? me|hit(ting)? me|beats? me|beat(ing|s)? (me|her|him)|
-               abus(e|es|ive|ing)|assault\w*|threaten(s|ed|ing) (me|to kill)|
-               scared (of|for) my (husband|wife|partner|father|mother|boyfriend|girlfriend)|
-               won'?t let me leave|controls? (everything|me|my)|
-               gets? violent|throws? things at me|marital rape|dowry harass\w*)\b/xi,
-      
-      minors: /\b(my (son|daughter|child|kid|nephew|niece)|a (child|minor|student))\b
+
+      abuse: /\b(hits?\s+me|hit(ting)?\s+me|beats?\s+me|beat(ing|s)?\s+(me|her|him)|
+               abus(e|es|ive|ing)|assault\w*|threaten(s|ed|ing)\s+(me|to\s+kill)|
+               scared\s+(of|for)\s+my\s+(husband|wife|partner|father|mother|boyfriend|girlfriend)|
+               won'?t\s+let\s+me\s+leave|controls?\s+(everything|me|my)|
+               gets?\s+violent|throws?\s+things\s+at\s+me|marital\s+rape|dowry\s+harass\w*)\b/xi,
+
+      minors: /\b(my\s+(son|daughter|child|kid|nephew|niece)|a\s+(child|minor|student))\b
                .{0,80}
                \b(abus\w*|hurt|hit|beat|touch\w*|inappropriat\w*|groom\w*|
                   harass\w*|bull(y|ied|ying)|self.?harm|suicid\w*)\b/xim,
-      
-      medical: /\b(diagnos\w*|prescri\w*|dosage|mg of|symptom\w*|chest pain|
-                 can'?t breathe|seizure|stroke|bleeding|pregnan\w*|
-                 psychiatri\w*|bipolar|schizophren\w*|panic attack\w*|
-                 antidepress\w*|stop(ping)? my medication)\b/xi,
-      
-      legal: /\b(lawsuit|suing|sue (him|her|them|my)|court (case|date|hearing)|
-               police (report|complaint|case)|FIR\b|arrest\w*|bail|
-               legal (action|notice|proceeding)|custody battle|divorce (petition|proceeding))\b/xi,
-      
-      sexual_violence: /\b(rap(e|ed|ing)|sexual(ly)? (assault\w*|abus\w*|harass\w*)|
-                        molested|forced me to|without my consent)\b/xi
+
+      medical: /\b(diagnos\w*|prescri\w*|dosage|mg\s+of|symptom\w*|chest\s+pain|
+                 can'?t\s+breathe|seizure|stroke|bleeding|pregnan\w*|
+                 psychiatri\w*|bipolar|schizophren\w*|panic\s+attack\w*|
+                 antidepress\w*|stop(ping)?\s+my\s+medication)\b/xi,
+
+      legal: /\b(lawsuit|suing|sue\s+(him|her|them|my)|court\s+(case|date|hearing)|
+               police\s+(report|complaint|case)|FIR\b|arrest\w*|bail|
+               legal\s+(action|notice|proceeding)|custody\s+battle|divorce\s+(petition|proceeding))\b/xi,
+
+      sexual_violence: /\b(rap(e|ed|ing)|sexual(ly)?\s+(assault\w*|abus\w*|harass\w*)|
+                        molested|forced\s+me\s+to|without\s+my\s+consent)\b/xi
     }.freeze
 
     Verdict = Struct.new(:routed?, :category, :categories, :stage, keyword_init: true)
@@ -67,7 +71,7 @@ module Neeti
     end
 
     def classifier_match
-      result = SafetyClassifier.new(@query, elevated: @elevated).call
+      result = ::SafetyClassifier.new(@query, elevated: @elevated).call
       result.categories
     rescue StandardError => e
       # FAIL CLOSED. An unavailable classifier means we cannot establish safety,

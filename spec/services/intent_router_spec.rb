@@ -2,134 +2,79 @@
 require "rails_helper"
 
 RSpec.describe Neeti::IntentRouter do
-  describe "#route" do
-    context "crisis detection" do
-      it "routes crisis queries to safety resources" do
-        query = "I want to end my life"
-        result = described_class.new.route(query)
-        
-        expect(result[:route]).to eq(:crisis)
-        expect(result[:action]).to eq(:show_safety_resources)
+  describe "#call" do
+    context "lexical matches" do
+      it "routes self-harm queries" do
+        verdict = described_class.new("I want to end my life").call
+
+        expect(verdict.routed?).to be true
+        expect(verdict.category).to eq(:self_harm)
+        expect(verdict.stage).to eq(:lexical)
       end
-      
-      it "detects self-harm ideation patterns" do
-        query = "I'm thinking about hurting myself"
-        result = described_class.new.route(query)
-        
-        expect(result[:route]).to eq(:crisis)
-      end
-      
+
       it "detects suicide keywords" do
-        query = "How can I kill myself without pain"
-        result = described_class.new.route(query)
-        
-        expect(result[:route]).to eq(:crisis)
+        verdict = described_class.new("How can I kill myself without pain").call
+
+        expect(verdict.routed?).to be true
+        expect(verdict.category).to eq(:self_harm)
       end
-      
-      it "detects violence references" do
-        query = "I want to murder someone"
-        result = described_class.new.route(query)
-        
-        expect(result[:route]).to eq(:crisis)
+
+      it "detects abuse patterns" do
+        verdict = described_class.new("My husband hits me and won't let me leave").call
+
+        expect(verdict.routed?).to be true
+        expect(verdict.category).to eq(:abuse)
       end
-    end
-    
-    context "greeting detection" do
-      it "routes greetings with minimal retrieval" do
-        query = "Hello, how are you?"
-        result = described_class.new.route(query)
-        
-        expect(result[:route]).to eq(:greeting)
-        expect(result[:action]).to eq(:minimal_retrieval)
+
+      it "detects medical questions" do
+        verdict = described_class.new("What dosage of ibuprofen mg is safe with chest pain").call
+
+        expect(verdict.routed?).to be true
+        expect(verdict.category).to eq(:medical)
       end
-      
-      it "detects namaste greeting" do
-        query = "Namaste"
-        result = described_class.new.route(query)
-        
-        expect(result[:route]).to eq(:greeting)
+
+      it "prioritizes self_harm over other categories when multiple match" do
+        verdict = described_class.new("I want to end my life, also considering a lawsuit").call
+
+        expect(verdict.category).to eq(:self_harm)
       end
     end
-    
-    context "factual question detection" do
-      it "routes simple factual questions" do
-        query = "What is the capital of India"
-        result = described_class.new.route(query)
-        
-        expect(result[:route]).to eq(:factual)
-        expect(result[:action]).to eq(:focused_retrieval)
+
+    context "no lexical or classifier match" do
+      before do
+        allow(SafetyClassifier).to receive(:new).and_return(instance_double(SafetyClassifier, call: SafetyClassifier::Result.new(categories: [], confidence: 0.0)))
       end
-      
-      it "detects who questions" do
-        query = "Who was Chanakya"
-        result = described_class.new.route(query)
-        
-        expect(result[:route]).to eq(:factual)
+
+      it "does not route ordinary advice queries" do
+        verdict = described_class.new("How do I negotiate a salary raise with my manager").call
+
+        expect(verdict.routed?).to be false
+        expect(verdict.category).to be_nil
       end
     end
-    
-    context "default routing" do
-      it "uses full retrieval for advice queries" do
-        query = "How do I negotiate a salary raise with my manager"
-        result = described_class.new.route(query)
-        
-        expect(result[:route]).to eq(:full_retrieval)
-        expect(result[:action]).to eq(:full_retrieval)
+
+    context "classifier fallback" do
+      it "routes via the classifier when no lexical pattern matches" do
+        allow(SafetyClassifier).to receive(:new).and_return(
+          instance_double(SafetyClassifier, call: SafetyClassifier::Result.new(categories: [:legal], confidence: 0.8))
+        )
+
+        verdict = described_class.new("Ambiguous phrasing the regex can't catch").call
+
+        expect(verdict.routed?).to be true
+        expect(verdict.category).to eq(:legal)
+        expect(verdict.stage).to eq(:classifier)
       end
-      
-      it "handles cofounder conflict queries" do
-        query = "My cofounder is not pulling their weight"
-        result = described_class.new.route(query)
-        
-        expect(result[:route]).to eq(:full_retrieval)
+
+      it "fails closed to the medical bucket when the classifier raises" do
+        allow(SafetyClassifier).to receive(:new).and_raise(StandardError, "timeout")
+
+        verdict = described_class.new("Ambiguous phrasing the regex can't catch").call
+
+        expect(verdict.routed?).to be true
+        expect(verdict.category).to eq(:medical)
+        expect(verdict.stage).to eq(:classifier)
       end
-    end
-  end
-  
-  describe "#crisis?" do
-    it "returns true for suicide queries" do
-      expect(described_class.new.crisis?("I want to commit suicide")).to be true
-    end
-    
-    it "returns true for self-harm queries" do
-      expect(described_class.new.crisis?("I need to hurt myself")).to be true
-    end
-    
-    it "returns true for depression mentions with hopelessness" do
-      expect(described_class.new.crisis?("Life feels hopeless and I'm depressed")).to be true
-    end
-    
-    it "returns false for normal advice queries" do
-      expect(described_class.new.crisis?("How do I handle a difficult colleague")).to be false
-    end
-    
-    it "returns false for greetings" do
-      expect(described_class.new.crisis?("Hello")).to be false
-    end
-  end
-  
-  describe "#greeting?" do
-    it "returns true for hi" do
-      expect(described_class.new.greeting?("Hi")).to be true
-    end
-    
-    it "returns true for how are you" do
-      expect(described_class.new.greeting?("How are you?")).to be true
-    end
-    
-    it "returns false for substantive queries" do
-      expect(described_class.new.greeting?("How do I deal with conflict")).to be false
-    end
-  end
-  
-  describe "#factual?" do
-    it "returns true for what is questions" do
-      expect(described_class.new.factual?("What is democracy")).to be true
-    end
-    
-    it "returns false for long complex questions" do
-      query = "What is the best way to handle a situation where my manager is being difficult"
-      expect(described_class.new.factual?(query)).to be false
     end
   end
 end

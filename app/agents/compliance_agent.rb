@@ -9,7 +9,7 @@ class ComplianceAgent < RubyLLM::Agent
   thinking effort: :high, budget: 8000
 
   instructions do
-    prompt("instructions", current_user_name: -> { chat.user.full_name })
+    prompt("instructions", current_user_name: -> { chat.user.email })
   end
 
   tools PolicySearchTool, AuditLogTool
