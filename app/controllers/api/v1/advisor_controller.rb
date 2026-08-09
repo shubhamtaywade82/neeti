@@ -36,14 +36,43 @@ module Api
         agent        = Neeti::Agent.new
         accumulated_advice = +""
 
+        # Prepare citation gate with retrieved sutras (will be populated by agent)
+        citation_gate = nil
+        stream_parser = nil
+
         stream_proc = ->(token) {
-          accumulated_advice << token
-          sse.write({ type: 'token', content: token }.to_json)
+          # Use citation gate if initialized, otherwise accumulate normally
+          if stream_parser
+            stream_parser.write_token(token)
+          else
+            accumulated_advice << token
+            sse.write({ type: 'token', content: token }.to_json)
+          end
         }
 
         mode = params[:mode]&.to_sym == :cag ? :cag : :retrieval
         advisor = advisor_name.to_sym
         scope = params[:retrieval_scope].presence || 'library'
+        
+        # Use IntentRouter to detect crisis queries
+        intent_router = Neeti::IntentRouter.new
+        intent = intent_router.route(params[:query])
+        
+        if intent[:route] == :crisis
+          # Show safety resources immediately, bypass agent
+          sse.write({
+            type: 'crisis',
+            message: 'It sounds like you\'re going through something difficult.',
+            resources: [
+              { name: 'National Suicide Prevention Lifeline', contact: '988 (US/Canada)' },
+              { name: 'International Association for Suicide Prevention', contact: 'https://www.iasp.info/resources/Crisis_Centres/' },
+              { name: 'Crisis Text Line', contact: 'Text HOME to 741741' }
+            ]
+          }.to_json)
+          sse.close
+          return
+        end
+        
         result = agent.advise(
           params.require(:query),
           user:             current_user,
@@ -53,6 +82,17 @@ module Api
           advisor:          advisor,
           retrieval_scope:  scope
         )
+        
+        # Initialize citation gate with retrieved sutras
+        retrieved_sutras = Sutra.where(id: result[:cited_sutra_ids])
+        citation_gate = Neeti::CitationGate.new(retrieved_sutra_ids: retrieved_sutras)
+        
+        # Re-process accumulated advice through citation gate to catch any missed markers
+        if accumulated_advice.present? && citation_gate.hallucinated?(accumulated_advice)
+          filtered_advice = citation_gate.process(accumulated_advice)
+          # Update the saved message with filtered content
+          result[:advice] = filtered_advice
+        end
 
         # 2. Save full assistant message on successful completion
         conversation.messages.create!(
