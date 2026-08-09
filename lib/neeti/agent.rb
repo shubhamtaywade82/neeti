@@ -4,8 +4,8 @@ module Neeti
     MAX_DOC_TOKENS = 6000
 
     def initialize(retriever: nil, provider: nil)
-      @retriever = retriever || Retriever.new(llm_classifier: LlmClassifier.new)
-      @provider  = provider  || ModelRouter.for(:advice)
+      @retriever = retriever
+      @provider  = provider || ModelRouter.for(:advice)
     end
 
     def advise(query, user:, conversation:, stream_proc: nil, mode: :retrieval, advisor: :chanakya, retrieval_scope: 'library')

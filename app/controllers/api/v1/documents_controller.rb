@@ -43,6 +43,10 @@ module Api
           return render json: { error: 'File content does not match its extension.' }, status: :unprocessable_entity
         end
 
+        if params[:collection_id].present? && !current_user.collections.exists?(id: params[:collection_id])
+          return render json: { error: 'Collection not found' }, status: :not_found
+        end
+
         doc = current_user.documents.create!(
           filename: file.original_filename,
           title: params[:title] || file.original_filename,
@@ -67,7 +71,12 @@ module Api
       def update
         doc = current_user.documents.find(params[:id])
         doc.update!(title: params[:title]) if params[:title]
-        doc.update!(collection_id: params[:collection_id]) if params.key?(:collection_id)
+        if params.key?(:collection_id)
+          if params[:collection_id].present? && !current_user.collections.exists?(id: params[:collection_id])
+            return render json: { error: 'Collection not found' }, status: :not_found
+          end
+          doc.update!(collection_id: params[:collection_id])
+        end
         render json: { document: serialize_document(doc) }
       end
 

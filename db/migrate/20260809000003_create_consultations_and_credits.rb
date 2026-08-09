@@ -68,12 +68,13 @@ class CreateConsultationsAndCredits < ActiveRecord::Migration[8.0]
     create_table :credit_ledger_entries do |t|
       t.references :user, null: false, foreign_key: true
       t.references :consultation, foreign_key: true
-      t.integer :delta, null: false
-      t.string :reason, null: false
+      t.integer :amount, null: false
+      t.integer :transaction_type, null: false
+      t.string :description
       t.integer :balance_after, null: false
       t.string :idempotency_key
       t.datetime :created_at, null: false
-      
+
       t.index [:user_id, :id]
       t.index :idempotency_key, unique: true, where: "idempotency_key IS NOT NULL"
     end
