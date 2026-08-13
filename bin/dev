@@ -1,2 +1,43 @@
-#!/usr/bin/env ruby
-exec "./bin/rails", "server", *ARGV
+#!/usr/bin/env bash
+set -e
+
+echo "==> Preparing Neeti Development Environment..."
+
+# Clean up any stale Rails server PID
+rm -f tmp/pids/server.pid
+
+# 1. Ensure PostgreSQL (pgvector) container is running
+if command -v docker >/dev/null 2>&1; then
+  if ! docker ps --format '{{.Names}}' | grep -q 'neeti-pgvector'; then
+    echo "==> Starting PostgreSQL pgvector container..."
+    docker start neeti-pgvector 2>/dev/null || docker run -d --name neeti-pgvector -p 5435:5432 -e POSTGRES_PASSWORD=postgres pgvector/pgvector:pg17
+  fi
+fi
+
+# 2. Check and initialize Ollama models if Ollama is installed
+if command -v ollama >/dev/null 2>&1; then
+  if ! curl -s http://localhost:11434/api/tags >/dev/null 2>&1; then
+    echo "==> Starting Ollama service..."
+    ollama serve >/dev/null 2>&1 &
+    sleep 2
+  fi
+
+  echo "==> Checking Ollama embedding model (nomic-embed-text)..."
+  if ! ollama list 2>/dev/null | grep -q "nomic-embed-text"; then
+    echo "==> Pulling nomic-embed-text..."
+    ollama pull nomic-embed-text &
+  fi
+fi
+
+# 3. Start Backend, Frontend, and Queue Worker
+if command -v foreman >/dev/null 2>&1; then
+  echo "==> Starting processes with Foreman..."
+  exec foreman start -f Procfile.dev "$@"
+else
+  echo "==> Starting Rails backend and Vite frontend..."
+  trap 'kill $(jobs -p)' EXIT INT TERM
+  bundle exec rails server -p 3000 &
+  (cd frontend && npm run dev) &
+  bundle exec rails solid_queue:start &
+  wait
+fi
