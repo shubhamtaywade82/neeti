@@ -73,8 +73,9 @@ module Neeti
         # Keep incomplete citation in buffer
         @buffer = pending
       else
-        # No citation in progress, emit normally
-        @stream_proc.call(token)
+        # No citation in progress, emit accumulated buffer (may include text
+        # carried over from a prior partial-citation extraction)
+        @stream_proc.call(@buffer)
         @buffer = ''
       end
     rescue => e

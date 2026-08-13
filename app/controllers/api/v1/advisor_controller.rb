@@ -54,11 +54,10 @@ module Api
         advisor = advisor_name.to_sym
         scope = params[:retrieval_scope].presence || 'library'
         
-        # Use IntentRouter to detect crisis queries
-        intent_router = Neeti::IntentRouter.new
-        intent = intent_router.route(params[:query])
-        
-        if intent[:route] == :crisis
+        # Use IntentRouter to detect crisis/safety-sensitive queries
+        intent = Neeti::IntentRouter.new(params[:query]).call
+
+        if intent.routed?
           # Show safety resources immediately, bypass agent
           sse.write({
             type: 'crisis',
