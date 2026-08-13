@@ -60,7 +60,7 @@ export function QueryInput({ onSubmit, onCancel, isStreaming, cagMode, onToggleC
             ref={textareaRef}
             className="flex-1 bg-transparent text-surface-800 placeholder-surface-400 text-xs sm:text-sm font-body
               focus:outline-none resize-none max-h-32 overflow-y-auto py-1.5 leading-relaxed"
-            placeholder="Ask across your active knowledge packs..."
+            placeholder="Describe your situation as you'd explain it to someone who wasn't there. Include context, what's at stake, and what decision you're facing..."
             value={value}
             rows={1}
             onChange={(e) => setValue(e.target.value)}

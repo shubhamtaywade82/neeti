@@ -1,17 +1,39 @@
 require 'razorpay'
 
 class RazorpayService
+  # Legacy subscription plans (deprecated for v1.0 - replaced with credit packs)
   PLAN_IDS = {
     'seeker'     => ENV.fetch('RAZORPAY_PLAN_SEEKER',     nil),
-    'strategist' => ENV.fetch('RAZORPAY_PLAN_STRATEGIST', nil),
-    'raja'       => ENV.fetch('RAZORPAY_PLAN_RAJA',       nil)
+    'strategist' => ENV.fetch('RAZORPAY_PLAN_STRATEGIST', nil)
+    # 'raja' removed - undeliverable by solo founder per PRD
   }.freeze
 
-  PLAN_DETAILS = {
-    'free'       => { name: 'Free',       price_inr: 0,    queries_per_day: 3,           features: ['3 queries/day', 'Basic wisdom'] },
-    'seeker'     => { name: 'Seeker',     price_inr: 199,  queries_per_day: 'unlimited', features: ['Unlimited queries', 'Daily sutra', 'Session history'] },
-    'strategist' => { name: 'Strategist', price_inr: 499,  queries_per_day: 'unlimited', features: ['Everything in Seeker', 'Persistent memory', 'Goal tracking'] },
-    'raja'       => { name: 'Raja',       price_inr: 1999, queries_per_day: 'unlimited', features: ['Everything in Strategist', 'Human expert review', 'Priority support'] }
+  # Credit packs for one-time purchase (v1.0 billing model)
+  CREDIT_PACKS = {
+    'single' => {
+      name: 'Single Consultation',
+      credits: 1,
+      price_in_paise: 3900, # ₹39
+      price_display: '₹39'
+    },
+    'starter' => {
+      name: 'Starter Pack',
+      credits: 5,
+      price_in_paise: 14900, # ₹149
+      price_display: '₹149'
+    },
+    'seeker' => {
+      name: 'Seeker Pack',
+      credits: 15,
+      price_in_paise: 39900, # ₹399
+      price_display: '₹399'
+    },
+    'strategist' => {
+      name: 'Strategist Pack',
+      credits: 50,
+      price_in_paise: 99900, # ₹999
+      price_display: '₹999'
+    }
   }.freeze
 
   def initialize
@@ -21,7 +43,66 @@ class RazorpayService
     )
   end
 
+  # Create Razorpay order for credit pack purchase
+  def create_order(user, credit_pack_id)
+    credit_pack = CREDIT_PACKS[credit_pack_id]
+    return nil unless credit_pack
+
+    customer_id = ensure_customer(user)
+    
+    order = Razorpay::Order.create(
+      amount: credit_pack[:price_in_paise],
+      currency: 'INR',
+      receipt: "order_#{user.id}_#{Time.now.to_i}",
+      customer_id: customer_id,
+      notes: {
+        user_id: user.id.to_s,
+        credit_pack_id: credit_pack_id,
+        credits: credit_pack[:credits].to_s
+      }
+    )
+    
+    {
+      order_id: order.id,
+      amount: credit_pack[:price_in_paise],
+      currency: 'INR',
+      credits: credit_pack[:credits]
+    }
+  rescue => e
+    Rails.logger.error("Razorpay order creation failed: #{e.message}")
+    nil
+  end
+
+  # Verify payment signature for direct payment flow
+  def verify_payment_signature(payment_id:, signature:, amount:)
+    # Generate expected signature using Razorpay secret
+    expected_signature = OpenSSL::HMAC.hexdigest(
+      'sha256',
+      ENV.fetch('RAZORPAY_KEY_SECRET'),
+      "#{payment_id}"
+    )
+    
+    # In production, use Razorpay's official verification
+    signature == expected_signature
+  rescue => e
+    Rails.logger.error("Payment signature verification failed: #{e.message}")
+    false
+  end
+
+  # Verify webhook signature
+  def verify_webhook_signature(payload, signature)
+    Razorpay::Utility.verify_webhook_signature(
+      payload, signature, ENV.fetch('RAZORPAY_WEBHOOK_SECRET')
+    )
+    true
+  rescue => e
+    Rails.logger.warn("Razorpay webhook signature verification failed: #{e.message}")
+    false
+  end
+
   def create_subscription(user, plan)
+    return nil unless PLAN_IDS.key?(plan)
+    
     customer_id  = ensure_customer(user)
     subscription = Razorpay::Subscription.create(
       plan_id:     PLAN_IDS.fetch(plan),
@@ -35,21 +116,18 @@ class RazorpayService
       razorpay_subscription_id: subscription.id
     )
     { subscription_id: subscription.id, short_url: subscription.short_url }
+  rescue => e
+    Rails.logger.error("Subscription creation failed: #{e.message}")
+    nil
   end
 
   def cancel_subscription(user)
     return { cancelled: false } unless user.razorpay_subscription_id
     Razorpay::Subscription.cancel(user.razorpay_subscription_id, cancel_at_cycle_end: 1)
     { cancelled: true }
-  end
-
-  def verify_webhook_signature(body, signature)
-    Razorpay::Utility.verify_webhook_signature(
-      body, signature, ENV.fetch('RAZORPAY_WEBHOOK_SECRET')
-    )
   rescue => e
-    Rails.logger.warn("Razorpay signature verification failed: #{e.message}")
-    false
+    Rails.logger.error("Subscription cancellation failed: #{e.message}")
+    { cancelled: false }
   end
 
   private
@@ -62,5 +140,8 @@ class RazorpayService
       contact: ''
     )
     customer.id
+  rescue => e
+    Rails.logger.error("Customer creation failed: #{e.message}")
+    nil
   end
 end

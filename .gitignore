@@ -1,1 +1,290 @@
-Nothing needs to be added to .gitignore since only a markdown file (CLAUDE_CODE_EFFICIENCY.md) was added, which is a source/config file and not a build artifact, dependency, or temporary file.
+```ruby
+# See https://help.github.com/articles/cannot-delete-local-repo-ignore-file for more info
+
+# Dependencies
+vendor/bundle/
+node_modules/
+
+# Logs
+log/*.log
+*.log
+
+# Runtime
+tmp/
+.ruby-version
+.DS_Store
+
+# Environment variables
+.env*
+
+# Coverage
+coverage/
+*.gcov
+*.lcov
+
+# Tests
+test/reports/
+
+# Build outputs
+public/packs/
+public/system/
+storage/
+*.sqlite3
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Compressed
+*.zip
+*.tar*
+*.gz
+*.rar
+*.7z
+
+# Compiled
+*.o
+*.so
+*.a
+*.class
+*.pyc
+__pycache__/
+
+# Cache
+.cache/
+.mypy_cache/
+.pytest_cache/
+.nyc_output/
+coverage/
+
+# Distribution / packaging
+.Python
+eggs/
+.egg-info/
+dist/
+build/
+develop-eggs/
+.installed.cfg
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# PyInstaller
+*.manifest
+*.spec
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+cover/
+
+# Translations
+*.mo
+*.pot
+
+# Django stuff:
+*.log
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+
+# Flask stuff:
+instance/
+.webassets-cache
+
+# Scrapy stuff:
+.scrapy
+
+# Sphinx documentation
+docs/_build/
+
+# PyBuilder
+.pybuilder/
+target/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# IPython
+profile_default/
+ipython_config.py
+
+# pyenv
+.python-version
+
+# pipenv
+Pipfile.lock
+
+# PEP 582
+__pypackages__/
+
+# Celery stuff
+celerybeat-schedule
+celerybeat.pid
+
+# SageMath parsed files
+*.sage.py
+
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Spyder project settings
+.spyderproject
+.spyproject
+
+# Rope project settings
+.ropeproject
+
+# mkdocs documentation
+/site
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Pyre type checker
+.pyre/
+
+# IDE
+.vscode/
+.idea/
+
+# Ruby
+.bundle/
+Gemfile.lock
+.rubocop.yml
+.rubocop_todo.yml
+.rubocop_cache/
+*.gem
+*.rbc
+coverage/
+InstalledFiles
+pkg/
+spec/reports/
+spec/examples.txt
+test/tmp/
+test/version_tmp/
+tmp/
+
+# Rails
+*.rbc
+capybara-*.html
+.rspec
+/public/system
+/public/uploads
+/storage*
+/log/*
+/tmp/*
+*.log
+.fabric
+.yardoc
+_yardoc/
+doc/
+public/doc/
+.sass-cache
+.coverage
+.coveralls.yml
+.ruby-gemset
+.ruby-version
+config/database.yml
+config/secrets.yml
+config/credentials.yml
+config/master.key
+config/application.yml
+config/local_env.yml
+config/environments/production.rb
+config/initializers/secret_token.rb
+config/initializers/session_store.rb
+db/*.sqlite3
+db/*.sqlite3-journal
+db/schema.rb
+db/seeds.rb
+db/migrate/*.rb
+db/data/*.rb
+db/structure.sql
+db/test*.sql
+log/*
+tmp/*
+public/system/**
+public/uploads/**
+public/packs/**
+public/assets/**
+storage/**
+tmp/**
+tmp/**/*
+!log/.keep
+!public/system/.keep
+!public/uploads/.keep
+!tmp/.keep
+!storage/.keep
+vendor/bundle/**
+!.keep
+vendor/cache/**
+!.gem
+!.ruby-version
+.bundle/**
+!.gitkeep
+.ruby-gems
+.rvmrc
+Gemfile.lock
+Guardfile
+Capfile
+Vagrantfile
+Berksfile
+Berksfile.lock
+Podfile.lock
+Cartfile
+Cartfile.resolved
+Carthage/Checkouts
+Carthage/Build
+Pipfile.lock
+composer.lock
+*.gem
+*.rbc
+package-lock.json
+yarn.lock
+npm-debug.log*
+yarn-error.log*
+.jshintrc
+.tern-project
+.byebug_history
+.irb_history
+.byebug_history
+.rails
+node_modules/
+public/packs/
+public/system/
+storage/
+*.sqlite3
+```
