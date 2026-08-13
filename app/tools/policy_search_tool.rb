@@ -8,9 +8,8 @@ class PolicySearchTool < RubyLLM::Tool
   end
 
   def execute(query:, limit: 3)
-    # Use pg_search or Elasticsearch integration securely
-    documents = PolicyDocument.search(query).limit(limit)
-    documents.map { |doc| { id: doc.id, title: doc.title, summary: doc.summary } }
+    documents = Document.where("filename ILIKE :q OR title ILIKE :q", q: "%#{query}%").limit(limit)
+    documents.map { |doc| { id: doc.id, title: doc.title || doc.filename, status: doc.status } }
   rescue => e
     { error: "Policy search failed: #{e.message}" }
   end

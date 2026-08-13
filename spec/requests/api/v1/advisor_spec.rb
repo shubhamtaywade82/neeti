@@ -5,6 +5,9 @@ RSpec.describe "POST /api/v1/advice", type: :request do
   let(:headers) { auth_headers(user) }
 
   before do
+    allow(SafetyClassifier).to receive(:new).and_return(
+      instance_double(SafetyClassifier, call: SafetyClassifier::Result.new(categories: [], confidence: 0.0))
+    )
     create_list(:sutra, 5, themes: ["wisdom"])
     allow_any_instance_of(Neeti::Agent).to receive(:advise).and_return({
       advice:          "Know your enemy as yourself.",

@@ -9,5 +9,8 @@ FactoryBot.define do
     vices                   { %w[greed anger laziness].sample(1) }
     situations              { %w[career conflict leadership].sample(1) }
     emotions                { %w[fear ambition desire].sample(1) }
+    advisory_status         { :pending }
+    curated_by              { advisory_status.to_s != "pending" ? "Lead Curator" : nil }
+    curated_at              { advisory_status.to_s != "pending" ? Time.current : nil }
   end
 end

@@ -5,8 +5,8 @@ module Neeti
     CITATION_PATTERN = /\[\[S:(\d+)\]\]/
     
     def initialize(retrieved_sutra_ids:, user_document_ids: [])
-      @allowed_sutra_ids = retrieved_sutra_ids.map(&:id).map(&:to_i).to_set
-      @allowed_doc_ids = user_document_ids.map(&:to_i).to_set
+      @allowed_sutra_ids = Array(retrieved_sutra_ids).map { |s| s.respond_to?(:id) ? s.id : s }.map(&:to_i).to_set
+      @allowed_doc_ids = Array(user_document_ids).map { |d| d.respond_to?(:id) ? d.id : d }.map(&:to_i).to_set
       @dropped_citations = []
     end
     

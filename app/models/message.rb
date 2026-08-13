@@ -1,5 +1,5 @@
 class Message < ApplicationRecord
-  belongs_to :conversation
+  belongs_to :conversation, optional: true
   belongs_to :chat, optional: true
   has_many :tool_calls, dependent: :destroy
   
@@ -7,7 +7,6 @@ class Message < ApplicationRecord
   validates :content, presence: true
 
   # Ruby LLM integration - thinking and cost tracking
-  serialize :cited_sutra_ids, coder: JSON
 
   # Cost calculation helper
   def total_tokens

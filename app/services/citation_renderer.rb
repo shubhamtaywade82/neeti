@@ -17,7 +17,7 @@ class CitationRenderer
       sutra = @sutras.fetch(id)
       
       # Defence in depth: even post-gate, assert the safety status.
-      unless sutra.advisory_status_active? || sutra.advisory_status_contextual?
+      unless sutra.active? || sutra.contextual?
         raise "Non-retrievable sutra #{id} reached rendering — investigate immediately"
       end
       
@@ -29,7 +29,7 @@ class CitationRenderer
         transliteration: sutra.transliteration,
         translation: sutra.translation_en,
         # Applied in CODE. The model has no say in whether the wrapper appears.
-        historical_framing: sutra.advisory_status_contextual? ? CONTEXTUAL_WRAPPER : nil
+        historical_framing: sutra.contextual? ? CONTEXTUAL_WRAPPER : nil
       }
     end
   end

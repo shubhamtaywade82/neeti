@@ -130,11 +130,60 @@ module Neeti
       "thinking"          => %w[strategy wisdom knowledge],
     }.freeze
 
-    def initialize(llm_classifier:, limit: DEFAULT_LIMIT, pack_ids: nil, user: nil)
-      @llm      = llm_classifier
+    CHANNELS = CHANNEL_WEIGHTS
+
+    Candidate = Struct.new(:sutra_id, :score, :channel_ranks, keyword_init: true)
+
+    class Result
+      attr_reader :candidate_ids, :sutras, :sutras_by_id, :channel_counts, :candidates
+
+      def initialize(candidates:, sutras:, channel_counts:)
+        @candidates = candidates
+        @sutras = sutras
+        @candidate_ids = sutras.map(&:id)
+        @sutras_by_id = sutras.index_by(&:id)
+        @channel_counts = channel_counts
+      end
+
+      def empty? = @candidate_ids.empty?
+      def top(n = 4) = @candidates.first(n)
+    end
+
+    def initialize(query = nil, llm_classifier: nil, limit: DEFAULT_LIMIT, pack_ids: nil, user: nil)
+      @query    = query
+      @llm      = llm_classifier || (defined?(LlmClassifier) ? LlmClassifier.new : nil)
       @limit    = limit
       @pack_ids = pack_ids
       @user     = user
+    end
+
+    def call
+      q = @query.to_s
+      channel_results = {
+        metadata:  channel_metadata(q),
+        fts:       channel_fts(q),
+        llm:       channel_llm(q),
+        graph:     [],
+        embedding: channel_embedding(q),
+        user_docs: channel_user_docs(q)
+      }
+      
+      seed_sutras = (channel_results[:metadata] + channel_results[:fts] + channel_results[:llm]).uniq
+      channel_results[:graph] = channel_graph(seed_sutras)
+      
+      channel_counts = channel_results.transform_values(&:size)
+      fused_results = rrf_fusion(channel_results)
+      final_sutras = finalize(fused_results)
+      
+      candidates = final_sutras.map do |s|
+        Candidate.new(sutra_id: s.id, score: 1.0, channel_ranks: {})
+      end
+      
+      Result.new(
+        candidates: candidates,
+        sutras: final_sutras,
+        channel_counts: channel_counts
+      )
     end
 
     # @param query [String]
@@ -216,7 +265,8 @@ module Neeti
 
     # Channel 3: LLM theme classification
     def channel_llm(query)
-      themes = @llm.classify_themes(query, Theme.pluck(:name))
+      return [] unless @llm.respond_to?(:classify_themes)
+      themes = @llm.classify_themes(query, Theme.pluck(:name)) || []
       return [] if themes.empty?
 
       sutra_ids = SutraTheme.where(theme_id: Theme.where(name: themes).select(:id))

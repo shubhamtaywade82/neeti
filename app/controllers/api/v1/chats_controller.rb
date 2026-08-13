@@ -7,7 +7,7 @@ module Api
 
       def create
         # Create a persisted chat session tied to the user
-        chat = ComplianceAgent.create!(user: current_user)
+        chat = Chat.create!(user: current_user, agent_type: 'ComplianceAgent')
 
         # Queue the agent to process the message in the background
         ComplianceWorker.perform_later(chat.id, params[:message])
@@ -19,7 +19,7 @@ module Api
         # Return chat with messages including thinking traces for admins
         render json: {
           id: @chat.id,
-          messages: @chat.messages.map do |msg|
+          messages: @chat.messages.order(created_at: :asc).map do |msg|
             {
               id: msg.id,
               role: msg.role,
@@ -34,7 +34,7 @@ module Api
       private
 
       def set_chat
-        @chat = ComplianceAgent.find(params[:id])
+        @chat = Chat.find(params[:id])
       end
 
       def authorize_chat!

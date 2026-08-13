@@ -3,10 +3,6 @@ class ToolCall < ApplicationRecord
   belongs_to :chat
   belongs_to :message
 
-  # Serialize JSON columns
-  serialize :arguments, coder: JSON
-  serialize :result, coder: JSON
-
   # Validations
   validates :tool_name, presence: true
 

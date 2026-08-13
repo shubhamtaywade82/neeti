@@ -52,9 +52,9 @@ RSpec.describe Sutra, type: :model do
     end
     
     it "rejects invalid statuses" do
-      sutra = build(:sutra, advisory_status: "invalid")
-      expect(sutra).not_to be_valid
-      expect(sutra.errors[:advisory_status]).to include("is not included in the list")
+      expect {
+        build(:sutra, advisory_status: "invalid")
+      }.to raise_error(ArgumentError)
     end
   end
   

@@ -8,11 +8,18 @@ class Chat < ApplicationRecord
   serialize :metadata, coder: JSON
 
   # Validations
+  before_validation :set_default_agent_type, on: :create
   validates :agent_type, presence: true
 
   # Scopes
   scope :by_agent_type, ->(type) { where(agent_type: type) }
   scope :recent, -> { order(created_at: :desc) }
+
+  private
+
+  def set_default_agent_type
+    self.agent_type ||= 'ComplianceAgent'
+  end
 
   # Cost tracking
   def update_cost!

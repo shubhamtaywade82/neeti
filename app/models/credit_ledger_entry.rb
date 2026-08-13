@@ -6,7 +6,7 @@ class CreditLedgerEntry < ApplicationRecord
   validates :transaction_type, presence: true
   validates :balance_after, presence: true, numericality: { only_integer: true, greater_than_or_equal_to: 0 }
   
-  enum transaction_type: { 
+  enum :transaction_type, { 
     daily_grant: 0, 
     purchase: 1, 
     consultation_spend: 2, 

@@ -9,12 +9,12 @@ class AuditLogTool < RubyLLM::Tool
   end
 
   def execute(user_id: nil, action_type: nil, limit: 10)
-    logs = AuditLog.all
-    logs = logs.where(user_id: user_id) if user_id
-    logs = logs.where(action_type: action_type) if action_type
-    logs = logs.limit(limit)
+    logs = ToolCall.all
+    logs = logs.joins(:chat).where(chats: { user_id: user_id }) if user_id
+    logs = logs.where(tool_name: action_type) if action_type
+    logs = logs.order(created_at: :desc).limit(limit)
     
-    logs.map { |log| { id: log.id, user_id: log.user_id, action: log.action_type, timestamp: log.created_at, details: log.details } }
+    logs.map { |log| { id: log.id, tool_name: log.tool_name, success: log.success, timestamp: log.created_at } }
   rescue => e
     { error: "Audit log retrieval failed: #{e.message}" }
   end

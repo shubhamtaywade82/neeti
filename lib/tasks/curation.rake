@@ -1,25 +1,29 @@
 # lib/tasks/curation.rake
+require "csv"
+
 namespace :curation do
   desc "Export pending sutras for review (Pass 1-2 working set)"
   task :export_pending, [:file] => :environment do |_, args|
     file = args[:file] || "pending_sutras_#{Date.today}.csv"
-    pending = Sutra.where(advisory_status: :pending).order(:chapter, :verse_number)
+    pending = Sutra.where(advisory_status: :pending).order(:chapter, :canonical_id)
     
     CSV.open(file, "w") do |csv|
-      csv << %w[id chapter verse canonical_reference sanskrit translation_en
-                current_keywords current_themes advisory_status curation_note
+      csv << %w[id chapter canonical_id sanskrit translation_en
+                themes virtues vices situations emotions advisory_status curation_note
                 curated_by curated_at]
       
       pending.each do |s|
         csv << [
           s.id,
           s.chapter,
-          s.verse_number,
-          s.canonical_reference,
+          s.canonical_id,
           s.sanskrit,
           s.translation_en,
-          (s.keywords || []).join("; "),
-          (s.themes || []).map { |t| "#{t['theme_id']}:#{t['weight']}" }.join("; "),
+          (s.themes || []).map { |t| t.respond_to?(:name) ? t.name : t.to_s }.join("; "),
+          (s.virtues || []).map { |t| t.respond_to?(:name) ? t.name : t.to_s }.join("; "),
+          (s.vices || []).map { |t| t.respond_to?(:name) ? t.name : t.to_s }.join("; "),
+          (s.situations || []).map { |t| t.respond_to?(:name) ? t.name : t.to_s }.join("; "),
+          (s.emotions || []).map { |t| t.respond_to?(:name) ? t.name : t.to_s }.join("; "),
           s.advisory_status,
           s.curation_note,
           s.curated_by,
@@ -112,20 +116,12 @@ namespace :curation do
       puts "  #{status}: #{count} (#{pct}%)"
     end
     
-    # Keywords stats
-    sutras_with_keywords = Sutra.where.not(keywords: nil).where("keywords != ?", [])
-    avg_keywords = sutras_with_keywords.average("jsonb_array_length(keywords)")
-    puts ""
-    puts "Keywords:"
-    puts "  Sutras with keywords: #{sutras_with_keywords.count}"
-    puts "  Average keywords per sutra: #{avg_keywords&.round(2) || 0}"
-    
     # Themes stats
-    sutras_with_themes = Sutra.where.not(themes: nil).where("themes != ?", [])
-    avg_themes = sutras_with_themes.average("jsonb_array_length(themes)")
+    sutras_with_themes = Sutra.where("cardinality(sutras.themes) > 0")
+    avg_themes = Sutra.average("cardinality(sutras.themes)")
     puts ""
     puts "Themes:"
     puts "  Sutras with themes: #{sutras_with_themes.count}"
-    puts "  Average themes per sutra: #{avg_themes&.round(2) || 0}"
+    puts "  Average themes per sutra: #{avg_themes&.to_f&.round(2) || 0}"
   end
 end

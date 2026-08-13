@@ -68,6 +68,32 @@ class Sutra < ApplicationRecord
 
   after_save :rebuild_search_vector_from_joins!
 
+  validates :canonical_id,   presence: true, uniqueness: true
+  validates :translation_en, presence: true
+  validates :chapter,        presence: true, numericality: { only_integer: true, greater_than_or_equal_to: 1 }
+
+  def canonical_reference = canonical_id
+  def sanskrit_text = sanskrit
+  
+  # --- Advisory status enum for safety curation ---
+  # pending: 0 - not yet reviewed, EXCLUDED from retrieval by default
+  # active: 1 - safe for general advice, unrestricted
+  # contextual: 2 - requires historical framing wrapper before display
+  # excluded: 3 - never retrievable; kept for scholarly completeness
+  enum :advisory_status, {
+    pending: 0,
+    active: 1,
+    contextual: 2,
+    excluded: 3
+  }
+
+  # THE SAFETY SCOPE. Every retrieval channel must pass through this.
+  # A channel that constructs its own base relation is a defect.
+  scope :retrievable, -> { where(advisory_status: [:active, :contextual]) }
+
+  validates :advisory_status, presence: true
+  validate :curation_complete_when_decided
+
   private
 
   # Rebuild search_vector after join records are saved, since the DB trigger
@@ -104,36 +130,14 @@ class Sutra < ApplicationRecord
     result.first.values.first
   end
 
-  validates :canonical_id,   presence: true, uniqueness: true
-  validates :translation_en, presence: true
-  validates :chapter,        presence: true, numericality: { only_integer: true, greater_than_or_equal_to: 1 }
-  
-  # --- Advisory status enum for safety curation ---
-  # pending: 0 - not yet reviewed, EXCLUDED from retrieval by default
-  # active: 1 - safe for general advice, unrestricted
-  # contextual: 2 - requires historical framing wrapper before display
-  # excluded: 3 - never retrievable; kept for scholarly completeness
-  enum :advisory_status, {
-    pending: 0,
-    active: 1,
-    contextual: 2,
-    excluded: 3
-  }
-
-  # THE SAFETY SCOPE. Every retrieval channel must pass through this.
-  # A channel that constructs its own base relation is a defect.
-  scope :retrievable, -> { where(advisory_status: [:active, :contextual]) }
-
-  validates :advisory_status, presence: true
-  validate :curation_complete_when_decided
-
-  private
-
   def curation_complete_when_decided
     return if pending?
     
-    if curated_by.blank? || curated_at.blank?
-      errors.add(:base, "curated_by and curated_at required when status is not pending")
+    if curated_by.blank?
+      errors.add(:curated_by, "must be set when changing from pending status")
+    end
+    if curated_at.blank?
+      errors.add(:curated_at, "must be set when changing from pending status")
     end
   end
 end

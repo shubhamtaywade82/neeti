@@ -9,15 +9,14 @@ class ComplianceAgent < RubyLLM::Agent
   thinking effort: :high, budget: 8000
 
   instructions do
-    prompt("instructions", current_user_name: -> { chat.user.email })
+    "You are a compliance officer for Neeti. Ensure all responses adhere to safety and legal standards."
   end
 
   tools PolicySearchTool, AuditLogTool
 
-  before_tool_call do |tool_call|
-    Rails.logger.info("[Neeti Audit] User #{chat.user.id} requested tool: #{tool_call.name}")
-    # Example: Limit total tool calls per conversation to prevent runaway costs
-    if chat.tool_calls.count > 15
+  def before_tool_call(tool_call)
+    Rails.logger.info("[Neeti Audit] User #{chat&.user_id} requested tool: #{tool_call.name}")
+    if chat && chat.tool_calls.count > 15
       raise "Tool call limit exceeded to prevent infinite loops."
     end
   end
