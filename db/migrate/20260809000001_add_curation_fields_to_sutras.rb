@@ -8,17 +8,17 @@ class AddCurationFieldsToSutras < ActiveRecord::Migration[8.0]
     add_column :sutras, :tone, :string
     add_column :sutras, :applicability, :string, array: true, default: []
     add_column :sutras, :corpus_id, :bigint
-    
+
     add_index :sutras, :advisory_status
     add_index :sutras, :applicability, using: :gin
     add_index :sutras, :corpus_id
-    
+
     # CRITICAL: Every existing row lands in `pending` (0) and is therefore NOT retrievable.
     # This is intentional: the product is inert until curation completes.
     execute <<~SQL
       ALTER TABLE sutras ADD CONSTRAINT chk_sutras_advisory_status
         CHECK (advisory_status BETWEEN 0 AND 3);
-      
+
       ALTER TABLE sutras ADD CONSTRAINT chk_sutras_curated_when_decided
         CHECK (
           advisory_status = 0
@@ -30,7 +30,7 @@ class AddCurationFieldsToSutras < ActiveRecord::Migration[8.0]
   def down
     execute "ALTER TABLE sutras DROP CONSTRAINT IF EXISTS chk_sutras_curated_when_decided"
     execute "ALTER TABLE sutras DROP CONSTRAINT IF EXISTS chk_sutras_advisory_status"
-    
+
     remove_column :sutras, :corpus_id
     remove_column :sutras, :applicability
     remove_column :sutras, :tone

@@ -74,7 +74,7 @@ class Sutra < ApplicationRecord
 
   def canonical_reference = canonical_id
   def sanskrit_text = sanskrit
-  
+
   # --- Advisory status enum for safety curation ---
   # pending: 0 - not yet reviewed, EXCLUDED from retrieval by default
   # active: 1 - safe for general advice, unrestricted
@@ -132,7 +132,7 @@ class Sutra < ApplicationRecord
 
   def curation_complete_when_decided
     return if pending?
-    
+
     if curated_by.blank?
       errors.add(:curated_by, "must be set when changing from pending status")
     end

@@ -6,12 +6,12 @@ namespace :curation do
   task :export_pending, [:file] => :environment do |_, args|
     file = args[:file] || "pending_sutras_#{Date.today}.csv"
     pending = Sutra.where(advisory_status: :pending).order(:chapter, :canonical_id)
-    
+
     CSV.open(file, "w") do |csv|
       csv << %w[id chapter canonical_id sanskrit translation_en
                 themes virtues vices situations emotions advisory_status curation_note
                 curated_by curated_at]
-      
+
       pending.each do |s|
         csv << [
           s.id,
@@ -31,7 +31,7 @@ namespace :curation do
         ]
       end
     end
-    
+
     puts "Exported #{pending.count} pending sutras to #{file}"
   end
 
@@ -39,10 +39,10 @@ namespace :curation do
   task :import_reviewed, [:file] => :environment do |_, args|
     file = args[:file]
     raise "Please specify a file: rake curation:import_reviewed[filename.csv]" unless file
-    
+
     CSV.foreach(file, headers: true) do |row|
       sutra = Sutra.find(row["id"])
-      
+
       # Parse themes back to hash format
       themes = if row["current_themes"].present?
         row["current_themes"].split("; ").map do |t|
@@ -52,7 +52,7 @@ namespace :curation do
       else
         []
       end
-      
+
       sutra.update!(
         keywords: row["current_keywords"].to_s.split("; ").compact_blank,
         themes: themes,
@@ -62,7 +62,7 @@ namespace :curation do
         curated_at: row["curated_at"].present? ? Time.parse(row["curated_at"]) : Time.current
       )
     end
-    
+
     puts "Import complete"
   end
 
@@ -73,27 +73,27 @@ namespace :curation do
     active = Sutra.where(advisory_status: :active).count
     contextual = Sutra.where(advisory_status: :contextual).count
     excluded = Sutra.where(advisory_status: :excluded).count
-    
+
     puts "Total sutras: #{total}"
     puts "Pending: #{pending}"
     puts "Active: #{active}"
     puts "Contextual: #{contextual}"
     puts "Excluded: #{excluded}"
-    
+
     if pending > 0
       puts "\n⚠️  WARNING: #{pending} sutras still pending review"
       exit 1
     else
       puts "\n✅ All sutras have been reviewed"
     end
-    
+
     # Check for missing curator info on non-pending
     missing_curator = Sutra.where.not(advisory_status: :pending)
                            .where(curated_by: nil).or(
                              Sutra.where.not(advisory_status: :pending)
                                   .where(curated_at: nil)
                            ).count
-    
+
     if missing_curator > 0
       puts "⚠️  WARNING: #{missing_curator} non-pending sutras missing curator info"
       exit 1
@@ -106,7 +106,7 @@ namespace :curation do
   task :stats => :environment do
     total = Sutra.count
     status_counts = Sutra.group(:advisory_status).count
-    
+
     puts "=== Curation Statistics ==="
     puts "Total sutras: #{total}"
     puts ""
@@ -115,7 +115,7 @@ namespace :curation do
       pct = (count.to_f / total * 100).round(1)
       puts "  #{status}: #{count} (#{pct}%)"
     end
-    
+
     # Themes stats
     sutras_with_themes = Sutra.where("cardinality(sutras.themes) > 0")
     avg_themes = Sutra.average("cardinality(sutras.themes)")

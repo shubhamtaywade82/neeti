@@ -53,7 +53,7 @@ module Api
         mode = params[:mode]&.to_sym == :cag ? :cag : :retrieval
         advisor = advisor_name.to_sym
         scope = params[:retrieval_scope].presence || 'library'
-        
+
         # Use IntentRouter to detect crisis/safety-sensitive queries
         intent = Neeti::IntentRouter.new(params[:query]).call
 
@@ -71,7 +71,7 @@ module Api
           sse.close
           return
         end
-        
+
         result = agent.advise(
           params.require(:query),
           user:             current_user,
@@ -81,11 +81,11 @@ module Api
           advisor:          advisor,
           retrieval_scope:  scope
         )
-        
+
         # Initialize citation gate with retrieved sutras
         retrieved_sutras = Sutra.where(id: result[:cited_sutra_ids])
         citation_gate = Neeti::CitationGate.new(retrieved_sutra_ids: retrieved_sutras)
-        
+
         # Re-process accumulated advice through citation gate to catch any missed markers
         if accumulated_advice.present? && citation_gate.hallucinated?(accumulated_advice)
           filtered_advice = citation_gate.process(accumulated_advice)
@@ -103,7 +103,7 @@ module Api
 
         current_user.increment!(:daily_query_count)
 
-        cited = Sutra.where(id: result[:cited_sutra_ids]).map do |s|
+        cited = Sutra.where(id: result[:cited_sutra_ids]).includes(:knowledge_pack).map do |s|
           {
             type: 'sutra',
             id: s.canonical_id,
@@ -119,7 +119,7 @@ module Api
         end
 
         doc_cited = if result[:cited_document_ids].present?
-          Document.where(id: result[:cited_document_ids]).map do |d|
+          Document.where(id: result[:cited_document_ids]).includes(:collection).map do |d|
             {
               type: 'document',
               id: d.id,
@@ -172,16 +172,13 @@ module Api
       end
 
       def check_quota!
-        if current_user.daily_reset_at < Date.today
-          current_user.update!(daily_query_count: 0, daily_reset_at: Date.today)
-        end
-        if current_user.daily_query_count >= current_user.plan_limit
-          render json: {
-            error:       'Daily query limit reached.',
-            limit:       current_user.plan_limit,
-            upgrade_url: '/api/v1/subscriptions/plans'
-          }, status: :too_many_requests
-        end
+        return if current_user.within_daily_limit?
+
+        render json: {
+          error:       'Daily query limit reached.',
+          limit:       current_user.plan_limit,
+          upgrade_url: '/api/v1/subscriptions/plans'
+        }, status: :too_many_requests
       end
     end
   end

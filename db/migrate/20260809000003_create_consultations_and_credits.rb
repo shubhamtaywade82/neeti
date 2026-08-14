@@ -20,7 +20,7 @@ class CreateConsultationsAndCredits < ActiveRecord::Migration[8.0]
       t.integer :credits_consumed, null: false, default: 0
       t.integer :user_reaction
       t.timestamps
-      
+
       t.index :public_id, unique: true
       t.index [:user_id, :created_at]
       t.index :status
@@ -34,7 +34,7 @@ class CreateConsultationsAndCredits < ActiveRecord::Migration[8.0]
       t.integer :relevance_rank
       t.text :applied_interpretation
       t.timestamps
-      
+
       t.index [:consultation_id, :sutra_id], unique: true
       t.index [:consultation_id, :position], unique: true
     end
@@ -48,7 +48,7 @@ class CreateConsultationsAndCredits < ActiveRecord::Migration[8.0]
       t.integer :final_rank, null: false
       t.boolean :was_cited, null: false, default: false
       t.datetime :created_at, null: false
-      
+
       t.index [:consultation_id, :final_rank]
       t.index :created_at  # purge job
     end
@@ -60,7 +60,7 @@ class CreateConsultationsAndCredits < ActiveRecord::Migration[8.0]
       t.string :category, null: false
       t.string :detection_stage, null: false
       t.datetime :occurred_at, null: false
-      
+
       t.index [:user_id, :occurred_at]
     end
 
@@ -81,11 +81,11 @@ class CreateConsultationsAndCredits < ActiveRecord::Migration[8.0]
 
     # Add token_version to users (for JWT invalidation on subscription changes)
     add_column :users, :token_version, :integer, null: false, default: 0 unless column_exists?(:users, :token_version)
-    
+
     # Migrate billing model: remove daily_query_count, add credit_balance
     add_column :users, :credit_balance, :integer, null: false, default: 2 unless column_exists?(:users, :credit_balance) # Free tier starts with 2
     add_column :users, :last_credit_reset, :date unless column_exists?(:users, :last_credit_reset) # Track when daily grant was last given
-    
+
     # Note: We keep daily_query_count temporarily for backward compatibility during migration
     # It will be removed in a future migration once all clients are updated
   end

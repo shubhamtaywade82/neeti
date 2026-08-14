@@ -23,14 +23,14 @@ class User < ApplicationRecord
   validates :plan, inclusion: { in: PLANS }
 
   before_save { self.email = email.downcase }
-  
+
   # --- Credit-based billing (new system) ---
   FREE_DAILY_CREDITS = 2
-  
+
   def credit_balance
     super || 0
   end
-  
+
   def grant_daily_credits!
     return unless plan == 'free'
 
@@ -61,7 +61,7 @@ class User < ApplicationRecord
       update_column(:credit_balance, new_balance)
     end
   end
-  
+
   def bump_token_version!
     increment!(:token_version)
   end
@@ -94,6 +94,6 @@ class User < ApplicationRecord
   end
 
   def reset_daily_count_if_needed!
-    update_columns(daily_query_count: 0, daily_reset_at: Date.today) if daily_reset_at < Date.today
+    update_columns(daily_query_count: 0, daily_reset_at: Date.today) if daily_reset_at.nil? || daily_reset_at < Date.today
   end
 end

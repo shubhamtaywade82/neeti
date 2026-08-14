@@ -2,7 +2,7 @@
 module Neeti
   class IntentRouter
     CATEGORIES = %i[self_harm abuse minors medical legal sexual_violence].freeze
-    
+
     # Priority when multiple fire. Order matters.
     PRIORITY = %i[self_harm sexual_violence minors abuse medical legal].freeze
 

@@ -33,6 +33,8 @@ group :development, :test do
   gem "faker", "~> 3.3"
   gem "shoulda-matchers", "~> 8.0"
   gem "webmock", "~> 3.23"
+  gem "bullet"
+  gem "rails_best_practices", require: false
 end
 
 group :test do

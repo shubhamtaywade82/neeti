@@ -12,7 +12,7 @@ module Api::V1
       end
 
       if current_user.update(update_params)
-        current_user.increment!(:token_version) if params[:password].present?
+        current_user.bump_token_version! if params[:password].present?
         render json: user_json(current_user)
       else
         render json: { error: current_user.errors.full_messages.first }, status: :unprocessable_entity

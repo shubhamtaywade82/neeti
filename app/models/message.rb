@@ -2,7 +2,7 @@ class Message < ApplicationRecord
   belongs_to :conversation, optional: true
   belongs_to :chat, optional: true
   has_many :tool_calls, dependent: :destroy
-  
+
   validates :role,    presence: true, inclusion: { in: %w[user assistant] }
   validates :content, presence: true
 

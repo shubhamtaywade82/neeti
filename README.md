@@ -48,18 +48,18 @@ ollama pull llama3.1:8b
 
 ```bash
 # Terminal 1 — Rails API
-bundle exec rails server
-# → http://localhost:3000
+bundle exec rails server -p 3050
+# → http://localhost:3050
 
 # Terminal 2 — Ollama
 ollama serve
 
 # Terminal 3 — Frontend
 cd frontend && npm run dev
-# → http://localhost:5173
+# → http://localhost:5185
 ```
 
-Open `http://localhost:5173`, register, start chatting.
+Open `http://localhost:5185`, register, start chatting.
 
 ---
 

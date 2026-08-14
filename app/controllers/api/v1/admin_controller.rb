@@ -36,6 +36,7 @@ module Api::V1
       page  = (params[:page] || 1).to_i
       per   = [[(params[:per] || 20).to_i, 100].min, 1].max
       users = scope.offset((page - 1) * per).limit(per)
+      counts = Conversation.where(user_id: users.map(&:id)).group(:user_id).count
 
       render json: {
         total: total,
@@ -44,7 +45,7 @@ module Api::V1
         users: users.map { |u|
           { id: u.id, email: u.email, plan: u.plan, role: u.role,
             daily_query_count: u.daily_query_count,
-            created_at: u.created_at, conversations_count: u.conversations.count }
+            created_at: u.created_at, conversations_count: counts[u.id] || 0 }
         }
       }
     end
@@ -64,7 +65,7 @@ module Api::V1
     # DELETE /api/v1/admin/users/:id
     def destroy_user
       target = User.find(params[:id])
-      return render json: { error: 'Cannot delete self' }, status: :unprocessable_entity if target == current_user
+      return render json: { error: 'Cannot delete self' }, status: :unprocessable_entity if target.id == current_user.id
       target.destroy
       head :no_content
     rescue ActiveRecord::RecordNotFound

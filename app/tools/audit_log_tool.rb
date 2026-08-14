@@ -13,7 +13,7 @@ class AuditLogTool < RubyLLM::Tool
     logs = logs.joins(:chat).where(chats: { user_id: user_id }) if user_id
     logs = logs.where(tool_name: action_type) if action_type
     logs = logs.order(created_at: :desc).limit(limit)
-    
+
     logs.map { |log| { id: log.id, tool_name: log.tool_name, success: log.success, timestamp: log.created_at } }
   rescue => e
     { error: "Audit log retrieval failed: #{e.message}" }
