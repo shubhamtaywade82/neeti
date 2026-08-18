@@ -231,11 +231,10 @@ GEM
       bigdecimal
       json-schema (~> 4.0)
     ostruct (0.6.3)
-    pdf-reader (2.15.1)
+    pdf-reader (2.16.0)
       Ascii85 (>= 1.0, < 3.0, != 2.0.0)
       afm (>= 0.2.1, < 2)
       hashery (~> 2.0)
-      ruby-rc4
       ttfunk
     pg (1.6.3)
     pg (1.6.3-aarch64-linux)
@@ -342,7 +341,6 @@ GEM
       rspec-support (>= 3.13.0, < 5.0.0)
     rspec-support (3.13.7)
     ruby-progressbar (1.13.0)
-    ruby-rc4 (0.1.5)
     ruby_llm (1.16.0)
       base64
       event_stream_parser (~> 1)
@@ -424,7 +422,7 @@ DEPENDENCIES
   jwt (~> 3.2)
   oj (~> 3.17)
   ollama-client (~> 1.0)
-  pdf-reader (~> 2.12)
+  pdf-reader (~> 2.16)
   pg (~> 1.5)
   pg_search (~> 2.3)
   puma (>= 6.0)
@@ -537,7 +535,7 @@ CHECKSUMS
   oj (3.17.5) sha256=2f2150c335f53d19350394bcbb3d3d5de1a65f19963908d10c969cb27477efa2
   ollama-client (1.1.0) sha256=c7539388530b240f8db3181c0f6e0a7595deec56f47a791821c304bce0fedd36
   ostruct (0.6.3) sha256=95a2ed4a4bd1d190784e666b47b2d3f078e4a9efda2fccf18f84ddc6538ed912
-  pdf-reader (2.15.1) sha256=18c6a986a84a3117fa49f4279fc2de51f5d2399b71833df5d2bccd595c7068ce
+  pdf-reader (2.16.0) sha256=bf1b5564c085264d8279bde3cf1467778b75841494d20c0fe7da3dad475f3732
   pg (1.6.3) sha256=1388d0563e13d2758c1089e35e973a3249e955c659592d10e5b77c468f628a99
   pg (1.6.3-aarch64-linux) sha256=0698ad563e02383c27510b76bf7d4cd2de19cd1d16a5013f375dd473e4be72ea
   pg (1.6.3-aarch64-linux-musl) sha256=06a75f4ea04b05140146f2a10550b8e0d9f006a79cdaf8b5b130cde40e3ecc2c
@@ -577,7 +575,6 @@ CHECKSUMS
   rspec-rails (8.0.4) sha256=06235692fc0892683d3d34977e081db867434b3a24ae0dd0c6f3516bad4e22df
   rspec-support (3.13.7) sha256=0640e5570872aafefd79867901deeeeb40b0c9875a36b983d85f54fb7381c47c
   ruby-progressbar (1.13.0) sha256=80fc9c47a9b640d6834e0dc7b3c94c9df37f08cb072b7761e4a71e22cff29b33
-  ruby-rc4 (0.1.5) sha256=00cc40a39d20b53f5459e7ea006a92cf584e9bc275e2a6f7aa1515510e896c03
   ruby_llm (1.16.0) sha256=26bd5310cf2ce55f74a60f8aae0b0d0327b586ff4532c84828103c3b2b905a18
   ruby_llm-schema (0.4.0) sha256=e930f5a5316f9301bff3fb7fe572e44727d05bb8e50621001bbb49a47d63b8da
   rubyzip (3.4.1) sha256=0a79e745b5c25872ebd148457df5665da8530ed8626c993b01457128f173ca02
